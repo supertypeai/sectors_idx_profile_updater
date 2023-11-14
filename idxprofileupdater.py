@@ -1,16 +1,12 @@
-import argparse
 import json
-import re
-from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import requests
 import yfinance as yf
 from bs4 import BeautifulSoup
 from pyrate_limiter import Duration, Limiter, RequestRate
 from requests import Session
-from requests_cache import CacheMixin, SQLiteCache
+from requests_cache import CacheMixin
 from requests_ratelimiter import LimiterMixin, MemoryQueueBucket
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -26,7 +22,6 @@ class CachedLimiterSession(CacheMixin, LimiterMixin, Session):
                 RequestRate(2, Duration.SECOND * 5)
             ),  # max 2 requests per 5 seconds
             bucket_class=MemoryQueueBucket,
-            backend=SQLiteCache("yfinance.cache"),
         )
 
 
@@ -80,7 +75,7 @@ class IdxProfileUpdater:
 
         else:
             self.current_data = pd.DataFrame(columns=columns)
-            
+
         self.updated_data = None
         self.updated_rows = []
         self.modified_symbols = []
@@ -203,7 +198,7 @@ class IdxProfileUpdater:
             key = td_name.text.strip()
             if key == "Subsector":
                 value = td_content.text.strip()
-                profile_dict["sub_sector_id"] = sub_sector_id_map.get(value, None) 
+                profile_dict["sub_sector_id"] = sub_sector_id_map.get(value, None)
             elif key in key_renaming.keys():
                 renamed_key = key_renaming.get(key, key)
                 value = td_content.text.strip()
@@ -234,9 +229,11 @@ class IdxProfileUpdater:
         except:
             print(f"Employee number data not available for {yf_symbol} on YF API.")
         try:
-            data_dict["holders_breakdown"] = ticker.major_holders.set_index(
-                1
-            ).replace(np.nan, None).T.to_dict(orient="records")[0]
+            data_dict["holders_breakdown"] = (
+                ticker.major_holders.set_index(1)
+                .replace(np.nan, None)
+                .T.to_dict(orient="records")[0]
+            )
         except:
             print(f"Holders breakdown data not available for {yf_symbol} on YF API.")
 
@@ -274,7 +271,9 @@ class IdxProfileUpdater:
 
         active_symbols = self._retrieve_active_symbols()
         company_profile_data = self.current_data.copy()
-        csv_active_symbols = company_profile_data.query("delisting_date.isnull()")["symbol"].unique()
+        csv_active_symbols = company_profile_data.query("delisting_date.isnull()")[
+            "symbol"
+        ].unique()
         updated_inactive_symbols = list(set(csv_active_symbols) - set(active_symbols))
         updated_new_symbols = list(set(active_symbols) - set(csv_active_symbols))
 
@@ -292,7 +291,9 @@ class IdxProfileUpdater:
         )
 
         if update_new_symbols_only:
-            new_rows_filter = company_profile_data.query("symbol in @updated_new_symbols").index
+            new_rows_filter = company_profile_data.query(
+                "symbol in @updated_new_symbols"
+            ).index
             rows_to_update = company_profile_data.loc[new_rows_filter]
             self.modified_symbols.extend(updated_new_symbols)
 
@@ -342,8 +343,10 @@ class IdxProfileUpdater:
 
     def upsert_to_db(self):
         if self.supabase_client is None:
-            raise Exception("Can only upsert to DB if the class is initialized with Supabase client.")
-        
+            raise Exception(
+                "Can only upsert to DB if the class is initialized with Supabase client."
+            )
+
         if self.updated_data is None:
             raise Exception(
                 "No updated data available. Please run update_company_profile_data() first."
@@ -354,17 +357,19 @@ class IdxProfileUpdater:
             for cols in temp_df.columns:
                 if temp_df[cols].dtype == "datetime64[ns]":
                     temp_df[cols] = temp_df[cols].astype(str)
-            temp_df["updated_on"] = pd.Timestamp.now(tz="GMT").strftime("%Y-%m-%d %H:%M:%S")
+            temp_df["updated_on"] = pd.Timestamp.now(tz="GMT").strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
             temp_df = temp_df.replace({np.nan: None})
             records = temp_df.to_dict("records")
             return records
-        
+
         df = self.updated_rows.copy()
-        df['sub_sector_id'] = df['sub_sector_id'].astype(int)
+        df["sub_sector_id"] = df["sub_sector_id"].astype(int)
         records = convert_df_to_records(df)
-        self.supabase_client.table("idx_company_profile").upsert(records, returning="minimal", on_conflict="symbol").execute()
-        
-        
+        self.supabase_client.table("idx_company_profile").upsert(
+            records, returning="minimal", on_conflict="symbol"
+        ).execute()
 
 
 if __name__ == "__main__":

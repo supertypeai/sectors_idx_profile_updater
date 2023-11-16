@@ -102,7 +102,7 @@ class IdxProfileUpdater:
             symbol = row.find("td").text.strip()
             active_symbols.append(symbol + ".JK")
 
-        return active_symbols[:5] +['PICO.JK']
+        return active_symbols
 
     def _retrieve_profile_from_idx(self, yf_symbol):
         def extract_table_data(section_title):

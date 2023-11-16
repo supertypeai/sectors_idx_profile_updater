@@ -102,7 +102,7 @@ class IdxProfileUpdater:
             symbol = row.find("td").text.strip()
             active_symbols.append(symbol + ".JK")
 
-        return active_symbols
+        return active_symbols[:5] +['PICO.JK']
 
     def _retrieve_profile_from_idx(self, yf_symbol):
         def extract_table_data(section_title):
@@ -444,20 +444,24 @@ class IdxProfileUpdater:
                     merged_updated_df = temp_df.copy()
                 else:
                     merged_updated_df = pd.merge(merged_updated_df, temp_df, on="symbol", how="outer")
-                    
-            merged_updated_df = merged_updated_df.set_index('symbol').reindex(company_profile_data.symbol).reset_index()
-            
-            if company_profile_data.symbol.to_list() == merged_updated_df.symbol.to_list():  
-                company_profile_data[columns_to_clean] = merged_updated_df[columns_to_clean]     
+            print(merged_updated_df.columns)        
+            if len(company_profile_data) == len(merged_updated_df):  
+                company_profile_data = pd.merge(
+                    company_profile_data.drop(columns_to_clean, axis=1),merged_updated_df, 
+                    on='symbol', how='left'
+                    )     
             else:
-                raise AssertionError("Order of symbols before and after cleaning do not match") 
+                raise AssertionError("Error: Number of rows do not match") 
             
             self.updated_data = company_profile_data
             self.updated_rows = self.updated_data.query("symbol in @self.modified_symbols")
         except Exception as e:
-            print(f'Failed to clean shareholders columns, dropping uncleaned columns. Error: {e}')
-            rename_columns = [i+'_clean' for i in columns_to_clean]
-            company_profile_data[rename_columns] = merged_updated_df[columns_to_clean] 
+            print(f'Failed to clean shareholders columns, dropping uncleaned columns for upsert. Error: {e}')
+            rename_columns = []
+            for col in columns_to_clean:
+                if col in merged_updated_df.columns:
+                    company_profile_data[f'{col}_clean'] = merged_updated_df[col]
+                    rename_columns.append(f'{col}_clean')
         
             self.updated_data = company_profile_data
             self.updated_rows = self.updated_data.drop(

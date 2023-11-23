@@ -6,7 +6,6 @@ import yfinance as yf
 from bs4 import BeautifulSoup
 from pyrate_limiter import Duration, Limiter, RequestRate
 from requests import Session
-from requests_cache import CacheMixin
 from requests_ratelimiter import LimiterMixin, MemoryQueueBucket
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -15,7 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 
-class CachedLimiterSession(CacheMixin, LimiterMixin, Session):
+class LimiterSession(LimiterMixin, Session):
     def __init__(self):
         super().__init__(
             limiter=Limiter(
@@ -52,6 +51,7 @@ class IdxProfileUpdater:
             "audit_committees",
             "delisting_date",
             "employee_num",
+            "yf_currency",
             "holders_breakdown",
         ]
 
@@ -79,7 +79,7 @@ class IdxProfileUpdater:
         self.updated_rows = []
         self.modified_symbols = []
         self.chrome_driver_path = chrome_driver_path
-        self._session = CachedLimiterSession()
+        self._session = LimiterSession()
 
     def _retrieve_active_symbols(self):
         wd = webdriver.Chrome(service=Service(self.chrome_driver_path))
@@ -224,17 +224,28 @@ class IdxProfileUpdater:
         ticker = yf.Ticker(yf_symbol, session=self._session)
         data_dict = {}
         try:
-            data_dict["employee_num"] = ticker.info["fullTimeEmployees"]
+            ticker_info = ticker.info
         except:
-            print(f"Employee number data not available for {yf_symbol} on YF API.")
+            print(f"Ticker info not available for {yf_symbol} on YF API.")
+            
+        data_dict['employee_num'] = ticker_info.get('fullTimeEmployees')
+        yf_currency_map = {'IDR':1,'USD':2}
+        yf_currency = ticker_info.get('financialCurrency')
+        data_dict['yf_currency'] = yf_currency_map.get(yf_currency)
+        
         try:
-            data_dict["holders_breakdown"] = (
-                ticker.major_holders.set_index(1)
-                .replace(np.nan, None)
-                .T.to_dict(orient="records")[0]
-            )
+            holders_breakdown = ticker.major_holders
         except:
             print(f"Holders breakdown data not available for {yf_symbol} on YF API.")
+        
+        if holders_breakdown:
+            data_dict["holders_breakdown"] = (
+                    holders_breakdown.set_index(1)
+                    .replace(np.nan, None)
+                    .T.to_dict(orient="records")[0]
+                )
+        else:
+            data_dict["holders_breakdown"] = None
 
         return data_dict
 
@@ -513,8 +524,14 @@ class IdxProfileUpdater:
             raise Exception(
                 "No updated data available. Please run update_company_profile_data() first."
             )
-
-        def convert_df_to_records(df):
+            
+        def cast_int(num):
+                if pd.notna(num):
+                    return round(num)
+                else:
+                    return None
+                
+        def convert_df_to_records(df, int_cols=[]):
             temp_df = df.copy()
             for cols in temp_df.columns:
                 if temp_df[cols].dtype == "datetime64[ns]":
@@ -524,11 +541,16 @@ class IdxProfileUpdater:
             )
             temp_df = temp_df.replace({np.nan: None})
             records = temp_df.to_dict("records")
+            
+            for r in records:
+                for k, v in r.items():
+                    if k in int_cols:
+                        r[k] = cast_int(v)
+                        
             return records
 
         df = self.updated_rows.copy()
-        df["sub_sector_id"] = df["sub_sector_id"].astype(int)
-        records = convert_df_to_records(df)
+        records = convert_df_to_records(df, int_cols=["employee_num", "sub_sector_id", "yf_currency"])
         self.supabase_client.table("idx_company_profile").upsert(
             records, returning="minimal", on_conflict="symbol"
         ).execute()

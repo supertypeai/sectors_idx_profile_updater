@@ -435,6 +435,7 @@ class IdxProfileUpdater:
                 temp_df = _process_shareholder_col_to_df(df, col_name)
 
             temp_df = temp_df.replace(np.nan, None)
+            temp_df = temp_df.dropna(axis=1, how='all')
             json_df = temp_df.groupby('symbol').apply(lambda x: x.drop(columns=['symbol']).to_json(orient='records')).reset_index(name=col_name)
             json_df[col_name] = json_df.apply(lambda x: json.loads(x[col_name]), axis=1)
         
@@ -448,19 +449,20 @@ class IdxProfileUpdater:
         ]
         
         merged_updated_df = pd.DataFrame()
+        data_to_clean = company_profile_data.query("symbol in @self.modified_symbols")
         try:
             for col_name in columns_to_clean:
-                temp_df = process_json_col(company_profile_data, col_name)
+                temp_df = process_json_col(data_to_clean, col_name)
                 if merged_updated_df.empty:
                     merged_updated_df = temp_df.copy()
                 else:
                     merged_updated_df = pd.merge(merged_updated_df, temp_df, on="symbol", how="outer")
-            print(merged_updated_df.columns)        
-            if len(company_profile_data) == len(merged_updated_df):  
-                company_profile_data = pd.merge(
-                    company_profile_data.drop(columns_to_clean, axis=1),merged_updated_df, 
-                    on='symbol', how='left'
-                    )     
+            # print(merged_updated_df.columns)      
+            merged_updated_df = merged_updated_df.set_index('symbol')
+            if len(data_to_clean) == len(merged_updated_df):  
+                company_profile_data = company_profile_data.set_index('symbol')
+                company_profile_data.update(merged_updated_df)
+                company_profile_data = company_profile_data.reset_index()
             else:
                 raise AssertionError("Error: Number of rows do not match") 
             
@@ -558,7 +560,7 @@ class IdxProfileUpdater:
 
 if __name__ == "__main__":
     updater = IdxProfileUpdater(
-        # company_profile_csv_path="idx_company_profile_141123.csv"
+        # company_profile_csv_path="company_profile.csv",
         chrome_driver_path='E:\Downloads\chromedriver-win64\chromedriver.exe'
     )
     updater.update_company_profile_data(

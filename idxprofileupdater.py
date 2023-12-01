@@ -3,6 +3,7 @@ import json
 import numpy as np
 import pandas as pd
 import yfinance as yf
+import ast
 from bs4 import BeautifulSoup
 from pyrate_limiter import Duration, Limiter, RequestRate
 from requests import Session
@@ -13,6 +14,21 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
+def _convert_json_col_to_df(df, col_name):
+    if df.empty:
+        return None
+    temp_df = df.loc[df[col_name].notna(),['symbol', col_name]].set_index('symbol')
+    temp_df[col_name] = temp_df[col_name].apply(str)
+    try:
+        temp_df[col_name] = temp_df[col_name].apply(ast.literal_eval)
+    except ValueError as e:
+        pass
+    temp_df = temp_df.explode(col_name)
+    temp_df = temp_df[col_name].apply(pd.Series, dtype='object')
+    temp_df = temp_df.dropna(axis=1, how='all')
+    temp_df = temp_df.reset_index()
+    temp_df.columns = temp_df.columns.str.lower()
+    return temp_df
 
 class LimiterSession(LimiterMixin, Session):
     def __init__(self):
@@ -22,6 +38,145 @@ class LimiterSession(LimiterMixin, Session):
             ),  # max 2 requests per 5 seconds
             bucket_class=MemoryQueueBucket,
         )
+
+class OwnershipCleaner:
+    def __init__(self, shareholders_df) -> None:
+        self.current_shareholders_data = _convert_json_col_to_df(shareholders_df, 'shareholders')[['symbol','name','share_percentage']]
+        self.current_shareholders_data['name_lower'] = self.current_shareholders_data['name'].str.lower()
+        self.current_shareholders_data = self.current_shareholders_data.drop('name', axis=1)
+
+    def _process_management_col_to_df(self, df, col_name):
+        temp_df = _convert_json_col_to_df(df, col_name)
+        temp_df = temp_df.dropna(subset=['name', 'position'])
+        temp_df['position'] = temp_df['position'].str.title()
+        temp_df['name'] = temp_df['name'].str.title()
+        
+        position_renaming_dicts = \
+        {
+            'directors':{'Vice President': 'Vice President Director',
+                        'Vice Presiden Director': 'Vice President Director',
+                        'Presiden Direktur': 'President Director',
+                        'Wakil Presiden Direktur': 'Vice President Director', 
+                        'Direktur': 'Director',
+                        'Direktur Utama': 'President Director',
+                        'Wakil Direktur Utama': 'Vice President Director',
+                        '': 'Director'},
+            
+            'commissioners':{'President Commisioner': 'President Commissioner',
+                            'Vice President Commisioner': 'Vice President Commissioner',
+                            'Presiden Komisaris': 'President Commissioner',
+                            'Komisaris': 'Commissioner',
+                            'Wakil Komisaris Utama': 'Vice President Commissioner',
+                            'Komisaris Utama': 'President Commissioner',
+                            'Wakil Presiden Komisaris': 'Vice President Commissioner',
+                            '': 'Commissioner'},
+            
+            'audit_committees':{'Ketua': 'Head of Audit Committee',
+                            'Anggota': 'Member of Audit Committee',
+                            'Ketua Komite Audit': 'Head of Audit Committee',
+                            'Anggota Komite Audit': 'Member of Audit Committee',
+                            'Head': 'Head of Audit Committee',
+                            'Member': 'Member of Audit Committee',
+                            '': 'Audit Committee'}
+            }
+        
+        temp_df['position'] = temp_df['position'].replace(position_renaming_dicts[col_name])
+        temp_df = temp_df.drop_duplicates(subset=['symbol', 'name', 'position'])
+        
+        return temp_df
+        
+    def _process_shareholder_col_to_df(self, df, col_name, new_symbols=[]):
+        shareholders_df = _convert_json_col_to_df(df, col_name)
+        shareholders_df = shareholders_df.rename(columns={"summary": "share_amount", "percentage":"share_percentage"})
+        shareholders_df = shareholders_df.drop_duplicates()
+        
+        shareholders_df[['share_amount', 'share_percentage']] = shareholders_df[['share_amount', 'share_percentage']].astype(str)
+        shareholders_df['share_percentage'] = shareholders_df['share_percentage'].apply(lambda x: round(float(x.replace('%',''))/100,4))
+        shareholders_df['share_amount'] = shareholders_df['share_amount'].apply(lambda x: float(x.replace(',','')))
+        shareholders_df.loc[shareholders_df['name'] == 'Saham Treasury', 'type'] = 'Treasury Stock'
+        
+        name_mapping = {'Saham Treasury': 'Treasury Stock',
+                    'Pengendali Saham': 'Controlling Shareholder',
+                    'Non Pengendali Saham': 'Non Controlling Shareholder',
+                    'Masyarakat Warkat': 'Public (Scrip)',
+                    'Masyarakat Non Warkat': 'Public (Scripless)',
+                    'Masyarakat': 'Public',
+                    'MASYARAKAT': 'Public',
+                    'Publik': 'Public',
+                    'PUBLIK': 'Public',
+                    'Masyarakat Lainnya': 'Other Public',
+                    'Negara Republik Indonesia': 'Republic of Indonesia',
+                    'NEGARA REPUBLIK INDONESIA': 'Republic of Indonesia',
+                    'Kejaksaan Agung': 'Attorney General',
+                    'KEJAKSAAN AGUNG': 'Attorney General',
+                    'Direksi': 'Director',
+                    'AFILIASI PENGENDALI':'Controlling Affiliate',
+                    'Pihak Afiliasi ':'Affiliate Parties',
+                    'Pihak Afilasi':'Affiliate Parties',
+                    '0': np.nan,
+                    '-': np.nan,
+                    '': np.nan}
+        shareholders_df = shareholders_df.replace({'name': name_mapping})
+        shareholders_df = shareholders_df.loc[shareholders_df['share_amount']>0]
+        
+        type_mapping = {
+        'Direksi':'Director',
+        'Commisioner':'Commissioner',
+        'Komisaris':'Commissioner',
+        'Kurang dari 5%':'Less Than 5%',
+        'Lebih dari 5%':'More Than 5%',
+        'Saham Pengendali': 'Controlling Share',
+        'Saham Non Pengendali': 'Non Controlling Share',
+        'Masyarakat Warkat': 'Scrip Public Share',
+        'Masyarakat Non Warkat': 'Scripless Public Share',
+        '': '-'
+        }
+        shareholders_df = shareholders_df.replace({'type': type_mapping})
+        shareholders_df['name'] = shareholders_df['name'].str.title()
+        
+        directors_df = self._process_management_col_to_df(df, 'directors')
+        directors_df = directors_df.drop_duplicates(subset=['symbol', 'name'])
+        directors_df = directors_df.query("name != '-'")
+        directors_df['name_lower'] = directors_df['name'].str.lower()
+
+        commissioners_df = self._process_management_col_to_df(df, 'commissioners')
+        commissioners_df = commissioners_df.drop_duplicates(subset=['symbol', 'name'])
+        commissioners_df = commissioners_df.query("name != '-'")
+        commissioners_df['name_lower'] = commissioners_df['name'].str.lower()
+        
+        shareholders_df['name_lower'] = shareholders_df['name'].str.lower()
+        merged_df = pd.merge(shareholders_df, directors_df[['symbol', 'name_lower', 'position']], left_on=['symbol','name_lower'], right_on=['symbol','name_lower'], how='left')
+        merged_df = pd.merge(merged_df, commissioners_df[['symbol', 'name_lower', 'position']], left_on=['symbol','name_lower'], right_on=['symbol','name_lower'], how='left', suffixes=['_dir','_comm'])
+        
+        merged_df['type'] = np.where(merged_df['position_dir'].notna(), merged_df['position_dir'], merged_df['type'])
+        merged_df['type'] = np.where(merged_df['position_comm'].notna() & merged_df['position_dir'].isna(), merged_df['position_comm'], merged_df['type'])
+        merged_df = merged_df.groupby(['symbol', 'name_lower', 'type']).agg({'name':'first', 'share_amount':'sum', 'share_percentage':'sum'}).reset_index()
+        
+        merged_df = pd.merge(merged_df,self.current_shareholders_data,
+                                    how='left',on=['symbol','name_lower'],suffixes=['_new','_old'])
+        merged_df['share_percentage_change'] = (merged_df['share_percentage_new'] - merged_df['share_percentage_old'])/merged_df['share_percentage_old']
+        
+        filter = (~merged_df['symbol'].isin(new_symbols) & merged_df['share_percentage_change'].isna())
+        merged_df.loc[filter,'share_percentage_change'] = merged_df.loc[filter,'share_percentage_change'].fillna(merged_df['share_percentage_new'])
+        merged_df['share_percentage_change'] = merged_df['share_percentage_change'].fillna(0)
+        merged_df = merged_df.drop(columns=['share_percentage_old'])
+        merged_df = merged_df.rename(columns={'share_percentage_new':'share_percentage'})
+        merged_df['share_percentage_change'] = merged_df['share_percentage_change'].apply(lambda x: round(x,4))
+        merged_df = merged_df.drop(columns=['name_lower'])
+        
+        return merged_df
+    
+    def process_ownership_col(self, df, col_name, new_symbols):
+        if col_name in ['directors', 'commissioners', 'audit_committees']:
+            temp_df = self._process_management_col_to_df(df, col_name)
+        elif col_name == 'shareholders':
+            temp_df = self._process_shareholder_col_to_df(df, col_name, new_symbols)
+
+        temp_df = temp_df.replace(np.nan, None)
+        json_df = temp_df.groupby('symbol').apply(lambda x: x.drop(columns=['symbol']).to_json(orient='records')).reset_index(name=col_name)
+        json_df[col_name] = json_df.apply(lambda x: json.loads(x[col_name]), axis=1)
+    
+        return json_df
 
 class IdxProfileUpdater:
     def __init__(
@@ -78,6 +233,7 @@ class IdxProfileUpdater:
         self.updated_data = None
         self.updated_rows = []
         self.modified_symbols = []
+        self.ownershipcleaner = OwnershipCleaner(self.current_data[['symbol','shareholders']])
         self.chrome_driver_path = chrome_driver_path
         self._session = LimiterSession()
 
@@ -238,7 +394,7 @@ class IdxProfileUpdater:
         except:
             print(f"Holders breakdown data not available for {yf_symbol} on YF API.")
         
-        if holders_breakdown:
+        if holders_breakdown.empty:
             data_dict["holders_breakdown"] = (
                     holders_breakdown.set_index(1)
                     .replace(np.nan, None)
@@ -278,7 +434,36 @@ class IdxProfileUpdater:
                     print(
                         f"Failed to retrieve additional data for {row['symbol']} from YF API. Error: {e}"
                     )
-
+                    
+        ### Management & Shareholders Cleaning
+        def clean_ownership(df, columns, new_symbols):
+            if data_to_update == 'data_yf':
+                print('No ownership cleaning needed for updating data from YF')
+                return df
+            profile_df = df.copy()
+            merged_updated_df = pd.DataFrame()
+            try:
+                for col_name in columns:
+                    temp_df = self.ownershipcleaner.process_ownership_col(profile_df, col_name, new_symbols)
+                    if merged_updated_df.empty:
+                        merged_updated_df = temp_df.copy()
+                    else:
+                        merged_updated_df = pd.merge(merged_updated_df, temp_df, on="symbol", how="outer")
+                # print(merged_updated_df.columns)      
+                merged_updated_df = merged_updated_df.set_index('symbol')
+                # check length of merged_updated_df and profile_df is same. Check only for cleaned columns (if columns are null, no need to include it)
+                if len(profile_df.dropna(subset=columns_to_clean, how='all')) == len(merged_updated_df):  
+                    profile_df = profile_df.set_index('symbol')
+                    profile_df.update(merged_updated_df)
+                    profile_df = profile_df.reset_index()
+                else:
+                    raise AssertionError("Error: Number of rows do not match") 
+                return profile_df
+                
+            except Exception as e:
+                print(f'Failed to clean shareholders columns, dropping uncleaned columns for upsert. Error: {e}')
+                return None
+                
         active_symbols = self._retrieve_active_symbols()
         company_profile_data = self.current_data.copy()
         csv_active_symbols = company_profile_data.query("delisting_date.isnull()")[
@@ -312,175 +497,29 @@ class IdxProfileUpdater:
             self.modified_symbols.extend(active_symbols)
 
         rows_to_update.apply(update_profile_for_row, axis=1)
-
-        ### Management & Shareholders Cleaning
-        def _convert_json_col_to_df(df, col_name):
-            temp_df = df[['symbol', col_name]].set_index('symbol')
-            # temp_df[col_name] = temp_df[col_name].apply(ast.literal_eval)
-            temp_df = temp_df.explode(col_name)
-            temp_df = temp_df[col_name].apply(pd.Series, dtype='object')
-            temp_df = temp_df.reset_index()
-            temp_df.columns = temp_df.columns.str.lower()
-            return temp_df
-        
-        def _process_management_col_to_df(df, col_name):
-            temp_df = _convert_json_col_to_df(df, col_name)
-            temp_df = temp_df.dropna(subset=['name', 'position'])
-            temp_df['position'] = temp_df['position'].str.title()
-            temp_df['name'] = temp_df['name'].str.title()
-            
-            position_renaming_dicts = \
-            {
-                'directors':{'Vice President': 'Vice President Director',
-                            'Vice Presiden Director': 'Vice President Director',
-                            'Presiden Direktur': 'President Director',
-                            'Wakil Presiden Direktur': 'Vice President Director', 
-                            'Direktur': 'Director',
-                            'Direktur Utama': 'President Director',
-                            'Wakil Direktur Utama': 'Vice President Director',
-                            '': 'Director'},
-                
-                'commissioners':{'President Commisioner': 'President Commissioner',
-                                'Vice President Commisioner': 'Vice President Commissioner',
-                                'Presiden Komisaris': 'President Commissioner',
-                                'Komisaris': 'Commissioner',
-                                'Wakil Komisaris Utama': 'Vice President Commissioner',
-                                'Komisaris Utama': 'President Commissioner',
-                                'Wakil Presiden Komisaris': 'Vice President Commissioner',
-                                '': 'Commissioner'},
-                
-                'audit_committees':{'Ketua': 'Head of Audit Committee',
-                                'Anggota': 'Member of Audit Committee',
-                                'Ketua Komite Audit': 'Head of Audit Committee',
-                                'Anggota Komite Audit': 'Member of Audit Committee',
-                                'Head': 'Head of Audit Committee',
-                                'Member': 'Member of Audit Committee',
-                                '': 'Audit Committee'}
-                }
-            
-            temp_df['position'] = temp_df['position'].replace(position_renaming_dicts[col_name])
-            temp_df = temp_df.drop_duplicates(subset=['symbol', 'name', 'position'])
-            
-            return temp_df
-        
-        def _process_shareholder_col_to_df(df, col_name):
-            shareholders_df = _convert_json_col_to_df(df, col_name)
-            shareholders_df = shareholders_df.rename(columns={"summary": "share_amount", "percentage":"share_percentage"})
-            shareholders_df = shareholders_df.drop_duplicates()
-            
-            shareholders_df[['share_amount', 'share_percentage']] = shareholders_df[['share_amount', 'share_percentage']].astype(str)
-            shareholders_df['share_percentage'] = shareholders_df['share_percentage'].apply(lambda x: round(float(x.replace('%',''))/100,4))
-            shareholders_df['share_amount'] = shareholders_df['share_amount'].apply(lambda x: float(x.replace(',','')))
-            shareholders_df.loc[shareholders_df['name'] == 'Saham Treasury', 'type'] = 'Treasury Stock'
-            
-            name_mapping = {'Saham Treasury': 'Treasury Stock',
-                        'Pengendali Saham': 'Controlling Shareholder',
-                        'Non Pengendali Saham': 'Non Controlling Shareholder',
-                        'Masyarakat Warkat': 'Public (Scrip)',
-                        'Masyarakat Non Warkat': 'Public (Scripless)',
-                        'Masyarakat': 'Public',
-                        'MASYARAKAT': 'Public',
-                        'Publik': 'Public',
-                        'PUBLIK': 'Public',
-                        'Masyarakat Lainnya': 'Other Public',
-                        'Negara Republik Indonesia': 'Republic of Indonesia',
-                        'NEGARA REPUBLIK INDONESIA': 'Republic of Indonesia',
-                        'Kejaksaan Agung': 'Attorney General',
-                        'KEJAKSAAN AGUNG': 'Attorney General',
-                        'Direksi': 'Director',
-                        '0': np.nan,
-                        '-': np.nan,
-                        '': np.nan}
-            shareholders_df = shareholders_df.replace({'name': name_mapping})
-            
-            type_mapping = {
-            'Direksi':'Director',
-            'Commisioner':'Commissioner',
-            'Komisaris':'Commissioner',
-            'Kurang dari 5%':'Less Than 5%',
-            'Lebih dari 5%':'More Than 5%',
-            'Saham Pengendali': 'Controlling Share',
-            'Saham Non Pengendali': 'Non Controlling Share',
-            'Masyarakat Warkat': 'Scrip Public Share',
-            'Masyarakat Non Warkat': 'Scripless Public Share',
-            '': np.nan
-            }
-            shareholders_df = shareholders_df.replace({'type': type_mapping})
-            
-            directors_df = _process_management_col_to_df(df, 'directors')
-            directors_df = directors_df.drop_duplicates(subset=['symbol', 'name'])
-            directors_df = directors_df.query("name != '-'")
-            directors_df['name_lower'] = directors_df['name'].str.lower()
-
-            commissioners_df = _process_management_col_to_df(df, 'commissioners')
-            commissioners_df = commissioners_df.drop_duplicates(subset=['symbol', 'name'])
-            commissioners_df = commissioners_df.query("name != '-'")
-            commissioners_df['name_lower'] = commissioners_df['name'].str.lower()
-            
-            shareholders_df['name_lower'] = shareholders_df['name'].str.lower()
-            merged_df = pd.merge(shareholders_df, directors_df[['symbol', 'name_lower', 'position']], left_on=['symbol','name_lower'], right_on=['symbol','name_lower'], how='left')
-            merged_df = pd.merge(merged_df, commissioners_df[['symbol', 'name_lower', 'position']], left_on=['symbol','name_lower'], right_on=['symbol','name_lower'], how='left', suffixes=['_dir','_comm'])
-            
-            merged_df['type'] = np.where(merged_df['position_dir'].notna(), merged_df['position_dir'], merged_df['type'])
-            merged_df['type'] = np.where(merged_df['position_comm'].notna() & merged_df['position_dir'].isna(), merged_df['position_comm'], merged_df['type'])
-            merged_df = merged_df.groupby(['symbol', 'name_lower', 'type']).agg({'name':'first', 'share_amount':'sum', 'share_percentage':'sum'}).reset_index()
-            merged_df = merged_df.drop(columns=['name_lower'])
-            
-            return merged_df
-        
-        def process_json_col(df, col_name):
-            if col_name in ['directors', 'commissioners', 'audit_committees']:
-                temp_df = _process_management_col_to_df(df, col_name)
-            elif col_name == 'shareholders':
-                temp_df = _process_shareholder_col_to_df(df, col_name)
-
-            temp_df = temp_df.replace(np.nan, None)
-            temp_df = temp_df.dropna(axis=1, how='all')
-            json_df = temp_df.groupby('symbol').apply(lambda x: x.drop(columns=['symbol']).to_json(orient='records')).reset_index(name=col_name)
-            json_df[col_name] = json_df.apply(lambda x: json.loads(x[col_name]), axis=1)
-        
-            return json_df
-                
         columns_to_clean = [
-            "shareholders",
-            "directors",
-            "commissioners",
-            "audit_committees",
-        ]
-        
-        merged_updated_df = pd.DataFrame()
-        data_to_clean = company_profile_data.query("symbol in @self.modified_symbols")
-        try:
-            for col_name in columns_to_clean:
-                temp_df = process_json_col(data_to_clean, col_name)
-                if merged_updated_df.empty:
-                    merged_updated_df = temp_df.copy()
-                else:
-                    merged_updated_df = pd.merge(merged_updated_df, temp_df, on="symbol", how="outer")
-            # print(merged_updated_df.columns)      
-            merged_updated_df = merged_updated_df.set_index('symbol')
-            if len(data_to_clean) == len(merged_updated_df):  
-                company_profile_data = company_profile_data.set_index('symbol')
-                company_profile_data.update(merged_updated_df)
-                company_profile_data = company_profile_data.reset_index()
-            else:
-                raise AssertionError("Error: Number of rows do not match") 
-            
-            self.updated_data = company_profile_data
+                "shareholders",
+                "directors",
+                "commissioners",
+                "audit_committees",
+            ]
+        updated_rows = clean_ownership(rows_to_update, columns_to_clean, updated_new_symbols)
+        if updated_rows is not None:
+            self.updated_data = updated_rows
             self.updated_rows = self.updated_data.query("symbol in @self.modified_symbols")
-        except Exception as e:
-            print(f'Failed to clean shareholders columns, dropping uncleaned columns for upsert. Error: {e}')
+        else:
             rename_columns = []
             for col in columns_to_clean:
-                if col in merged_updated_df.columns:
-                    company_profile_data[f'{col}_clean'] = merged_updated_df[col]
+                if col in updated_rows.columns:
+                    updated_rows[f'{col}_clean'] = updated_rows[col]
                     rename_columns.append(f'{col}_clean')
         
-            self.updated_data = company_profile_data
+            self.updated_data = updated_rows
             self.updated_rows = self.updated_data.drop(
                 rename_columns + columns_to_clean, axis=1
                 ).query("symbol in @self.modified_symbols")
 
+   
     def save_update_to_csv(self, updated_rows_only=True):
         """Generate CSV file containing updated data.
 
@@ -564,6 +603,6 @@ if __name__ == "__main__":
         chrome_driver_path='E:\Downloads\chromedriver-win64\chromedriver.exe'
     )
     updater.update_company_profile_data(
-        update_new_symbols_only=True, data_to_update="all"
+        update_new_symbols_only=False, data_to_update="all"
     )
-    updater.save_update_to_csv(updated_rows_only=True)
+    updater.save_update_to_csv(updated_rows_only=False)

@@ -25,9 +25,9 @@ def _convert_json_col_to_df(df, col_name):
         pass
     temp_df = temp_df.explode(col_name)
     temp_df = temp_df[col_name].apply(pd.Series, dtype='object')
-    temp_df = temp_df.dropna(axis=1, how='all')
     temp_df = temp_df.reset_index()
     temp_df.columns = temp_df.columns.str.lower()
+    temp_df = temp_df.dropna(axis=1, how='all')
     return temp_df
 
 class LimiterSession(LimiterMixin, Session):
@@ -420,7 +420,7 @@ class IdxProfileUpdater:
                 try:
                     profile_dict = self._retrieve_profile_from_idx(row["symbol"])
                     for key in profile_dict.keys():
-                        company_profile_data.at[row.name, key] = profile_dict[key]
+                        rows_to_update.at[row.name, key] = profile_dict[key]
                 except Exception as e:
                     print(
                         f"Failed to retrieve company profile for {row['symbol']} from IDX site. Error: {e}"
@@ -429,7 +429,7 @@ class IdxProfileUpdater:
                 try:
                     yf_data_dict = self._retrieve_data_from_yf_api(row["symbol"])
                     for key in yf_data_dict.keys():
-                        company_profile_data.at[row.name, key] = yf_data_dict[key]
+                        rows_to_update.at[row.name, key] = yf_data_dict[key]
                 except Exception as e:
                     print(
                         f"Failed to retrieve additional data for {row['symbol']} from YF API. Error: {e}"
@@ -452,11 +452,12 @@ class IdxProfileUpdater:
                 # print(merged_updated_df.columns)      
                 merged_updated_df = merged_updated_df.set_index('symbol')
                 # check length of merged_updated_df and profile_df is same. Check only for cleaned columns (if columns are null, no need to include it)
-                if len(profile_df.dropna(subset=columns_to_clean, how='all')) == len(merged_updated_df):  
+                if len(profile_df.dropna(subset=columns, how='all')) == len(merged_updated_df):  
                     profile_df = profile_df.set_index('symbol')
                     profile_df.update(merged_updated_df)
                     profile_df = profile_df.reset_index()
                 else:
+                    merged_updated_df.to_csv('cleaned_shareholders.csv', index=False)
                     raise AssertionError("Error: Number of rows do not match") 
                 return profile_df
                 
@@ -506,19 +507,9 @@ class IdxProfileUpdater:
         updated_rows = clean_ownership(rows_to_update, columns_to_clean, updated_new_symbols)
         if updated_rows is not None:
             self.updated_data = updated_rows
-            self.updated_rows = self.updated_data.query("symbol in @self.modified_symbols")
         else:
-            rename_columns = []
-            for col in columns_to_clean:
-                if col in updated_rows.columns:
-                    updated_rows[f'{col}_clean'] = updated_rows[col]
-                    rename_columns.append(f'{col}_clean')
-        
-            self.updated_data = updated_rows
-            self.updated_rows = self.updated_data.drop(
-                rename_columns + columns_to_clean, axis=1
-                ).query("symbol in @self.modified_symbols")
-
+            self.updated_data = rows_to_update
+        self.updated_rows = self.updated_data.query("symbol in @self.modified_symbols")
    
     def save_update_to_csv(self, updated_rows_only=True):
         """Generate CSV file containing updated data.
@@ -599,7 +590,7 @@ class IdxProfileUpdater:
 
 if __name__ == "__main__":
     updater = IdxProfileUpdater(
-        # company_profile_csv_path="company_profile.csv",
+        company_profile_csv_path="company_profile.csv",
         chrome_driver_path='E:\Downloads\chromedriver-win64\chromedriver.exe'
     )
     updater.update_company_profile_data(

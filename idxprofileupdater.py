@@ -1,5 +1,10 @@
 import json
-
+import cloudscraper
+from ratelimit import limits
+import time
+import os
+from supabase import create_client
+from dotenv import load_dotenv
 import numpy as np
 import pandas as pd
 import yfinance as yf
@@ -13,6 +18,80 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
+
+columns = [
+    "company_name",
+    "symbol",
+    "address",
+    "email",
+    "phone",
+    "fax",
+    "NPWP",
+    "website",
+    "listing_date",
+    "listing_board",
+    "sub_sector_id",
+    "industry",
+    "sub_industry",
+    "register",
+    "shareholders",
+    "directors",
+    "commissioners",
+    "audit_committees",
+    "delisting_date",
+    "employee_num",
+    "yf_currency",
+    "holders_breakdown",
+    ]
+        
+non_null_columns = [
+    'symbol',
+    "company_name",
+    "listing_date",
+    "listing_board",
+    "sub_sector_id",
+    "industry",
+    "sub_industry",
+    "nologo",
+    "wsj_format",
+    "current_source"
+    ]
+
+sub_sector_id_map = {
+    "Transportation Infrastructure": 28,
+    "Food & Beverage": 2,
+    "Holding & Investment Companies": 21,
+    "Leisure Goods": 12,
+    "Software & IT Services": 30,
+    "Basic Materials": 8,
+    "Automobiles & Components": 10,
+    "Retailing": 14,
+    "Investment Service": 22,
+    "Consumer Services": 11,
+    "Media & Entertainment": 13,
+    "Telecommunication": 6,
+    "Technology Hardware & Equipment": 31,
+    "Banks": 19,
+    "Pharmaceuticals & Health Care Research": 24,
+    "Household Goods": 1,
+    "Tobacco": 3,
+    "Insurance": 4,
+    "Industrial Goods": 5,
+    "Properties & Real Estate": 7,
+    "Apparel & Luxury Goods": 9,
+    "Food & Staples Retailing": 15,
+    "Nondurable Household Products": 16,
+    "Alternative Energy": 17,
+    "Oil, Gas & Coal": 18,
+    "Financing Service": 20,
+    "Healthcare Equipment & Providers": 23,
+    "Multi-sector Holdings": 26,
+    "Heavy Constructions & Civil Engineering": 27,
+    "Industrial Services": 25,
+    "Utilities": 29,
+    "Logistics & Deliveries": 32,
+    "Transportation": 33,
+}
 
 def _convert_json_col_to_df(df, col_name):
     if df.empty:
@@ -120,16 +199,16 @@ class OwnershipCleaner:
         shareholders_df = shareholders_df.loc[shareholders_df['share_amount']>0]
         
         type_mapping = {
-        'Direksi':'Director',
-        'Commisioner':'Commissioner',
-        'Komisaris':'Commissioner',
-        'Kurang dari 5%':'Less Than 5%',
-        'Lebih dari 5%':'More Than 5%',
-        'Saham Pengendali': 'Controlling Share',
-        'Saham Non Pengendali': 'Non Controlling Share',
-        'Masyarakat Warkat': 'Scrip Public Share',
-        'Masyarakat Non Warkat': 'Scripless Public Share',
-        '': '-'
+            'Direksi':'Director',
+            'Commisioner':'Commissioner',
+            'Komisaris':'Commissioner',
+            'Kurang dari 5%':'Less Than 5%',
+            'Lebih dari 5%':'More Than 5%',
+            'Saham Pengendali': 'Controlling Share',
+            'Saham Non Pengendali': 'Non Controlling Share',
+            'Masyarakat Warkat': 'Scrip Public Share',
+            'Masyarakat Non Warkat': 'Scripless Public Share',
+            '': '-'
         }
         shareholders_df = shareholders_df.replace({'type': type_mapping})
         shareholders_df['name'] = shareholders_df['name'].str.title()
@@ -159,10 +238,10 @@ class OwnershipCleaner:
         filter = (~merged_df['symbol'].isin(new_symbols) & merged_df['share_percentage_change'].isna())
         merged_df.loc[filter,'share_percentage_change'] = merged_df.loc[filter,'share_percentage_change'].fillna(merged_df['share_percentage_new'])
         merged_df['share_percentage_change'] = merged_df['share_percentage_change'].fillna(0)
-        merged_df = merged_df.drop(columns=['share_percentage_old'])
+        
         merged_df = merged_df.rename(columns={'share_percentage_new':'share_percentage'})
         merged_df['share_percentage_change'] = merged_df['share_percentage_change'].apply(lambda x: round(x,4))
-        merged_df = merged_df.drop(columns=['name_lower'])
+        merged_df = merged_df.drop(columns=['name_lower', 'share_percentage_old'])
         
         return merged_df
     
@@ -184,31 +263,8 @@ class IdxProfileUpdater:
         company_profile_csv_path=None,
         supabase_client=None,
         chrome_driver_path="./chromedriver.exe",
+        data_to_update="all"
     ):
-        columns = [
-            "company_name",
-            "symbol",
-            "address",
-            "email",
-            "phone",
-            "fax",
-            "NPWP",
-            "website",
-            "listing_date",
-            "listing_board",
-            "sub_sector_id",
-            "industry",
-            "sub_industry",
-            "register",
-            "shareholders",
-            "directors",
-            "commissioners",
-            "audit_committees",
-            "delisting_date",
-            "employee_num",
-            "yf_currency",
-            "holders_breakdown",
-        ]
 
         if company_profile_csv_path and supabase_client:
             raise ValueError(
@@ -217,6 +273,7 @@ class IdxProfileUpdater:
 
         elif company_profile_csv_path:
             self.current_data = pd.read_csv(company_profile_csv_path)
+            self.non_null_current_data = self.current_data[['symbol','nologo','wsj_format','current_source']]
             self.current_data = self.current_data[columns]
 
         elif supabase_client:
@@ -225,6 +282,7 @@ class IdxProfileUpdater:
             )
             self.supabase_client = supabase_client
             self.current_data = pd.DataFrame(response.data)
+            self.non_null_current_data = self.current_data[['symbol','nologo','wsj_format','current_source']]
             self.current_data = self.current_data[columns]
 
         else:
@@ -235,7 +293,9 @@ class IdxProfileUpdater:
         self.modified_symbols = []
         self.ownershipcleaner = OwnershipCleaner(self.current_data[['symbol','shareholders']])
         self.chrome_driver_path = chrome_driver_path
+        self.data_to_update = data_to_update
         self._session = LimiterSession()
+        self.cloudscraper_session = cloudscraper.create_scraper(browser='chrome')
 
     def _retrieve_active_symbols(self):
         wd = webdriver.Chrome(service=Service(self.chrome_driver_path))
@@ -259,7 +319,18 @@ class IdxProfileUpdater:
             active_symbols.append(symbol + ".JK")
 
         return active_symbols
+    
+    def _retrieve_active_symbols_from_idx_api(self):
+        url = "https://www.idx.co.id/primary/StockData/GetSecuritiesStock?start=0&length=9999&code=&sector=&board=&language=en-us"
+        response = self.cloudscraper_session.get(url)
+        if response.status_code != 200:
+            print(f"Failed to retrieve from IDX API. Status code: {response.status_code}")
+            raise Exception()
+        data = response.json()['data']
+        active_symbols = [index['Code']+'.JK' for index in data]
 
+        return active_symbols
+        
     def _retrieve_profile_from_idx(self, yf_symbol):
         def extract_table_data(section_title):
             h4 = bs.find("h4", string=section_title)
@@ -283,42 +354,6 @@ class IdxProfileUpdater:
                 data_list.append(data)
 
             return data_list
-
-        sub_sector_id_map = {
-            "Transportation Infrastructure": 28,
-            "Food & Beverage": 2,
-            "Holding & Investment Companies": 21,
-            "Leisure Goods": 12,
-            "Software & IT Services": 30,
-            "Basic Materials": 8,
-            "Automobiles & Components": 10,
-            "Retailing": 14,
-            "Investment Service": 22,
-            "Consumer Services": 11,
-            "Media & Entertainment": 13,
-            "Telecommunication": 6,
-            "Technology Hardware & Equipment": 31,
-            "Banks": 19,
-            "Pharmaceuticals & Health Care Research": 24,
-            "Household Goods": 1,
-            "Tobacco": 3,
-            "Insurance": 4,
-            "Industrial Goods": 5,
-            "Properties & Real Estate": 7,
-            "Apparel & Luxury Goods": 9,
-            "Food & Staples Retailing": 15,
-            "Nondurable Household Products": 16,
-            "Alternative Energy": 17,
-            "Oil, Gas & Coal": 18,
-            "Financing Service": 20,
-            "Healthcare Equipment & Providers": 23,
-            "Multi-sector Holdings": 26,
-            "Heavy Constructions & Civil Engineering": 27,
-            "Industrial Services": 25,
-            "Utilities": 29,
-            "Logistics & Deliveries": 32,
-            "Transportation": 33,
-        }
 
         symbol = yf_symbol.split(".")[0]
         wd = webdriver.Chrome(service=Service(self.chrome_driver_path))
@@ -375,6 +410,87 @@ class IdxProfileUpdater:
         profile_dict["delisting_date"] = None
 
         return profile_dict
+    
+    @limits(calls=2, period=5)
+    def _retrieve_profile_from_idx_api(self, yf_symbol):
+        symbol = (yf_symbol.split(".")[0]).lower()
+        url = f"https://www.idx.co.id/primary/ListedCompany/GetCompanyProfilesDetail?KodeEmiten={symbol}&language=en-us"
+        response = self.cloudscraper_session.get(url)
+        if response.status_code != 200:
+            print(f"Failed to retrieve from IDX API. Status code: {response.status_code}")
+            raise Exception()
+        print('API responded with status code:', response.status_code)
+        data = response.json()
+        profile_dict = {"symbol": yf_symbol}
+        profiles = data['Profiles'][0]
+
+        key_renaming = {
+            "Alamat": "address",
+            "BAE": "register",
+            "Industri": "industry",
+            "SubIndustri": "sub_industry",
+            "Email": "email",
+            "Fax": "fax",
+            "NamaEmiten": "company_name",
+            "PapanPencatatan": "listing_board",
+            "TanggalPencatatan": "listing_date",
+            "Telepon": "phone",
+            "Website": "website",
+            "NPWP": "NPWP",
+        }
+        shareholders_renaming = {
+            'Nama':'Name',
+            'Jabatan':'Position',
+            'Afiliasi':'Affiliated',
+            'Independen':'Independent',
+            'Jumlah':'Summary',
+            'Kategori':'Type',
+            'Persentase':'Percentage'
+        }
+        truth_dict = {False:'No', True:'Yes'}
+        
+        for key, value in profiles.items():
+            if key.lower() == "subsektor":
+                profile_dict["sub_sector_id"] = sub_sector_id_map.get(value, None)
+            elif key in key_renaming.keys():
+                renamed_key = key_renaming.get(key, key)
+                profile_dict[renamed_key] = str(value).strip()
+                
+        def _change_bool_to_string(list_dict, key_name): 
+            for i in range(len(list_dict)):
+                list_dict[i][key_name] = truth_dict.get(list_dict[i][key_name])
+            return list_dict
+        
+        def _clean_dict(list_dict, key_name=None):
+            if not list_dict:
+                return list_dict
+            if key_name :
+                list_dict = _change_bool_to_string(list_dict, key_name)
+            for dct in list_dict.copy():
+                for key in list(dct.keys()):
+                    dct[shareholders_renaming.get(key, key)] = dct.pop(key)
+            return list_dict
+        
+        directors = data['Direktur']
+        directors = _clean_dict(directors, 'Afiliasi')
+        profile_dict['directors'] = directors
+        
+        commissioners = data['Komisaris']
+        commissioners = _clean_dict(commissioners, 'Independen')
+        profile_dict['commissioners'] = commissioners
+        
+        audit_committees = data['KomiteAudit']
+        audit_committees = _clean_dict(audit_committees)
+        profile_dict['audit_committees'] = audit_committees
+        
+        shareholders_data = data['PemegangSaham']
+        shareholders = [{key: value for key, value in sub.items() if key!='Pengendali'} for sub in shareholders_data]
+        shareholders = _clean_dict(shareholders)
+        profile_dict['shareholders'] = shareholders
+        
+        profile_dict["delisting_date"] = None
+        
+        return profile_dict
 
     def _retrieve_data_from_yf_api(self, yf_symbol):
         ticker = yf.Ticker(yf_symbol, session=self._session)
@@ -394,7 +510,7 @@ class IdxProfileUpdater:
         except:
             print(f"Holders breakdown data not available for {yf_symbol} on YF API.")
         
-        if holders_breakdown.empty:
+        if holders_breakdown is not None:
             data_dict["holders_breakdown"] = (
                     holders_breakdown.set_index(1)
                     .replace(np.nan, None)
@@ -405,9 +521,7 @@ class IdxProfileUpdater:
 
         return data_dict
 
-    def update_company_profile_data(
-        self, update_new_symbols_only=True, data_to_update="all"
-    ):
+    def update_company_profile_data(self, update_new_symbols_only=True):
         """Update company profile data.
 
         Args:
@@ -416,16 +530,26 @@ class IdxProfileUpdater:
         """
 
         def update_profile_for_row(row):
-            if data_to_update in ["profile_idx", "all"]:
+            if self.data_to_update in ["profile_idx", "all"]:
+                idx_api_flag = True
                 try:
-                    profile_dict = self._retrieve_profile_from_idx(row["symbol"])
+                    profile_dict = self._retrieve_profile_from_idx_api(row["symbol"])
                     for key in profile_dict.keys():
                         rows_to_update.at[row.name, key] = profile_dict[key]
+                    time.sleep(4)
                 except Exception as e:
-                    print(
-                        f"Failed to retrieve company profile for {row['symbol']} from IDX site. Error: {e}"
-                    )
-            if data_to_update in ["data_yf", "all"]:
+                    print(f'IDX API failed for {row["symbol"]} error: {e}')
+                    idx_api_flag = False
+                if not idx_api_flag:
+                    try:
+                        profile_dict = self._retrieve_profile_from_idx(row["symbol"])
+                        for key in profile_dict.keys():
+                            rows_to_update.at[row.name, key] = profile_dict[key]
+                    except Exception as e:
+                        print(
+                            f"Failed to retrieve company profile for {row['symbol']} from IDX site. Error: {e}"
+                        )
+            if self.data_to_update in ["data_yf", "all"]:
                 try:
                     yf_data_dict = self._retrieve_data_from_yf_api(row["symbol"])
                     for key in yf_data_dict.keys():
@@ -437,7 +561,7 @@ class IdxProfileUpdater:
                     
         ### Management & Shareholders Cleaning
         def clean_ownership(df, columns, new_symbols):
-            if data_to_update == 'data_yf':
+            if self.data_to_update == 'data_yf':
                 print('No ownership cleaning needed for updating data from YF')
                 return df
             profile_df = df.copy()
@@ -464,8 +588,11 @@ class IdxProfileUpdater:
             except Exception as e:
                 print(f'Failed to clean shareholders columns, dropping uncleaned columns for upsert. Error: {e}')
                 return None
-                
-        active_symbols = self._retrieve_active_symbols()
+        try: 
+            active_symbols = self._retrieve_active_symbols_from_idx_api()
+        except Exception as e:   
+            print('IDX API failed, retrieving with Selenium')     
+            active_symbols = self._retrieve_active_symbols()
         company_profile_data = self.current_data.copy()
         csv_active_symbols = company_profile_data.query("delisting_date.isnull()")[
             "symbol"
@@ -510,6 +637,9 @@ class IdxProfileUpdater:
         else:
             self.updated_data = rows_to_update
         self.updated_rows = self.updated_data.query("symbol in @self.modified_symbols")
+        self.updated_rows = pd.merge(self.updated_rows, 
+                                     self.non_null_current_data[['symbol','nologo','wsj_format','current_source']], 
+                                     on='symbol',how='left')
    
     def save_update_to_csv(self, updated_rows_only=True):
         """Generate CSV file containing updated data.
@@ -580,20 +710,30 @@ class IdxProfileUpdater:
                         r[k] = cast_int(v)
                         
             return records
-
         df = self.updated_rows.copy()
-        records = convert_df_to_records(df, int_cols=["employee_num", "sub_sector_id", "yf_currency"])
+        df[["wsj_format", "current_source"]] = df[["wsj_format", "current_source"]].fillna(-1)
+        df['nologo'] = df['nologo'].fillna(True)
+        yf_cols = ['employee_num','yf_currency','holders_breakdown']
+        if self.data_to_update == 'data_yf':
+            df = df[non_null_columns+yf_cols]
+        elif self.data_to_update == 'profile_idx':
+            df = df[[col for col in columns if col not in yf_cols]]
+        records = convert_df_to_records(df, int_cols=["employee_num", "sub_sector_id", "yf_currency", "wsj_format", "current_source"])
         self.supabase_client.table("idx_company_profile").upsert(
             records, returning="minimal", on_conflict="symbol"
         ).execute()
 
 
 if __name__ == "__main__":
+    # load_dotenv()
+    # url, key = os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY')
+    # supabase_client = create_client(url, key)
     updater = IdxProfileUpdater(
-        company_profile_csv_path="company_profile.csv",
-        chrome_driver_path='E:\Downloads\chromedriver-win64\chromedriver.exe'
+        # company_profile_csv_path="company_profile.csv",
+        # supabase_client=supabase_client,
+        chrome_driver_path='E:\Downloads\chromedriver-win64\chromedriver.exe',
+        data_to_update="profile_idx"
     )
-    updater.update_company_profile_data(
-        update_new_symbols_only=False, data_to_update="all"
-    )
+    updater.update_company_profile_data(update_new_symbols_only=False)
     updater.save_update_to_csv(updated_rows_only=False)
+    # updater.upsert_to_db()

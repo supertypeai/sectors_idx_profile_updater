@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 import numpy as np
 import pandas as pd
 import yfinance as yf
-import ast
 from bs4 import BeautifulSoup
 from pyrate_limiter import Duration, Limiter, RequestRate
 from requests import Session
@@ -97,9 +96,9 @@ def _convert_json_col_to_df(df, col_name):
     if df.empty:
         return None
     temp_df = df.loc[df[col_name].notna(),['symbol', col_name]].set_index('symbol')
-    temp_df[col_name] = temp_df[col_name].apply(str)
+    # temp_df[col_name] = temp_df[col_name].apply(str)
     try:
-        temp_df[col_name] = temp_df[col_name].apply(ast.literal_eval)
+        temp_df[col_name] = temp_df[col_name].apply(json.loads)
     except ValueError as e:
         pass
     temp_df = temp_df.explode(col_name)
@@ -411,7 +410,7 @@ class IdxProfileUpdater:
 
         return profile_dict
     
-    @limits(calls=2, period=5)
+    @limits(calls=2, period=4)
     def _retrieve_profile_from_idx_api(self, yf_symbol):
         symbol = (yf_symbol.split(".")[0]).lower()
         url = f"https://www.idx.co.id/primary/ListedCompany/GetCompanyProfilesDetail?KodeEmiten={symbol}&language=en-us"
@@ -536,7 +535,7 @@ class IdxProfileUpdater:
                     profile_dict = self._retrieve_profile_from_idx_api(row["symbol"])
                     for key in profile_dict.keys():
                         rows_to_update.at[row.name, key] = profile_dict[key]
-                    time.sleep(4)
+                    time.sleep(3)
                 except Exception as e:
                     print(f'IDX API failed for {row["symbol"]} error: {e}')
                     idx_api_flag = False

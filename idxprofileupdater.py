@@ -235,7 +235,7 @@ class OwnershipCleaner:
         merged_df['share_percentage_change'] = (merged_df['share_percentage_new'] - merged_df['share_percentage_old'])/merged_df['share_percentage_old']
         
         filter = (~merged_df['symbol'].isin(new_symbols) & merged_df['share_percentage_change'].isna())
-        merged_df.loc[filter,'share_percentage_change'] = merged_df.loc[filter,'share_percentage_change'].fillna(merged_df['share_percentage_new'])
+        merged_df.loc[filter,'share_percentage_change'] = merged_df.loc[filter,'share_percentage_change'].fillna(merged_df.loc[filter,'share_percentage_new'])
         merged_df['share_percentage_change'] = merged_df['share_percentage_change'].fillna(0)
         
         merged_df = merged_df.rename(columns={'share_percentage_new':'share_percentage'})
@@ -483,7 +483,7 @@ class IdxProfileUpdater:
         profile_dict['audit_committees'] = audit_committees
         
         shareholders_data = data['PemegangSaham']
-        shareholders = [{key: value for key, value in sub.items() if key!='Pengendali'} for sub in shareholders_data]
+        shareholders = [{key: str(value).strip() for key, value in sub.items() if key!='Pengendali'} for sub in shareholders_data]
         shareholders = _clean_dict(shareholders)
         profile_dict['shareholders'] = shareholders
         

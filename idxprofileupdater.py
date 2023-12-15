@@ -99,7 +99,7 @@ def _convert_json_col_to_df(df, col_name):
     # temp_df[col_name] = temp_df[col_name].apply(str)
     try:
         temp_df[col_name] = temp_df[col_name].apply(json.loads)
-    except ValueError as e:
+    except TypeError as e:
         pass
     temp_df = temp_df.explode(col_name)
     temp_df = temp_df[col_name].apply(pd.Series, dtype='object')

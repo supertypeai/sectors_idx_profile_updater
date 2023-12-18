@@ -99,9 +99,13 @@ class OwnershipCleaner:
         Args:
             shareholders_df (pd.DataFrame): the dataframe containing the current shareholders data
         """
-        self.current_shareholders_data = self._convert_json_col_to_df(shareholders_df, 'shareholders')[['symbol','name','share_percentage']]
-        self.current_shareholders_data['name_lower'] = self.current_shareholders_data['name'].str.lower()
-        self.current_shareholders_data = self.current_shareholders_data.drop('name', axis=1)
+        if not shareholders_df.empty:
+            self.current_shareholders_data = self._convert_json_col_to_df(shareholders_df, 'shareholders')[['symbol','name','share_percentage']]
+            self.current_shareholders_data['name_lower'] = self.current_shareholders_data['name'].str.lower()
+            self.current_shareholders_data = self.current_shareholders_data.drop('name', axis=1)
+        else:
+            columns = ['symbol','name_lower','share_percentage']
+            self.current_shareholders_data = pd.DataFrame(columns=columns)
 
     def _convert_json_col_to_df(self, df, col_name):
         """Converts a json column in a dataframe to a new dataframe
@@ -116,7 +120,7 @@ class OwnershipCleaner:
         if df.empty:
             return None
         temp_df = df.loc[df[col_name].notna(),['symbol', col_name]].set_index('symbol')
-        # temp_df[col_name] = temp_df[col_name].apply(str)
+
         try:
             temp_df[col_name] = temp_df[col_name].apply(json.loads)
         except TypeError as e:
@@ -312,23 +316,20 @@ class IdxProfileUpdater:
             )
 
         elif company_profile_csv_path:
-            self.current_data = pd.read_csv(company_profile_csv_path)
-            # self.fixed_data = self.current_data[fixed_columns]
-            # self.idx_data = self.current_data[idx_columns]
+            self.current_data = pd.read_csv(company_profile_csv_path, columns=all_columns)
+
 
         elif supabase_client:
             response = (
                 supabase_client.table("idx_company_profile").select("*").execute()
             )
             self.supabase_client = supabase_client
-            self.current_data = pd.DataFrame(response.data)
-            # self.fixed_data = self.current_data[fixed_columns]
-            # self.idx_data = self.current_data[idx_columns]
+            self.current_data = pd.DataFrame(response.data, columns=all_columns)
+
 
         else:
             self.current_data = pd.DataFrame(columns=all_columns)
-            # self.fixed_data = self.current_data[fixed_columns]
-            # self.idx_data = self.current_data[idx_columns]
+
 
 
         self.new_data = None
@@ -652,11 +653,11 @@ class IdxProfileUpdater:
             self.modified_symbols.extend(retrieved_active_symbols)
 
         if rows_to_update.empty:
-            print("No new symbols to update.")
+            print("No rows to update.")
             return
         
         rows_to_update = rows_to_update.apply(update_profile_for_row, axis=1)
-        
+    
         columns_to_clean = [
                 "shareholders",
                 "directors",
@@ -763,14 +764,13 @@ class IdxProfileUpdater:
 
 
 if __name__ == "__main__":
-    # load_dotenv()
-    # url, key = os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY')
-    # supabase_client = create_client(url, key)
+    load_dotenv()
+    url, key = os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY')
+    supabase_client = create_client(url, key)
     updater = IdxProfileUpdater(
         # company_profile_csv_path="company_profile.csv",
-        # supabase_client=supabase_client,
+        supabase_client=supabase_client,
         chrome_driver_path='E:\Downloads\chromedriver-win64\chromedriver.exe',
     )
-    updater.update_company_profile_data(update_new_symbols_only=False)
-    updater.save_update_to_csv(updated_rows_only=False)
-    # updater.upsert_to_db()
+    updater.update_company_profile_data(update_new_symbols_only=True)
+    updater.upsert_to_db()

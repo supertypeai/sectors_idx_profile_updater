@@ -18,9 +18,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
-columns = [
-    "company_name",
+all_columns = [
     "symbol",
+    "company_name",
     "address",
     "email",
     "phone",
@@ -38,23 +38,12 @@ columns = [
     "commissioners",
     "audit_committees",
     "delisting_date",
-    "employee_num",
-    "yf_currency",
-    "holders_breakdown",
-    ]
-        
-non_null_columns = [
-    'symbol',
-    "company_name",
-    "listing_date",
-    "listing_board",
-    "sub_sector_id",
-    "industry",
-    "sub_industry",
     "nologo",
     "wsj_format",
-    "current_source"
-    ]
+    "yf_currency",
+    "current_source",
+    "updated_on"
+]
 
 sub_sector_id_map = {
     "Transportation Infrastructure": 28,
@@ -92,21 +81,7 @@ sub_sector_id_map = {
     "Transportation": 33,
 }
 
-def _convert_json_col_to_df(df, col_name):
-    if df.empty:
-        return None
-    temp_df = df.loc[df[col_name].notna(),['symbol', col_name]].set_index('symbol')
-    # temp_df[col_name] = temp_df[col_name].apply(str)
-    try:
-        temp_df[col_name] = temp_df[col_name].apply(json.loads)
-    except TypeError as e:
-        pass
-    temp_df = temp_df.explode(col_name)
-    temp_df = temp_df[col_name].apply(pd.Series, dtype='object')
-    temp_df = temp_df.reset_index()
-    temp_df.columns = temp_df.columns.str.lower()
-    temp_df = temp_df.dropna(axis=1, how='all')
-    return temp_df
+
 
 class LimiterSession(LimiterMixin, Session):
     def __init__(self):
@@ -119,12 +94,52 @@ class LimiterSession(LimiterMixin, Session):
 
 class OwnershipCleaner:
     def __init__(self, shareholders_df) -> None:
-        self.current_shareholders_data = _convert_json_col_to_df(shareholders_df, 'shareholders')[['symbol','name','share_percentage']]
+        """Initializes the OwnershipCleaner class with the current shareholders data
+
+        Args:
+            shareholders_df (pd.DataFrame): the dataframe containing the current shareholders data
+        """
+        self.current_shareholders_data = self._convert_json_col_to_df(shareholders_df, 'shareholders')[['symbol','name','share_percentage']]
         self.current_shareholders_data['name_lower'] = self.current_shareholders_data['name'].str.lower()
         self.current_shareholders_data = self.current_shareholders_data.drop('name', axis=1)
 
+    def _convert_json_col_to_df(self, df, col_name):
+        """Converts a json column in a dataframe to a new dataframe
+
+        Args:
+            df (pd.DataFrame): the original dataframe
+            col_name (str): the name of the json column
+
+        Returns:
+            pd.DataFrame: the converted dataframe
+        """
+        if df.empty:
+            return None
+        temp_df = df.loc[df[col_name].notna(),['symbol', col_name]].set_index('symbol')
+        # temp_df[col_name] = temp_df[col_name].apply(str)
+        try:
+            temp_df[col_name] = temp_df[col_name].apply(json.loads)
+        except TypeError as e:
+            pass
+        
+        temp_df = temp_df.explode(col_name)
+        temp_df = temp_df[col_name].apply(pd.Series, dtype='object')
+        temp_df = temp_df.reset_index()
+        temp_df.columns = temp_df.columns.str.lower()
+        temp_df = temp_df.dropna(axis=1, how='all')
+        return temp_df
+
     def _process_management_col_to_df(self, df, col_name):
-        temp_df = _convert_json_col_to_df(df, col_name)
+        """Processes the management column (directors, commissioners, or audit_committees) in the dataframe to a new dataframe
+
+        Args:
+            df (pd.DataFrame): the original dataframe
+            col_name (str): the name of the management column
+
+        Returns:
+            pd.DataFrame: the processed dataframe
+        """
+        temp_df = self._convert_json_col_to_df(df, col_name)
         temp_df = temp_df.dropna(subset=['name', 'position'])
         temp_df['position'] = temp_df['position'].str.title()
         temp_df['name'] = temp_df['name'].str.title()
@@ -163,8 +178,17 @@ class OwnershipCleaner:
         
         return temp_df
         
-    def _process_shareholder_col_to_df(self, df, col_name, new_symbols=[]):
-        shareholders_df = _convert_json_col_to_df(df, col_name)
+    def _process_shareholder_col_to_df(self, df, col_name):
+        """Processes the shareholder column in the dataframe to a new dataframe
+
+        Args:
+            df (pd.DataFrame): the original dataframe
+            col_name (str): the name of the shareholder column
+
+        Returns:
+            pd.DataFrame: the processed dataframe
+        """
+        shareholders_df = self._convert_json_col_to_df(df, col_name)
         shareholders_df = shareholders_df.rename(columns={"summary": "share_amount", "percentage":"share_percentage"})
         shareholders_df = shareholders_df.drop_duplicates()
         
@@ -209,6 +233,7 @@ class OwnershipCleaner:
             'Masyarakat Non Warkat': 'Scripless Public Share',
             '': '-'
         }
+        
         shareholders_df = shareholders_df.replace({'type': type_mapping})
         shareholders_df['name'] = shareholders_df['name'].str.title()
         
@@ -234,7 +259,9 @@ class OwnershipCleaner:
                                     how='left',on=['symbol','name_lower'],suffixes=['_new','_old'])
         merged_df['share_percentage_change'] = (merged_df['share_percentage_new'] - merged_df['share_percentage_old'])/merged_df['share_percentage_old']
         
-        filter = (~merged_df['symbol'].isin(new_symbols) & merged_df['share_percentage_change'].isna())
+        existing_symbols = self.current_shareholders_data['symbol'].unique()
+        filter = (merged_df['symbol'].isin(existing_symbols) & merged_df['share_percentage_change'].isna())
+        
         merged_df.loc[filter,'share_percentage_change'] = merged_df.loc[filter,'share_percentage_change'].fillna(merged_df.loc[filter,'share_percentage_new'])
         merged_df['share_percentage_change'] = merged_df['share_percentage_change'].fillna(0)
         
@@ -244,11 +271,19 @@ class OwnershipCleaner:
         
         return merged_df
     
-    def process_ownership_col(self, df, col_name, new_symbols):
+    def process_ownership_col(self, df, col_name):
+        """
+        Process the ownership column (directors, commissioners, audit_committees or shareholders) in a dataframe to a json format
+        Args:
+            df (pd.DataFrame): dataframe to be processed
+            col_name (str): column name to be processed
+        Returns:
+            pd.DataFrame: processed dataframe containing the ownership column in json format
+        """
         if col_name in ['directors', 'commissioners', 'audit_committees']:
             temp_df = self._process_management_col_to_df(df, col_name)
         elif col_name == 'shareholders':
-            temp_df = self._process_shareholder_col_to_df(df, col_name, new_symbols)
+            temp_df = self._process_shareholder_col_to_df(df, col_name)
 
         temp_df = temp_df.replace(np.nan, None)
         json_df = temp_df.groupby('symbol').apply(lambda x: x.drop(columns=['symbol']).to_json(orient='records')).reset_index(name=col_name)
@@ -262,8 +297,14 @@ class IdxProfileUpdater:
         company_profile_csv_path=None,
         supabase_client=None,
         chrome_driver_path="./chromedriver.exe",
-        data_to_update="all"
     ):
+        """Class to update idx_company_profile table in supabase database.
+
+        Args:
+            company_profile_csv_path (str, optional): the path to the exported CSV file of the idx_company_profile table. Defaults to None. Only one of company_profile_csv_path or supabase_client should be provided.
+            supabase_client (SupabaseClient, optional): the supabase client. Defaults to None. Only one of company_profile_csv_path or supabase_client should be provided.
+            chrome_driver_path (str, optional): the path to the chrome driver. Defaults to "./chromedriver.exe".
+        """
 
         if company_profile_csv_path and supabase_client:
             raise ValueError(
@@ -272,8 +313,8 @@ class IdxProfileUpdater:
 
         elif company_profile_csv_path:
             self.current_data = pd.read_csv(company_profile_csv_path)
-            self.non_null_current_data = self.current_data[['symbol','nologo','wsj_format','current_source']]
-            self.current_data = self.current_data[columns]
+            # self.fixed_data = self.current_data[fixed_columns]
+            # self.idx_data = self.current_data[idx_columns]
 
         elif supabase_client:
             response = (
@@ -281,22 +322,24 @@ class IdxProfileUpdater:
             )
             self.supabase_client = supabase_client
             self.current_data = pd.DataFrame(response.data)
-            self.non_null_current_data = self.current_data[['symbol','nologo','wsj_format','current_source']]
-            self.current_data = self.current_data[columns]
+            # self.fixed_data = self.current_data[fixed_columns]
+            # self.idx_data = self.current_data[idx_columns]
 
         else:
-            self.current_data = pd.DataFrame(columns=columns)
+            self.current_data = pd.DataFrame(columns=all_columns)
+            # self.fixed_data = self.current_data[fixed_columns]
+            # self.idx_data = self.current_data[idx_columns]
 
-        self.updated_data = None
-        self.updated_rows = []
+
+        self.new_data = None
+        self.updated_rows = None
         self.modified_symbols = []
         self.ownershipcleaner = OwnershipCleaner(self.current_data[['symbol','shareholders']])
         self.chrome_driver_path = chrome_driver_path
-        self.data_to_update = data_to_update
         self._session = LimiterSession()
         self.cloudscraper_session = cloudscraper.create_scraper(browser='chrome')
 
-    def _retrieve_active_symbols(self):
+    def _retrieve_active_symbols_selenium(self):
         wd = webdriver.Chrome(service=Service(self.chrome_driver_path))
         url = "https://www.idx.co.id/en/market-data/stocks-data/stock-list/"
         wd.get(url)
@@ -319,18 +362,31 @@ class IdxProfileUpdater:
 
         return active_symbols
     
-    def _retrieve_active_symbols_from_idx_api(self):
+    def _retrieve_active_symbols_cloudscraper(self):
         url = "https://www.idx.co.id/primary/StockData/GetSecuritiesStock?start=0&length=9999&code=&sector=&board=&language=en-us"
         response = self.cloudscraper_session.get(url)
         if response.status_code != 200:
-            print(f"Failed to retrieve from IDX API. Status code: {response.status_code}")
-            raise Exception()
+            raise Exception(f"Error retrieving active symbols from IDX using cloudscraper. Status code: {response.status_code}")
         data = response.json()['data']
         active_symbols = [index['Code']+'.JK' for index in data]
 
         return active_symbols
+
+    def _retrieve_active_symbols(self, use_selenium=True):
+        """Retrieve the list of active symbols from IDX website.
+
+        Args:
+            use_selenuim (bool, optional): Whether to use Selenium or cloudscraper. Defaults to True (Selenium).
+
+        Returns:
+            list: list of active symbols
+        """
+        if use_selenium:
+            return self._retrieve_active_symbols_selenium()
+        else:
+            return self._retrieve_active_symbols_cloudscraper()
         
-    def _retrieve_profile_from_idx(self, yf_symbol):
+    def _retrieve_idx_profile_selenium(self, yf_symbol):
         def extract_table_data(section_title):
             h4 = bs.find("h4", string=section_title)
             table = h4.find_next_sibling("table")
@@ -411,14 +467,12 @@ class IdxProfileUpdater:
         return profile_dict
     
     @limits(calls=2, period=4)
-    def _retrieve_profile_from_idx_api(self, yf_symbol):
+    def _retrieve_idx_profile_cloudscraper(self, yf_symbol):
         symbol = (yf_symbol.split(".")[0]).lower()
         url = f"https://www.idx.co.id/primary/ListedCompany/GetCompanyProfilesDetail?KodeEmiten={symbol}&language=en-us"
         response = self.cloudscraper_session.get(url)
         if response.status_code != 200:
-            print(f"Failed to retrieve from IDX API. Status code: {response.status_code}")
-            raise Exception()
-        print('API responded with status code:', response.status_code)
+            raise Exception(f"Error with status code: {response.status_code}")
         data = response.json()
         profile_dict = {"symbol": yf_symbol}
         profiles = data['Profiles'][0]
@@ -490,120 +544,91 @@ class IdxProfileUpdater:
         profile_dict["delisting_date"] = None
         
         return profile_dict
+    
+    def _retrieve_idx_profile(self, yf_symbol, use_selenuim=True):
+        """Retrieve company profile from IDX website.
 
-    def _retrieve_data_from_yf_api(self, yf_symbol):
-        ticker = yf.Ticker(yf_symbol, session=self._session)
-        data_dict = {}
-        try:
-            ticker_info = ticker.info
-        except:
-            print(f"Ticker info not available for {yf_symbol} on YF API.")
-            
-        data_dict['employee_num'] = ticker_info.get('fullTimeEmployees')
-        yf_currency_map = {'IDR':1,'USD':2}
-        yf_currency = ticker_info.get('financialCurrency')
-        data_dict['yf_currency'] = yf_currency_map.get(yf_currency)
-        
-        try:
-            holders_breakdown = ticker.major_holders
-        except:
-            print(f"Holders breakdown data not available for {yf_symbol} on YF API.")
-        
-        if holders_breakdown is not None:
-            data_dict["holders_breakdown"] = (
-                    holders_breakdown.set_index(1)
-                    .replace(np.nan, None)
-                    .T.to_dict(orient="records")[0]
-                )
+        Args:
+            yf_symbol (str): Yahoo Finance symbol.
+            use_selenuim (bool, optional): Whether to use Selenium or cloudscraper. Defaults to True (Selenium).
+
+        Returns:
+            dict: Company profile.
+        """
+        if use_selenuim:
+            return self._retrieve_idx_profile_selenium(yf_symbol)
         else:
-            data_dict["holders_breakdown"] = None
+            return self._retrieve_idx_profile_cloudscraper(yf_symbol)
 
-        return data_dict
 
     def update_company_profile_data(self, update_new_symbols_only=True):
         """Update company profile data.
 
         Args:
             update_new_symbols_only (bool, optional): Whether to update only rows with new symbols or all rows. Defaults to True.
-            data_to_update (str, optional): Which data to update: "profile_idx", "data_yf", or "all". Defaults to "all".
         """
 
         def update_profile_for_row(row):
-            if self.data_to_update in ["profile_idx", "all"]:
-                idx_api_flag = True
+            temp_row = row.copy()
+            use_selenium = False
+            try:
+                profile_dict = self._retrieve_idx_profile(row["symbol"], use_selenium)
+                for key in profile_dict.keys():
+                    temp_row[key] = profile_dict[key]
+                time.sleep(3)
+            except Exception as e:
+                print(f'Failed to retrieve company profile for {row["symbol"]} using cloudscraper, retrying with Selenium. Error message: "{e}"')
+                use_selenium = True
+                
+            if use_selenium:
                 try:
-                    profile_dict = self._retrieve_profile_from_idx_api(row["symbol"])
+                    profile_dict = self._retrieve_idx_profile(row["symbol"], use_selenium)
                     for key in profile_dict.keys():
-                        rows_to_update.at[row.name, key] = profile_dict[key]
-                    time.sleep(3)
+                        temp_row[key] = profile_dict[key]
                 except Exception as e:
-                    print(f'IDX API failed for {row["symbol"]} error: {e}')
-                    idx_api_flag = False
-                if not idx_api_flag:
-                    try:
-                        profile_dict = self._retrieve_profile_from_idx(row["symbol"])
-                        for key in profile_dict.keys():
-                            rows_to_update.at[row.name, key] = profile_dict[key]
-                    except Exception as e:
-                        print(
-                            f"Failed to retrieve company profile for {row['symbol']} from IDX site. Error: {e}"
-                        )
-            if self.data_to_update in ["data_yf", "all"]:
-                try:
-                    yf_data_dict = self._retrieve_data_from_yf_api(row["symbol"])
-                    for key in yf_data_dict.keys():
-                        rows_to_update.at[row.name, key] = yf_data_dict[key]
-                except Exception as e:
-                    print(
-                        f"Failed to retrieve additional data for {row['symbol']} from YF API. Error: {e}"
-                    )
+                    print(f'Failed to retrieve company profile for {row["symbol"]} using Selenium.  message: "{e}"')
+                    
+            temp_row["updated_on"] = pd.Timestamp.now(tz="GMT").strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+                    
+            return temp_row
                     
         ### Management & Shareholders Cleaning
-        def clean_ownership(df, columns, new_symbols):
-            if self.data_to_update == 'data_yf':
-                print('No ownership cleaning needed for updating data from YF')
-                return df
+        def clean_ownership(df, columns):
             profile_df = df.copy()
             merged_updated_df = pd.DataFrame()
             try:
                 for col_name in columns:
-                    temp_df = self.ownershipcleaner.process_ownership_col(profile_df, col_name, new_symbols)
+                    temp_df = self.ownershipcleaner.process_ownership_col(profile_df, col_name)
                     if merged_updated_df.empty:
                         merged_updated_df = temp_df.copy()
                     else:
-                        merged_updated_df = pd.merge(merged_updated_df, temp_df, on="symbol", how="outer")
-                # print(merged_updated_df.columns)      
-                merged_updated_df = merged_updated_df.set_index('symbol')
-                # check length of merged_updated_df and profile_df is same. Check only for cleaned columns (if columns are null, no need to include it)
-                if len(profile_df.dropna(subset=columns, how='all')) == len(merged_updated_df):  
-                    profile_df = profile_df.set_index('symbol')
-                    profile_df.update(merged_updated_df)
-                    profile_df = profile_df.reset_index()
-                else:
-                    merged_updated_df.to_csv('cleaned_shareholders.csv', index=False)
-                    raise AssertionError("Error: Number of rows do not match") 
-                return profile_df
+                        merged_updated_df = pd.merge(merged_updated_df, temp_df, on="symbol", how="outer")    
+                return merged_updated_df
                 
             except Exception as e:
-                print(f'Failed to clean shareholders columns, dropping uncleaned columns for upsert. Error: {e}')
+                print(f'Failed to clean shareholders columns. Error: {e}')
                 return None
+            
         try: 
-            active_symbols = self._retrieve_active_symbols_from_idx_api()
+            retrieved_active_symbols = self._retrieve_active_symbols(use_selenium=False)
         except Exception as e:   
-            print('IDX API failed, retrieving with Selenium')     
-            active_symbols = self._retrieve_active_symbols()
+            print('Failed to retrieve active symbols with cloudscraper, retrying with Selenium.')     
+            retrieved_active_symbols = self._retrieve_active_symbols(use_selenium=True)
+            
         company_profile_data = self.current_data.copy()
-        csv_active_symbols = company_profile_data.query("delisting_date.isnull()")[
+        table_active_symbols = company_profile_data.query("delisting_date.isnull()")[
             "symbol"
         ].unique()
-        updated_inactive_symbols = list(set(csv_active_symbols) - set(active_symbols))
-        updated_new_symbols = list(set(active_symbols) - set(csv_active_symbols))
+        updated_inactive_symbols = list(set(table_active_symbols) - set(retrieved_active_symbols))
+        updated_new_symbols = list(set(retrieved_active_symbols) - set(table_active_symbols))
 
-        inactive_filter = company_profile_data.query(
+        updated_inactive_filter = company_profile_data.query(
             "symbol in @updated_inactive_symbols"
         ).index
         company_profile_data.loc[
-            inactive_filter, "delisting_date"
+            updated_inactive_filter, "delisting_date"
         ] = pd.Timestamp.now().strftime("%Y-%m-%d")
         self.modified_symbols.extend(updated_inactive_symbols)
 
@@ -613,40 +638,59 @@ class IdxProfileUpdater:
         )
 
         if update_new_symbols_only:
-            new_rows_filter = company_profile_data.query(
+            updated_new_filter = company_profile_data.query(
                 "symbol in @updated_new_symbols"
             ).index
-            rows_to_update = company_profile_data.loc[new_rows_filter]
+            rows_to_update = company_profile_data.loc[updated_new_filter]
             self.modified_symbols.extend(updated_new_symbols)
 
         else:
-            rows_to_update = company_profile_data
-            self.modified_symbols.extend(active_symbols)
+            active_filter = company_profile_data.query(
+                "symbol in @retrieved_active_symbols"
+            ).index
+            rows_to_update = company_profile_data.loc[active_filter]
+            self.modified_symbols.extend(retrieved_active_symbols)
 
-        rows_to_update.apply(update_profile_for_row, axis=1)
+        if rows_to_update.empty:
+            print("No new symbols to update.")
+            return
+        
+        rows_to_update = rows_to_update.apply(update_profile_for_row, axis=1)
+        
         columns_to_clean = [
                 "shareholders",
                 "directors",
                 "commissioners",
                 "audit_committees",
             ]
-        updated_rows = clean_ownership(rows_to_update, columns_to_clean, updated_new_symbols)
-        if updated_rows is not None:
-            self.updated_data = updated_rows
+        
+        cleaned_rows = clean_ownership(rows_to_update, columns_to_clean)
+        
+        if cleaned_rows is not None:
+            rows_to_update.set_index('symbol', inplace=True)
+            rows_to_update.update(cleaned_rows.set_index('symbol'))
+            rows_to_update.reset_index(inplace=True)
+
         else:
-            self.updated_data = rows_to_update
-        self.updated_rows = self.updated_data.query("symbol in @self.modified_symbols")
-        self.updated_rows = pd.merge(self.updated_rows, 
-                                     self.non_null_current_data[['symbol','nologo','wsj_format','current_source']], 
-                                     on='symbol',how='left')
-   
+            print('Failed to clean ownership columns. Dropping uncleaned columns for upsert and saving them to csv instead.')
+            company_profile_data[["symbol"] + columns_to_clean].to_csv('ownership_data_uncleaned.csv', index=False)
+            company_profile_data = company_profile_data.drop(columns=columns_to_clean)
+        
+
+        company_profile_data.set_index('symbol', inplace=True)
+        company_profile_data.update(rows_to_update.set_index('symbol'))
+        company_profile_data.reset_index(inplace=True)
+
+        self.new_data = company_profile_data
+        self.updated_rows = self.new_data.query("symbol in @self.modified_symbols")
+        
     def save_update_to_csv(self, updated_rows_only=True):
         """Generate CSV file containing updated data.
 
         Args:
             updated_rows_only (bool, optional): Whether to save only updated rows or all rows. Defaults to True.
         """
-        if self.updated_data is None:
+        if self.new_data is None:
             raise Exception(
                 "No updated data available. Please run update_company_profile_data() first."
             )
@@ -656,7 +700,6 @@ class IdxProfileUpdater:
             "directors",
             "commissioners",
             "audit_committees",
-            "holders_breakdown"
         ]
 
         date_now = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
@@ -669,22 +712,25 @@ class IdxProfileUpdater:
                 filename = f"idx_company_profile_updated_rows_{date_now}.csv"
 
         else:
-            df = self.updated_data.copy()
+            df = self.new_data.copy()
             filename = f"idx_company_profile_all_rows_{date_now}.csv"
         
         df[json_cols] = df[json_cols].applymap(json.dumps)
         df.to_csv(filename, index=False)
 
     def upsert_to_db(self):
+        """ Upsert updated data to idx_company_profile table in Supabase DB.
+        """
         if self.supabase_client is None:
             raise Exception(
                 "Can only upsert to DB if the class is initialized with Supabase client."
             )
 
-        if self.updated_data is None:
-            raise Exception(
-                "No updated data available. Please run update_company_profile_data() first."
+        if self.new_data is None:
+            print(
+                "No updated data available. Please run update_company_profile_data() first if you haven't."
             )
+            return
             
         def cast_int(num):
                 if pd.notna(num):
@@ -697,9 +743,6 @@ class IdxProfileUpdater:
             for cols in temp_df.columns:
                 if temp_df[cols].dtype == "datetime64[ns]":
                     temp_df[cols] = temp_df[cols].astype(str)
-            temp_df["updated_on"] = pd.Timestamp.now(tz="GMT").strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
             temp_df = temp_df.replace({np.nan: None})
             records = temp_df.to_dict("records")
             
@@ -709,15 +752,11 @@ class IdxProfileUpdater:
                         r[k] = cast_int(v)
                         
             return records
+        
         df = self.updated_rows.copy()
         df[["wsj_format", "current_source"]] = df[["wsj_format", "current_source"]].fillna(-1)
         df['nologo'] = df['nologo'].fillna(True)
-        yf_cols = ['employee_num','yf_currency','holders_breakdown']
-        if self.data_to_update == 'data_yf':
-            df = df[non_null_columns+yf_cols]
-        elif self.data_to_update == 'profile_idx':
-            df = df[[col for col in columns if col not in yf_cols]]
-        records = convert_df_to_records(df, int_cols=["employee_num", "sub_sector_id", "yf_currency", "wsj_format", "current_source"])
+        records = convert_df_to_records(df, int_cols=["sub_sector_id", "yf_currency", "wsj_format", "current_source"])
         self.supabase_client.table("idx_company_profile").upsert(
             records, returning="minimal", on_conflict="symbol"
         ).execute()
@@ -731,7 +770,6 @@ if __name__ == "__main__":
         # company_profile_csv_path="company_profile.csv",
         # supabase_client=supabase_client,
         chrome_driver_path='E:\Downloads\chromedriver-win64\chromedriver.exe',
-        data_to_update="profile_idx"
     )
     updater.update_company_profile_data(update_new_symbols_only=False)
     updater.save_update_to_csv(updated_rows_only=False)

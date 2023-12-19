@@ -316,7 +316,7 @@ class IdxProfileUpdater:
             )
 
         elif company_profile_csv_path:
-            self.current_data = pd.read_csv(company_profile_csv_path, columns=all_columns)
+            self.current_data = pd.read_csv(company_profile_csv_path, usecols=all_columns)
 
 
         elif supabase_client:

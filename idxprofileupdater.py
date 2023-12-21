@@ -39,8 +39,8 @@ all_columns = [
     "audit_committees",
     "delisting_date",
     "nologo",
-    "wsj_format",
     "yf_currency",
+    "wsj_format",
     "current_source",
     "updated_on"
 ]
@@ -755,7 +755,7 @@ class IdxProfileUpdater:
             return records
         
         df = self.updated_rows.copy()
-        df[["wsj_format", "current_source"]] = df[["wsj_format", "current_source"]].fillna(-1)
+        df[["yf_currency", "wsj_format", "current_source"]] = df[["yf_currency", "wsj_format", "current_source"]].fillna(-1)
         df['nologo'] = df['nologo'].fillna(True)
         records = convert_df_to_records(df, int_cols=["sub_sector_id", "yf_currency", "wsj_format", "current_source"])
         self.supabase_client.table("idx_company_profile").upsert(

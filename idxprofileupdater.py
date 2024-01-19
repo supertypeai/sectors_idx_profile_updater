@@ -93,19 +93,19 @@ class LimiterSession(LimiterMixin, Session):
         )
 
 class OwnershipCleaner:
-    def __init__(self, shareholders_df) -> None:
+    def __init__(self) -> None:
         """Initializes the OwnershipCleaner class with the current shareholders data
 
         Args:
             shareholders_df (pd.DataFrame): the dataframe containing the current shareholders data
         """
-        if not shareholders_df.empty:
-            self.current_shareholders_data = self._convert_json_col_to_df(shareholders_df, 'shareholders')[['symbol','name','share_percentage']]
-            self.current_shareholders_data['name_lower'] = self.current_shareholders_data['name'].str.lower()
-            self.current_shareholders_data = self.current_shareholders_data.drop('name', axis=1)
-        else:
-            columns = ['symbol','name_lower','share_percentage']
-            self.current_shareholders_data = pd.DataFrame(columns=columns)
+        # if not shareholders_df.empty:
+        #     self.current_shareholders_data = self._convert_json_col_to_df(shareholders_df, 'shareholders')[['symbol','name','share_percentage']]
+        #     self.current_shareholders_data['name_lower'] = self.current_shareholders_data['name'].str.lower()
+        #     self.current_shareholders_data = self.current_shareholders_data.drop('name', axis=1)
+        # else:
+        #     columns = ['symbol','name_lower','share_percentage']
+        #     self.current_shareholders_data = pd.DataFrame(columns=columns)
 
     def _convert_json_col_to_df(self, df, col_name):
         """Converts a json column in a dataframe to a new dataframe
@@ -184,7 +184,7 @@ class OwnershipCleaner:
         
     def _process_shareholder_col_to_df(self, df, col_name):
         """Processes the shareholder column in the dataframe to a new dataframe
-
+ 
         Args:
             df (pd.DataFrame): the original dataframe
             col_name (str): the name of the shareholder column
@@ -192,13 +192,30 @@ class OwnershipCleaner:
         Returns:
             pd.DataFrame: the processed dataframe
         """
+        def convert_share_percentage(x):
+            try:
+                return round(float(x.replace('%', '')) / 100, 4)
+            except Exception as e:
+                print(f'Error: {e}. Value is {x}')
+                return None
+        
+        def convert_share_amount(x):
+            try:
+                return float(x.replace(',', ''))
+            except Exception as e:
+                print(f'Error: {e}. Value is {x}')
+                return None
+            
         shareholders_df = self._convert_json_col_to_df(df, col_name)
         shareholders_df = shareholders_df.rename(columns={"summary": "share_amount", "percentage":"share_percentage"})
         shareholders_df = shareholders_df.drop_duplicates()
         
         shareholders_df[['share_amount', 'share_percentage']] = shareholders_df[['share_amount', 'share_percentage']].astype(str)
-        shareholders_df['share_percentage'] = shareholders_df['share_percentage'].apply(lambda x: round(float(x.replace('%',''))/100,4))
-        shareholders_df['share_amount'] = shareholders_df['share_amount'].apply(lambda x: float(x.replace(',','')))
+        # shareholders_df['share_percentage'] = shareholders_df['share_percentage'].apply(lambda x: round(float(x.replace('%',''))/100,4))
+        shareholders_df['share_percentage'] = shareholders_df['share_percentage'].apply(convert_share_percentage)
+        # shareholders_df['share_amount'] = shareholders_df['share_amount'].apply(lambda x: float(x.replace(',','')))
+        shareholders_df['share_amount'] = shareholders_df['share_amount'].apply(convert_share_amount)
+
         shareholders_df.loc[shareholders_df['name'] == 'Saham Treasury', 'type'] = 'Treasury Stock'
         
         name_mapping = {'Saham Treasury': 'Treasury Stock',
@@ -259,19 +276,19 @@ class OwnershipCleaner:
         merged_df['type'] = np.where(merged_df['position_comm'].notna() & merged_df['position_dir'].isna(), merged_df['position_comm'], merged_df['type'])
         merged_df = merged_df.groupby(['symbol', 'name_lower', 'type']).agg({'name':'first', 'share_amount':'sum', 'share_percentage':'sum'}).reset_index()
         
-        merged_df = pd.merge(merged_df,self.current_shareholders_data,
-                                    how='left',on=['symbol','name_lower'],suffixes=['_new','_old'])
-        merged_df['share_percentage_change'] = (merged_df['share_percentage_new'] - merged_df['share_percentage_old'])/merged_df['share_percentage_old']
+        # merged_df = pd.merge(merged_df,self.current_shareholders_data,
+        #                             how='left',on=['symbol','name_lower'],suffixes=['_new','_old'])
+        # merged_df['share_percentage_change'] = (merged_df['share_percentage_new'] - merged_df['share_percentage_old'])/merged_df['share_percentage_old']
         
-        existing_symbols = self.current_shareholders_data['symbol'].unique()
-        filter = (merged_df['symbol'].isin(existing_symbols) & merged_df['share_percentage_change'].isna())
+        # existing_symbols = self.current_shareholders_data['symbol'].unique()
+        # filter = (merged_df['symbol'].isin(existing_symbols) & merged_df['share_percentage_change'].isna())
         
-        merged_df.loc[filter,'share_percentage_change'] = merged_df.loc[filter,'share_percentage_change'].fillna(merged_df.loc[filter,'share_percentage_new'])
-        merged_df['share_percentage_change'] = merged_df['share_percentage_change'].fillna(0)
+        # merged_df.loc[filter,'share_percentage_change'] = merged_df.loc[filter,'share_percentage_change'].fillna(merged_df.loc[filter,'share_percentage_new'])
+        # merged_df['share_percentage_change'] = merged_df['share_percentage_change'].fillna(0)
         
-        merged_df = merged_df.rename(columns={'share_percentage_new':'share_percentage'})
-        merged_df['share_percentage_change'] = merged_df['share_percentage_change'].apply(lambda x: round(x,4))
-        merged_df = merged_df.drop(columns=['name_lower', 'share_percentage_old'])
+        # merged_df = merged_df.rename(columns={'share_percentage_new':'share_percentage'})
+        # merged_df['share_percentage_change'] = merged_df['share_percentage_change'].apply(lambda x: round(x,4))
+        merged_df = merged_df.drop(columns=['name_lower'])
         
         return merged_df
     
@@ -316,6 +333,7 @@ class IdxProfileUpdater:
             )
 
         elif company_profile_csv_path:
+            self.supabase_client = None
             self.current_data = pd.read_csv(company_profile_csv_path, usecols=all_columns)
 
 
@@ -326,16 +344,14 @@ class IdxProfileUpdater:
             self.supabase_client = supabase_client
             self.current_data = pd.DataFrame(response.data, columns=all_columns)
 
-
         else:
+            self.supabase_client = None
             self.current_data = pd.DataFrame(columns=all_columns)
-
-
 
         self.new_data = None
         self.updated_rows = None
-        self.modified_symbols = []
-        self.ownershipcleaner = OwnershipCleaner(self.current_data[['symbol','shareholders']])
+        self.modified_symbols = set()
+        self.ownershipcleaner = OwnershipCleaner()
         self.chrome_driver_path = chrome_driver_path
         self._session = LimiterSession()
         self.cloudscraper_session = cloudscraper.create_scraper(browser='chrome')
@@ -377,7 +393,7 @@ class IdxProfileUpdater:
         """Retrieve the list of active symbols from IDX website.
 
         Args:
-            use_selenuim (bool, optional): Whether to use Selenium or cloudscraper. Defaults to True (Selenium).
+            use_selenium (bool, optional): Whether to use Selenium or cloudscraper. Defaults to True (Selenium).
 
         Returns:
             list: list of active symbols
@@ -461,6 +477,7 @@ class IdxProfileUpdater:
             try:
                 profile_dict[key] = extract_table_data(title)
             except:
+                profile_dict[key] = None
                 print(f"{title} data not available for {symbol} on IDX site.")
 
         profile_dict["delisting_date"] = None
@@ -517,7 +534,7 @@ class IdxProfileUpdater:
         
         def _clean_dict(list_dict, key_name=None):
             if not list_dict:
-                return list_dict
+                return None
             if key_name :
                 list_dict = _change_bool_to_string(list_dict, key_name)
             for dct in list_dict.copy():
@@ -546,23 +563,23 @@ class IdxProfileUpdater:
         
         return profile_dict
     
-    def _retrieve_idx_profile(self, yf_symbol, use_selenuim=True):
+    def _retrieve_idx_profile(self, yf_symbol, use_selenium=True):
         """Retrieve company profile from IDX website.
 
         Args:
             yf_symbol (str): Yahoo Finance symbol.
-            use_selenuim (bool, optional): Whether to use Selenium or cloudscraper. Defaults to True (Selenium).
+            use_selenium (bool, optional): Whether to use Selenium or cloudscraper. Defaults to True (Selenium).
 
         Returns:
             dict: Company profile.
         """
-        if use_selenuim:
+        if use_selenium:
             return self._retrieve_idx_profile_selenium(yf_symbol)
         else:
             return self._retrieve_idx_profile_cloudscraper(yf_symbol)
 
 
-    def update_company_profile_data(self, update_new_symbols_only=True):
+    def update_company_profile_data(self, update_new_symbols_only=True, target_symbols=None):
         """Update company profile data.
 
         Args:
@@ -578,7 +595,6 @@ class IdxProfileUpdater:
                     temp_row[key] = profile_dict[key]
                 time.sleep(3)
             except Exception as e:
-                print(f'Failed to retrieve company profile for {row["symbol"]} using cloudscraper, retrying with Selenium. Error message: "{e}"')
                 use_selenium = True
                 
             if use_selenium:
@@ -587,7 +603,9 @@ class IdxProfileUpdater:
                     for key in profile_dict.keys():
                         temp_row[key] = profile_dict[key]
                 except Exception as e:
+                    self.modified_symbols.remove(row["symbol"])
                     print(f'Failed to retrieve company profile for {row["symbol"]} using Selenium.  message: "{e}"')
+                    
                     
             temp_row["updated_on"] = pd.Timestamp.now(tz="GMT").strftime(
                 "%Y-%m-%d %H:%M:%S"
@@ -599,25 +617,20 @@ class IdxProfileUpdater:
         def clean_ownership(df, columns):
             profile_df = df.copy()
             merged_updated_df = pd.DataFrame()
-            try:
-                for col_name in columns:
-                    temp_df = self.ownershipcleaner.process_ownership_col(profile_df, col_name)
-                    if merged_updated_df.empty:
-                        merged_updated_df = temp_df.copy()
-                    else:
-                        merged_updated_df = pd.merge(merged_updated_df, temp_df, on="symbol", how="outer")    
-                return merged_updated_df
-                
-            except Exception as e:
-                print(f'Failed to clean shareholders columns. Error: {e}')
-                return None
+            
+            for col_name in columns:
+                temp_df = self.ownershipcleaner.process_ownership_col(profile_df, col_name)
+                if merged_updated_df.empty:
+                    merged_updated_df = temp_df.copy()
+                else:
+                    merged_updated_df = pd.merge(merged_updated_df, temp_df, on="symbol", how="outer")    
+            return merged_updated_df
             
         try: 
             retrieved_active_symbols = self._retrieve_active_symbols(use_selenium=False)
         except Exception as e:   
-            print('Failed to retrieve active symbols with cloudscraper, retrying with Selenium.')     
             retrieved_active_symbols = self._retrieve_active_symbols(use_selenium=True)
-            
+        
         company_profile_data = self.current_data.copy()
         table_active_symbols = company_profile_data.query("delisting_date.isnull()")[
             "symbol"
@@ -631,7 +644,7 @@ class IdxProfileUpdater:
         company_profile_data.loc[
             updated_inactive_filter, "delisting_date"
         ] = pd.Timestamp.now().strftime("%Y-%m-%d")
-        self.modified_symbols.extend(updated_inactive_symbols)
+        self.modified_symbols.update(updated_inactive_symbols)
 
         company_profile_data = pd.concat(
             [company_profile_data, pd.DataFrame({"symbol": updated_new_symbols})],
@@ -639,25 +652,30 @@ class IdxProfileUpdater:
         )
 
         if update_new_symbols_only:
+            if not target_symbols:
+                target_symbols = updated_new_symbols
             updated_new_filter = company_profile_data.query(
-                "symbol in @updated_new_symbols"
+                "symbol in @updated_new_symbols and symbol in @target_symbols"
             ).index
-            rows_to_update = company_profile_data.loc[updated_new_filter]
-            self.modified_symbols.extend(updated_new_symbols)
+            rows_to_update = company_profile_data.loc[updated_new_filter].copy()
 
         else:
+            if not target_symbols:
+                target_symbols = retrieved_active_symbols
             active_filter = company_profile_data.query(
-                "symbol in @retrieved_active_symbols"
+                "symbol in @retrieved_active_symbols and symbol in @target_symbols"
             ).index
-            rows_to_update = company_profile_data.loc[active_filter]
-            self.modified_symbols.extend(retrieved_active_symbols)
+            rows_to_update = company_profile_data.loc[active_filter].copy()
+            
 
         if rows_to_update.empty:
             print("No rows to update.")
             return
         
+        self.modified_symbols.update(rows_to_update["symbol"].tolist())
         rows_to_update = rows_to_update.apply(update_profile_for_row, axis=1)
-    
+
+        
         columns_to_clean = [
                 "shareholders",
                 "directors",
@@ -665,18 +683,18 @@ class IdxProfileUpdater:
                 "audit_committees",
             ]
         
-        cleaned_rows = clean_ownership(rows_to_update, columns_to_clean)
+        try:
+            cleaned_rows = clean_ownership(rows_to_update, columns_to_clean)
         
-        if cleaned_rows is not None:
+        except Exception as e:
+            print(f'Failed to clean ownership columns. Dropping uncleaned columns for upsert and saving them to csv instead. Error message: "{e}"')
+            company_profile_data[["symbol"] + columns_to_clean].to_csv('ownership_data_uncleaned.csv', index=False)
+            company_profile_data = company_profile_data.drop(columns=columns_to_clean)
+            
+        else:
             rows_to_update.set_index('symbol', inplace=True)
             rows_to_update.update(cleaned_rows.set_index('symbol'))
             rows_to_update.reset_index(inplace=True)
-
-        else:
-            print('Failed to clean ownership columns. Dropping uncleaned columns for upsert and saving them to csv instead.')
-            company_profile_data[["symbol"] + columns_to_clean].to_csv('ownership_data_uncleaned.csv', index=False)
-            company_profile_data = company_profile_data.drop(columns=columns_to_clean)
-        
 
         company_profile_data.set_index('symbol', inplace=True)
         company_profile_data.update(rows_to_update.set_index('symbol'))
@@ -719,12 +737,15 @@ class IdxProfileUpdater:
         df[json_cols] = df[json_cols].applymap(json.dumps)
         df.to_csv(filename, index=False)
 
-    def upsert_to_db(self):
+    def upsert_to_db(self, supabase_client=None):
         """ Upsert updated data to idx_company_profile table in Supabase DB.
         """
-        if self.supabase_client is None:
+        if not self.supabase_client:
+            self.supabase_client = supabase_client
+            
+        if not self.supabase_client:
             raise Exception(
-                "Can only upsert to DB if the class is initialized with Supabase client."
+                "Can only upsert to DB if Supabase client is provided."
             )
 
         if self.new_data is None:

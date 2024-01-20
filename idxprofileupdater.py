@@ -675,6 +675,7 @@ class IdxProfileUpdater:
         self.modified_symbols.update(rows_to_update["symbol"].tolist())
         rows_to_update = rows_to_update.apply(update_profile_for_row, axis=1)
 
+        self._rows_to_update_temp = rows_to_update.copy()
         
         columns_to_clean = [
                 "shareholders",
@@ -687,14 +688,13 @@ class IdxProfileUpdater:
             cleaned_rows = clean_ownership(rows_to_update, columns_to_clean)
         
         except Exception as e:
-            print(f'Failed to clean ownership columns. Dropping uncleaned columns for upsert and saving them to csv instead. Error message: "{e}"')
-            company_profile_data[["symbol"] + columns_to_clean].to_csv('ownership_data_uncleaned.csv', index=False)
-            company_profile_data = company_profile_data.drop(columns=columns_to_clean)
-            
-        else:
-            rows_to_update.set_index('symbol', inplace=True)
-            rows_to_update.update(cleaned_rows.set_index('symbol'))
-            rows_to_update.reset_index(inplace=True)
+            print(f'Failed to clean ownership columns. Dropping uncleaned columns for upsert and saving them to csv instead. Error message: {e}')
+            rows_to_update[["symbol"] + columns_to_clean].to_csv('ownership_data_uncleaned.csv', index=False)
+            rows_to_update = rows_to_update.drop(columns=columns_to_clean)
+
+        rows_to_update.set_index('symbol', inplace=True)
+        rows_to_update.update(cleaned_rows.set_index('symbol'))
+        rows_to_update.reset_index(inplace=True)
 
         company_profile_data.set_index('symbol', inplace=True)
         company_profile_data.update(rows_to_update.set_index('symbol'))

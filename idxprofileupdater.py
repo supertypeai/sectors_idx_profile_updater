@@ -205,16 +205,20 @@ class OwnershipCleaner:
             except Exception as e:
                 print(f'Error: {e}. Value is {x}')
                 return None
-            
+        
         shareholders_df = self._convert_json_col_to_df(df, col_name)
-        shareholders_df = shareholders_df.rename(columns={"summary": "share_amount", "percentage":"share_percentage"})
         shareholders_df = shareholders_df.drop_duplicates()
         
-        shareholders_df[['share_amount', 'share_percentage']] = shareholders_df[['share_amount', 'share_percentage']].astype(str)
-        # shareholders_df['share_percentage'] = shareholders_df['share_percentage'].apply(lambda x: round(float(x.replace('%',''))/100,4))
-        shareholders_df['share_percentage'] = shareholders_df['share_percentage'].apply(convert_share_percentage)
-        # shareholders_df['share_amount'] = shareholders_df['share_amount'].apply(lambda x: float(x.replace(',','')))
-        shareholders_df['share_amount'] = shareholders_df['share_amount'].apply(convert_share_amount)
+        old_shareholders_df = shareholders_df[shareholders_df['share_amount'].notna()].copy()
+        shareholders_df = shareholders_df.drop(index=old_shareholders_df.index)
+        old_shareholders_df = old_shareholders_df.drop(columns=['share_amount_new', 'share_percentage_new'])
+        shareholders_df = shareholders_df.drop(columns=['share_amount', 'share_percentage'])
+        
+        shareholders_df[['share_amount_new', 'share_percentage_new']] = shareholders_df[['share_amount_new', 'share_percentage_new']].astype(str)
+        # shareholders_df['share_percentage_new'] = shareholders_df['share_percentage_new'].apply(lambda x: round(float(x.replace('%',''))/100,4))
+        shareholders_df['share_percentage_new'] = shareholders_df['share_percentage_new'].apply(convert_share_percentage)
+        # shareholders_df['share_amount_new'] = shareholders_df['share_amount_new'].apply(lambda x: float(x.replace(',','')))
+        shareholders_df['share_amount_new'] = shareholders_df['share_amount_new'].apply(convert_share_amount)
 
         shareholders_df.loc[shareholders_df['name'] == 'Saham Treasury', 'type'] = 'Treasury Stock'
         
@@ -240,7 +244,7 @@ class OwnershipCleaner:
                     '-': np.nan,
                     '': np.nan}
         shareholders_df = shareholders_df.replace({'name': name_mapping})
-        shareholders_df = shareholders_df.loc[shareholders_df['share_amount']>0]
+        shareholders_df = shareholders_df.loc[shareholders_df['share_amount_new']>0]
         
         type_mapping = {
             'Direksi':'Director',
@@ -274,7 +278,7 @@ class OwnershipCleaner:
         
         merged_df['type'] = np.where(merged_df['position_dir'].notna(), merged_df['position_dir'], merged_df['type'])
         merged_df['type'] = np.where(merged_df['position_comm'].notna() & merged_df['position_dir'].isna(), merged_df['position_comm'], merged_df['type'])
-        merged_df = merged_df.groupby(['symbol', 'name_lower', 'type']).agg({'name':'first', 'share_amount':'sum', 'share_percentage':'sum'}).reset_index()
+        merged_df = merged_df.groupby(['symbol', 'name_lower', 'type']).agg({'name':'first', 'share_amount_new':'sum', 'share_percentage_new':'sum'}).reset_index()
         
         # merged_df = pd.merge(merged_df,self.current_shareholders_data,
         #                             how='left',on=['symbol','name_lower'],suffixes=['_new','_old'])
@@ -289,6 +293,10 @@ class OwnershipCleaner:
         # merged_df = merged_df.rename(columns={'share_percentage_new':'share_percentage'})
         # merged_df['share_percentage_change'] = merged_df['share_percentage_change'].apply(lambda x: round(x,4))
         merged_df = merged_df.drop(columns=['name_lower'])
+        
+        merged_df = merged_df.rename(columns={'share_amount_new':'share_amount', 'share_percentage_new':'share_percentage'})
+        merged_df = pd.concat([merged_df, old_shareholders_df], ignore_index=True)
+        
         
         return merged_df
     
@@ -355,9 +363,10 @@ class IdxProfileUpdater:
         self.chrome_driver_path = chrome_driver_path
         self._session = LimiterSession()
         self.cloudscraper_session = cloudscraper.create_scraper(browser='chrome')
+        self.options = webdriver.ChromeOptions()
 
     def _retrieve_active_symbols_selenium(self):
-        wd = webdriver.Chrome(service=Service(self.chrome_driver_path))
+        wd = webdriver.Chrome(service=Service(self.chrome_driver_path), options=self.options)
         url = "https://www.idx.co.id/en/market-data/stocks-data/stock-list/"
         wd.get(url)
 
@@ -428,7 +437,7 @@ class IdxProfileUpdater:
             return data_list
 
         symbol = yf_symbol.split(".")[0]
-        wd = webdriver.Chrome(service=Service(self.chrome_driver_path))
+        wd = webdriver.Chrome(service=Service(self.chrome_driver_path), options=self.options)
         url = f"https://www.idx.co.id/en/listed-companies/company-profiles/{symbol}"
         wd.get(url)
         wait = WebDriverWait(wd, 20)
@@ -510,13 +519,13 @@ class IdxProfileUpdater:
             "NPWP": "NPWP",
         }
         shareholders_renaming = {
-            'Nama':'Name',
-            'Jabatan':'Position',
-            'Afiliasi':'Affiliated',
-            'Independen':'Independent',
-            'Jumlah':'Summary',
-            'Kategori':'Type',
-            'Persentase':'Percentage'
+            'Nama':'name',
+            'Jabatan':'position',
+            'Afiliasi':'affiliated',
+            'Independen':'independent',
+            'Jumlah':'share_amount_new',
+            'Kategori':'type',
+            'Persentase':'share_percentage_new'
         }
         truth_dict = {False:'No', True:'Yes'}
         
@@ -691,10 +700,11 @@ class IdxProfileUpdater:
             print(f'Failed to clean ownership columns. Dropping uncleaned columns for upsert and saving them to csv instead. Error message: {e}')
             rows_to_update[["symbol"] + columns_to_clean].to_csv('ownership_data_uncleaned.csv', index=False)
             rows_to_update = rows_to_update.drop(columns=columns_to_clean)
-
-        rows_to_update.set_index('symbol', inplace=True)
-        rows_to_update.update(cleaned_rows.set_index('symbol'))
-        rows_to_update.reset_index(inplace=True)
+            
+        else:
+            rows_to_update.set_index('symbol', inplace=True)
+            rows_to_update.update(cleaned_rows.set_index('symbol'))
+            rows_to_update.reset_index(inplace=True)
 
         company_profile_data.set_index('symbol', inplace=True)
         company_profile_data.update(rows_to_update.set_index('symbol'))
@@ -737,7 +747,7 @@ class IdxProfileUpdater:
         df[json_cols] = df[json_cols].applymap(json.dumps)
         df.to_csv(filename, index=False)
 
-    def upsert_to_db(self, supabase_client=None):
+    def upsert_to_db(self, save_current_data=True, supabase_client=None):
         """ Upsert updated data to idx_company_profile table in Supabase DB.
         """
         if not self.supabase_client:
@@ -782,6 +792,9 @@ class IdxProfileUpdater:
         self.supabase_client.table("idx_company_profile").upsert(
             records, returning="minimal", on_conflict="symbol"
         ).execute()
+        
+        if save_current_data:
+            self.current_data.to_csv('idx_company_profile_current.csv', index=False)
 
 
 if __name__ == "__main__":

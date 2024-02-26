@@ -1,15 +1,15 @@
 import json
-import cloudscraper
-from ratelimit import limits
-import time
 import os
-from supabase import create_client
-from dotenv import load_dotenv
+import time
+
+import cloudscraper
 import numpy as np
 import pandas as pd
 import yfinance as yf
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from pyrate_limiter import Duration, Limiter, RequestRate
+from ratelimit import limits
 from requests import Session
 from requests_ratelimiter import LimiterMixin, MemoryQueueBucket
 from selenium import webdriver
@@ -17,6 +17,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
+from supabase import create_client
 
 all_columns = [
     "symbol",
@@ -518,6 +519,7 @@ class IdxProfileUpdater:
             "Website": "website",
             "NPWP": "NPWP",
         }
+        
         shareholders_renaming = {
             'Nama':'name',
             'Jabatan':'position',
@@ -527,6 +529,7 @@ class IdxProfileUpdater:
             'Kategori':'type',
             'Persentase':'share_percentage_new'
         }
+        
         truth_dict = {False:'No', True:'Yes'}
         
         for key, value in profiles.items():
@@ -614,8 +617,12 @@ class IdxProfileUpdater:
                 except Exception as e:
                     self.modified_symbols.remove(row["symbol"])
                     print(f'Failed to retrieve company profile for {row["symbol"]} using Selenium.  message: "{e}"')
-                    
-                    
+
+            # replace '-','0','' with None
+            replace_cols = ['address', 'email', 'phone', 'fax', 'NPWP', 'website', 'register']
+            for col in replace_cols:
+                temp_row[col] = temp_row[col].replace(['-', '0', ''], [None, None, None])
+                
             temp_row["updated_on"] = pd.Timestamp.now(tz="GMT").strftime(
                 "%Y-%m-%d %H:%M:%S"
             )

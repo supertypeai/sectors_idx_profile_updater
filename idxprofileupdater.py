@@ -1,8 +1,9 @@
 import json
 import os
+import ssl
 import time
+import urllib.request
 
-import cloudscraper
 import numpy as np
 import pandas as pd
 import yfinance as yf
@@ -82,7 +83,36 @@ sub_sector_id_map = {
     "Transportation": 33,
 }
 
+class ProxyRequester:
+    def __init__(self, proxy=None):
+        """Initializes the ProxyRequester class with the provided proxy
 
+        Args:
+            proxy (str, optional): the proxy to be used. Defaults to None. Example: 'brd-customer-xxx-zone-xxx:xxx@brd.superproxy.io:xxx'
+        """
+        # Set up SSL context to unverified
+        ssl._create_default_https_context = ssl._create_unverified_context
+
+        # Create a ProxyHandler with provided proxy
+        proxy_settings = {}
+        if proxy:
+            proxy_settings['http'] = 'http://' + proxy
+            proxy_settings['https'] = 'http://' + proxy
+        
+        self.proxy_support = urllib.request.ProxyHandler(proxy_settings)
+
+        # Create and install an opener with the ProxyHandler
+        self.opener = urllib.request.build_opener(self.proxy_support)
+        urllib.request.install_opener(self.opener)
+
+    def fetch_url(self, url):
+        # Use the installed opener to fetch the URL
+        try:
+            with urllib.request.urlopen(url) as response:
+                return response.read().decode()
+        except Exception as e:
+            print(f"Error fetching URL: {e}")
+            return False
 
 class LimiterSession(LimiterMixin, Session):
     def __init__(self):
@@ -120,6 +150,7 @@ class OwnershipCleaner:
         """
         if df.empty:
             return None
+        
         temp_df = df.loc[df[col_name].notna(),['symbol', col_name]].set_index('symbol')
 
         try:
@@ -210,10 +241,18 @@ class OwnershipCleaner:
         shareholders_df = self._convert_json_col_to_df(df, col_name)
         shareholders_df = shareholders_df.drop_duplicates()
         
+        old_cols = ['share_amount', 'share_percentage']
+        new_cols = ['share_amount_new', 'share_percentage_new']
+        
+        for cols in old_cols:
+            if cols not in shareholders_df.columns:
+                shareholders_df[cols] = None
+        
         old_shareholders_df = shareholders_df[shareholders_df['share_amount'].notna()].copy()
+        old_shareholders_df = old_shareholders_df.drop(columns=new_cols)
+
         shareholders_df = shareholders_df.drop(index=old_shareholders_df.index)
-        old_shareholders_df = old_shareholders_df.drop(columns=['share_amount_new', 'share_percentage_new'])
-        shareholders_df = shareholders_df.drop(columns=['share_amount', 'share_percentage'])
+        shareholders_df = shareholders_df.drop(columns=old_cols)
         
         shareholders_df[['share_amount_new', 'share_percentage_new']] = shareholders_df[['share_amount_new', 'share_percentage_new']].astype(str)
         # shareholders_df['share_percentage_new'] = shareholders_df['share_percentage_new'].apply(lambda x: round(float(x.replace('%',''))/100,4))
@@ -327,6 +366,7 @@ class IdxProfileUpdater:
         company_profile_csv_path=None,
         supabase_client=None,
         chrome_driver_path="./chromedriver.exe",
+        proxy=None
     ):
         """Class to update idx_company_profile table in supabase database.
 
@@ -363,7 +403,7 @@ class IdxProfileUpdater:
         self.ownershipcleaner = OwnershipCleaner()
         self.chrome_driver_path = chrome_driver_path
         self._session = LimiterSession()
-        self.cloudscraper_session = cloudscraper.create_scraper(browser='chrome')
+        self._requester = ProxyRequester(proxy)
         self.options = webdriver.ChromeOptions()
 
     def _retrieve_active_symbols_selenium(self):
@@ -389,12 +429,12 @@ class IdxProfileUpdater:
 
         return active_symbols
     
-    def _retrieve_active_symbols_cloudscraper(self):
+    def _retrieve_active_symbols_json(self):
         url = "https://www.idx.co.id/primary/StockData/GetSecuritiesStock?start=0&length=9999&code=&sector=&board=&language=en-us"
-        response = self.cloudscraper_session.get(url)
-        if response.status_code != 200:
-            raise Exception(f"Error retrieving active symbols from IDX using cloudscraper. Status code: {response.status_code}")
-        data = response.json()['data']
+        response = self._requester.fetch_url(url)
+        if response == False:
+            raise Exception("Error retrieving active symbols from IDX json.")
+        data = json.loads(response)['data']
         active_symbols = [index['Code']+'.JK' for index in data]
 
         return active_symbols
@@ -403,7 +443,7 @@ class IdxProfileUpdater:
         """Retrieve the list of active symbols from IDX website.
 
         Args:
-            use_selenium (bool, optional): Whether to use Selenium or cloudscraper. Defaults to True (Selenium).
+            use_selenium (bool, optional): Whether to use Selenium or json endpoint. Defaults to True (Selenium).
 
         Returns:
             list: list of active symbols
@@ -411,7 +451,7 @@ class IdxProfileUpdater:
         if use_selenium:
             return self._retrieve_active_symbols_selenium()
         else:
-            return self._retrieve_active_symbols_cloudscraper()
+            return self._retrieve_active_symbols_json()
         
     def _retrieve_idx_profile_selenium(self, yf_symbol):
         def extract_table_data(section_title):
@@ -437,6 +477,24 @@ class IdxProfileUpdater:
 
             return data_list
 
+        def _clean_dict(list_dict):
+            shareholders_renaming = {
+            'Name':'name',
+            'Position':'position',
+            'Affiliated':'affiliated',
+            'Independent':'independent',
+            'Summary':'share_amount_new',
+            'Type':'type',
+            'Percentage':'share_percentage_new'
+            }
+            
+            if not list_dict:
+                return None
+            for dct in list_dict.copy():
+                for key in list(dct.keys()):
+                    dct[shareholders_renaming.get(key, key)] = dct.pop(key)
+            return list_dict
+        
         symbol = yf_symbol.split(".")[0]
         wd = webdriver.Chrome(service=Service(self.chrome_driver_path), options=self.options)
         url = f"https://www.idx.co.id/en/listed-companies/company-profiles/{symbol}"
@@ -482,10 +540,11 @@ class IdxProfileUpdater:
             "commissioners": "Comissioners",
             "audit_committees": "Audit Committee",
         }
-
+        
         for key, title in key_title_dict.items():
             try:
                 profile_dict[key] = extract_table_data(title)
+                profile_dict[key] = _clean_dict(profile_dict[key])
             except:
                 profile_dict[key] = None
                 print(f"{title} data not available for {symbol} on IDX site.")
@@ -495,13 +554,14 @@ class IdxProfileUpdater:
         return profile_dict
     
     @limits(calls=2, period=4)
-    def _retrieve_idx_profile_cloudscraper(self, yf_symbol):
+    def _retrieve_idx_profile_json(self, yf_symbol):
         symbol = (yf_symbol.split(".")[0]).lower()
         url = f"https://www.idx.co.id/primary/ListedCompany/GetCompanyProfilesDetail?KodeEmiten={symbol}&language=en-us"
-        response = self.cloudscraper_session.get(url)
-        if response.status_code != 200:
-            raise Exception(f"Error with status code: {response.status_code}")
-        data = response.json()
+        response = self._requester.fetch_url(url)
+        if response == False:
+            raise Exception("Error retrieving active symbols from IDX json.")
+        
+        data = json.loads(response)
         profile_dict = {"symbol": yf_symbol}
         profiles = data['Profiles'][0]
 
@@ -580,7 +640,7 @@ class IdxProfileUpdater:
 
         Args:
             yf_symbol (str): Yahoo Finance symbol.
-            use_selenium (bool, optional): Whether to use Selenium or cloudscraper. Defaults to True (Selenium).
+            use_selenium (bool, optional): Whether to use Selenium or json endpoint. Defaults to True (Selenium).
 
         Returns:
             dict: Company profile.
@@ -588,7 +648,7 @@ class IdxProfileUpdater:
         if use_selenium:
             return self._retrieve_idx_profile_selenium(yf_symbol)
         else:
-            return self._retrieve_idx_profile_cloudscraper(yf_symbol)
+            return self._retrieve_idx_profile_json(yf_symbol)
 
 
     def update_company_profile_data(self, update_new_symbols_only=True, target_symbols=None):
@@ -620,8 +680,7 @@ class IdxProfileUpdater:
 
             # replace '-','0','' with None
             replace_cols = ['address', 'email', 'phone', 'fax', 'NPWP', 'website', 'register']
-            for col in replace_cols:
-                temp_row[col] = temp_row[col].replace(['-', '0', ''], [None, None, None])
+            temp_row[replace_cols] = temp_row[replace_cols].replace(['-', '0', ''], [None, None, None])
                 
             temp_row["updated_on"] = pd.Timestamp.now(tz="GMT").strftime(
                 "%Y-%m-%d %H:%M:%S"
@@ -705,6 +764,7 @@ class IdxProfileUpdater:
         
         except Exception as e:
             print(f'Failed to clean ownership columns. Dropping uncleaned columns for upsert and saving them to csv instead. Error message: {e}')
+            rows_to_update[columns_to_clean] = rows_to_update[columns_to_clean].applymap(json.dumps)
             rows_to_update[["symbol"] + columns_to_clean].to_csv('ownership_data_uncleaned.csv', index=False)
             rows_to_update = rows_to_update.drop(columns=columns_to_clean)
             

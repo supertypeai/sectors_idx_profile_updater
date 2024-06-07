@@ -362,7 +362,7 @@ class IdxProfileUpdater:
 
         elif supabase_client:
             response = (
-                supabase_client.table("idx_company_profile_temp").select("*").execute()
+                supabase_client.table("idx_company_profile").select("*").execute()
             )
             self.supabase_client = supabase_client
             self.current_data = pd.DataFrame(response.data, columns=all_columns)
@@ -667,7 +667,7 @@ class IdxProfileUpdater:
         df[["yf_currency", "wsj_format", "current_source"]] = df[["yf_currency", "wsj_format", "current_source"]].fillna(-1)
         df['nologo'] = df['nologo'].fillna(True)
         records = convert_df_to_records(df, int_cols=["sub_sector_id", "yf_currency", "wsj_format", "current_source"])
-        self.supabase_client.table("idx_company_profile_temp").upsert(
+        self.supabase_client.table("idx_company_profile").upsert(
             records, returning="minimal", on_conflict="symbol"
         ).execute()
         

@@ -1,3 +1,5 @@
+# PROOF BRIGHTDATA TEMBUS
+
 import json
 import pandas as pd
 from datetime import datetime
@@ -26,16 +28,16 @@ def retrieve_active_symbols():
 
     return active_symbols
 
-def retrieve_company_profile(symbol):
-    url = f"https://www.idx.co.id/primary/ListedCompany/GetCompanyProfilesDetail?KodeEmiten={symbol}&language=en-us"
-    with urllib.request.urlopen(url) as response:
-        html = response.read()
-    data = json.loads(html)
-    print(data)
+# def retrieve_company_profile(symbol):
+#     url = f"https://www.idx.co.id/primary/ListedCompany/GetCompanyProfilesDetail?KodeEmiten={symbol}&language=en-us"
+#     with urllib.request.urlopen(url) as response:
+#         html = response.read()
+#     data = json.loads(html)
+#     print(data)
 
-    return data
+#     return data
 
 retrieve_active_symbols()
-retrieve_company_profile('BBCA')
+# retrieve_company_profile('BBCA')
 
 

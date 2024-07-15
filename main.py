@@ -706,5 +706,5 @@ if __name__ == "__main__":
         supabase_client=supabase_client,
         proxy = proxy
     )
-    updater.update_company_profile_data(update_new_symbols_only=True)
+    updater.update_company_profile_data(update_new_symbols_only=False)
     updater.upsert_to_db()

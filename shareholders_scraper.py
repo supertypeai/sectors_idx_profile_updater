@@ -134,11 +134,11 @@ def get_new_shareholders_data(symbol, supabase):
       return shareholders_df
     
 MAX_ATTEMPT = 3
-SLEEP = 3
+SLEEP = 1.5
 CWD = os.getcwd()
 DATA_DIR = os.path.join(CWD, "data")
 
-def get_shareholder_data(symbol_list: list, process: int, supabase):
+def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = False):
   retry = 0 
   i = 0 
   failed_list = []
@@ -182,14 +182,31 @@ def get_shareholder_data(symbol_list: list, process: int, supabase):
     time.sleep(SLEEP)
 
   # Save the data
-  filename = os.path.join(DATA_DIR, f"shareholders_data_P{process}.csv")
-  data.to_csv(filename,index=False)
+  if (not is_failure_handling):
+    filename = os.path.join(DATA_DIR, f"shareholders_data.csv")
+    data.to_csv(filename, index=False)
+  else:
+    filename = os.path.join(DATA_DIR, f"additional_shareholders_data.csv")
+    data.to_csv(filename, index=False)
 
   # Store failed data
-  failed_filename = os.path.join(DATA_DIR, f"failed_data_P{process}.json")
+  failed_filename = os.path.join(DATA_DIR, f"failed_data.json")
   with open(failed_filename, "w") as final:
     json.dump(failed_list, final, indent=2)
 
+def preparing_to_insert_db(df_db : pd.DataFrame):
+  CSV_FILE = os.path.join(DATA_DIR, "shareholders_data.csv")
+  df_scrapped = pd.read_csv(CSV_FILE)
+
+  # For handling new column 'new_shareholders' | Will be deleted if it is not needed
+  df_scrapped = df_scrapped.rename(columns={"shareholders": "new_shareholders"})
+  df_final = df_db.merge(df_scrapped, left_on="symbol", right_on='symbol')
+
+  # Drop the old one, replace it with the new one
+  df_final = df_final.drop(['new_shareholders_x'], axis=1)
+  df_final = df_final.rename(columns={"new_shareholders_y": "new_shareholders"})
+  df_final = df_final.replace({np.nan: None})
+  return df_final
 
 if __name__ == "__main__":
   url_supabase = os.getenv("SUPABASE_URL")
@@ -202,18 +219,51 @@ if __name__ == "__main__":
   symbol.columns = ["symbol","exchange"]
   symbol = list(symbol.symbol)
 
+  # Start time
+  start = time.time()
+
   length_list = len(symbol)
   i1 = int(length_list / 2)
 
-  get_shareholder_data(symbol, 1, supabase)
+  get_shareholder_data(symbol, supabase) # COMMENT OUT THIS ONE TO TEST THE DB UPDATE
 
+  # Checkpoint
+  checkpoint = time.time()
 
-  # p1 = Process(target=get_shareholder_data, args=(symbol[:i1], 1, supabase))
-  # p2 = Process(target=get_shareholder_data, args=(symbol[i1:], 2, supabase))
+  # # Preparing to be inserted to db
+  # data_db = supabase.table("idx_company_profile").select("").execute()
+  # df_db = pd.DataFrame(data_db.data)
+  # df_final = preparing_to_insert_db(df_db)
+  # records = df_final.to_dict(orient="records")
 
-  # p1.start()
-  # p2.start()
+  CSV_FILE = os.path.join(DATA_DIR, "shareholders_data.csv")
+  df_scrapped = pd.read_csv(CSV_FILE)
+  # For handling new column 'new_shareholders' | Will be deleted if it is not needed
+  df_scrapped = df_scrapped.rename(columns={"shareholders": "new_shareholders"})
+  records = df_scrapped.to_dict(orient="records")
 
-  # p1.join()
-  # p2.join()
+  # Update db
+  try:
+    for record in records[:5]:
+      supabase.table("idx_company_profile").update(
+          {"new_shareholders": record['new_shareholders']}
+      ).eq("symbol", record['symbol']).execute()
+      print(f"Successfully updated shareholders data {record['symbol']}")
+
+    # supabase.table("idx_company_profile").upsert(
+    #     records, returning="minimal", on_conflict="symbol"
+    # ).execute()
+
+    print(
+        f"Successfully updated {len(records)} data to database"
+    )
+  except Exception as e:
+    raise Exception(f"Error upserting to database: {e}")
+  
+  # End
+  end = time.time()
+
+  print(f"Time elapsed for scraping : {time.strftime('%H:%M:%S', time.gmtime(int(checkpoint - start)))}")
+  print(f"Time elapsed to update the database : {time.strftime('%H:%M:%S', time.gmtime(int(end - checkpoint)))}")
+
 

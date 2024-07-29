@@ -30,14 +30,14 @@ if __name__ == "__main__":
     CSV_FILE = os.path.join(DATA_DIR, "additional_shareholders_data.csv")
     df_scrapped = pd.read_csv(CSV_FILE)
     # For handling new column 'new_shareholders' | Will be deleted if it is not needed
-    df_scrapped = df_scrapped.rename(columns={"shareholders": "new_shareholders"})
     records = df_scrapped.to_dict(orient="records")
 
     # Update db
     try:
       for record in records:
+        data_dict = json.loads(record['shareholders'])
         supabase.table("idx_company_profile").update(
-            {"new_shareholders": record['new_shareholders']}
+            {"shareholders": data_dict}
         ).eq("symbol", record['symbol']).execute()
         print(f"Successfully updated shareholders data {record['symbol']}")
 

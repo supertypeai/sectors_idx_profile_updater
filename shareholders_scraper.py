@@ -194,20 +194,6 @@ def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = Fals
   with open(failed_filename, "w") as final:
     json.dump(failed_list, final, indent=2)
 
-def preparing_to_insert_db(df_db : pd.DataFrame):
-  CSV_FILE = os.path.join(DATA_DIR, "shareholders_data.csv")
-  df_scrapped = pd.read_csv(CSV_FILE)
-
-  # For handling new column 'new_shareholders' | Will be deleted if it is not needed
-  df_scrapped = df_scrapped.rename(columns={"shareholders": "new_shareholders"})
-  df_final = df_db.merge(df_scrapped, left_on="symbol", right_on='symbol')
-
-  # Drop the old one, replace it with the new one
-  df_final = df_final.drop(['new_shareholders_x'], axis=1)
-  df_final = df_final.rename(columns={"new_shareholders_y": "new_shareholders"})
-  df_final = df_final.replace({np.nan: None})
-  return df_final
-
 if __name__ == "__main__":
   url_supabase = os.getenv("SUPABASE_URL")
   key = os.getenv("SUPABASE_KEY")
@@ -230,12 +216,6 @@ if __name__ == "__main__":
   # Checkpoint
   checkpoint = time.time()
 
-  # # Preparing to be inserted to db
-  # data_db = supabase.table("idx_company_profile").select("").execute()
-  # df_db = pd.DataFrame(data_db.data)
-  # df_final = preparing_to_insert_db(df_db)
-  # records = df_final.to_dict(orient="records")
-
   CSV_FILE = os.path.join(DATA_DIR, "shareholders_data.csv")
   df_scrapped = pd.read_csv(CSV_FILE)
   # For handling new column 'new_shareholders' | Will be deleted if it is not needed
@@ -244,7 +224,7 @@ if __name__ == "__main__":
 
   # Update db
   try:
-    for record in records[:5]:
+    for record in records:
       supabase.table("idx_company_profile").update(
           {"new_shareholders": record['new_shareholders']}
       ).eq("symbol", record['symbol']).execute()

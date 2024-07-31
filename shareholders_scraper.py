@@ -194,6 +194,17 @@ def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = Fals
   with open(failed_filename, "w") as final:
     json.dump(failed_list, final, indent=2)
 
+def handle_percentage(df: pd.DataFrame):
+  for index, row in df.iterrows():
+    shareholder_list_data = row['shareholders']
+    shareholder_list = json.loads(shareholder_list_data)
+    for i in range(len(shareholder_list)):
+      shareholder_dict = shareholder_list[i]
+      shareholder_dict['share_percentage'] = round(shareholder_dict['share_percentage'] / 100, 4) # Make it 4 digits decimal
+      shareholder_list[i] = shareholder_dict
+    df.at[index, 'shareholders'] = shareholder_list
+  return df
+
 if __name__ == "__main__":
   url_supabase = os.getenv("SUPABASE_URL")
   key = os.getenv("SUPABASE_KEY")
@@ -217,16 +228,14 @@ if __name__ == "__main__":
   checkpoint = time.time()
 
   CSV_FILE = os.path.join(DATA_DIR, "shareholders_data.csv")
-  df_scrapped = pd.read_csv(CSV_FILE)
-  # For handling new column 'new_shareholders' | Will be deleted if it is not needed
+  df_scrapped = handle_percentage(pd.read_csv(CSV_FILE))
   records = df_scrapped.to_dict(orient="records")
 
   # Update db
   try:
     for record in records:
-      data_dict = json.loads(record['shareholders'])
       supabase.table("idx_company_profile").update(
-          {"shareholders": data_dict}
+          {"shareholders": record['shareholders']}
       ).eq("symbol", record['symbol']).execute()
       print(f"Successfully updated shareholders data {record['symbol']}")
 

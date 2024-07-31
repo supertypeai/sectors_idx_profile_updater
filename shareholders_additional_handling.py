@@ -2,7 +2,7 @@ import json
 import os
 from dotenv import load_dotenv
 from supabase import create_client
-from shareholders_scraper import get_shareholder_data
+from shareholders_scraper import get_shareholder_data, handle_percentage
 import pandas as pd
 
 load_dotenv()
@@ -28,16 +28,14 @@ if __name__ == "__main__":
 
     # Preparing to be inserted to db
     CSV_FILE = os.path.join(DATA_DIR, "additional_shareholders_data.csv")
-    df_scrapped = pd.read_csv(CSV_FILE)
-    # For handling new column 'new_shareholders' | Will be deleted if it is not needed
+    df_scrapped = handle_percentage(pd.read_csv(CSV_FILE))
     records = df_scrapped.to_dict(orient="records")
 
     # Update db
     try:
       for record in records:
-        data_dict = json.loads(record['shareholders'])
         supabase.table("idx_company_profile").update(
-            {"shareholders": data_dict}
+            {"shareholders": record['shareholders']}
         ).eq("symbol", record['symbol']).execute()
         print(f"Successfully updated shareholders data {record['symbol']}")
 

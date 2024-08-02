@@ -194,15 +194,35 @@ def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = Fals
   with open(failed_filename, "w") as final:
     json.dump(failed_list, final, indent=2)
 
-def handle_percentage(df: pd.DataFrame):
+def is_same_dict(dict1: dict, dict2: dict) -> bool :
+  for key, val in dict1.items():
+    if (key in dict2 and val == dict2[key]):
+      continue
+    else:
+      return False
+  return True
+
+def is_dict_in_list(dict_arg : dict, list_arg: list) -> bool:
+  for dict_itr in list_arg:
+    if (is_same_dict(dict_arg, dict_itr)):
+      return True
+  return False
+
+def handle_percentage_and_duplicate(df: pd.DataFrame):
   for index, row in df.iterrows():
     shareholder_list_data = row['shareholders']
     shareholder_list = json.loads(shareholder_list_data)
+
+    # Handle percentage
     for i in range(len(shareholder_list)):
       shareholder_dict = shareholder_list[i]
-      shareholder_dict['share_percentage'] = round(shareholder_dict['share_percentage'] / 100, 4) # Make it 4 digits decimal
+      shareholder_dict['share_percentage'] = round(shareholder_dict['share_percentage'] / 100, 5) # Make it 5 digits decimal
       shareholder_list[i] = shareholder_dict
-    df.at[index, 'shareholders'] = shareholder_list
+
+    # Handle duplicate
+    new_shareholder_list = [i for n, i in enumerate(shareholder_list) if not is_dict_in_list(i, shareholder_list[:n])]
+
+    df.at[index, 'shareholders'] = new_shareholder_list
   return df
 
 if __name__ == "__main__":
@@ -228,7 +248,7 @@ if __name__ == "__main__":
   checkpoint = time.time()
 
   CSV_FILE = os.path.join(DATA_DIR, "shareholders_data.csv")
-  df_scrapped = handle_percentage(pd.read_csv(CSV_FILE))
+  df_scrapped = handle_percentage_and_duplicate(pd.read_csv(CSV_FILE))
   records = df_scrapped.to_dict(orient="records")
 
   # Update db

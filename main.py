@@ -675,10 +675,6 @@ class IdxProfileUpdater:
             self.current_data.to_csv('idx_company_profile_current.csv', index=False)
 
 
-        if save_current_data:
-            self.current_data.to_csv('idx_company_profile_current.csv', index=False)
-
-
 if __name__ == "__main__":
     load_dotenv()
     url, key = os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY')

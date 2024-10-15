@@ -80,7 +80,9 @@ def get_new_shareholders_data(symbol, supabase):
     
     else:
       shareholders_data = data['PemegangSaham']
-      shareholders = [{key: str(value).strip() for key, value in sub.items() if key!='Pengendali'} for sub in shareholders_data]
+      shareholders = [{key: str(value).strip().capitalize() if isinstance(value, str) else value 
+                 for key, value in sub.items() if key != 'Pengendali'} 
+                for sub in shareholders_data]
       shareholders = _clean_dict(shareholders)
       shareholders_df = pd.DataFrame(shareholders)
 

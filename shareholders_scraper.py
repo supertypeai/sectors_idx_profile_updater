@@ -133,6 +133,9 @@ def get_new_shareholders_data(symbol, supabase):
           shareholders_df = shareholders_df[["name","type","share_amount","share_percentage"]]
 
       shareholders_df = shareholders_df.sort_values("name")
+
+      shareholders_df = shareholders_df.groupby("name").sum().reset_index(drop=False)
+        
       return shareholders_df
     
 MAX_ATTEMPT = 3

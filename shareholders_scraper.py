@@ -7,9 +7,18 @@ import urllib.request
 import os
 import time
 import json
-# from multiprocessing import Process
+import logging
+from imp import reload
+import datetime
 
 load_dotenv()
+
+def initiate_logging(LOG_FILENAME):
+    reload(logging)
+
+    formatLOG = '%(asctime)s - %(levelname)s: %(message)s'
+    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO, format=formatLOG)
+    logging.info('The shareholders data scraper program started')
 
 
 def get_management_data(supabase,symbol):
@@ -236,6 +245,9 @@ if __name__ == "__main__":
   symbol.columns = ["symbol","exchange"]
   symbol = list(symbol.symbol)
 
+  LOG_FILENAME = 'scrapper.log'
+  initiate_logging(LOG_FILENAME)
+
   # Start time
   start = time.time()
 
@@ -271,5 +283,7 @@ if __name__ == "__main__":
 
   print(f"Time elapsed for scraping : {time.strftime('%H:%M:%S', time.gmtime(int(checkpoint - start)))}")
   print(f"Time elapsed to update the database : {time.strftime('%H:%M:%S', time.gmtime(int(end - checkpoint)))}")
+
+  logging.info(f"{datetime.datetime.now().strftime('%Y-%m-%d')} the shareholders data has been scrapped. Execution time: {time.strftime('%H:%M:%S', time.gmtime(end-start))}")
 
 

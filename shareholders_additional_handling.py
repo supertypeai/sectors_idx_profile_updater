@@ -4,8 +4,18 @@ from dotenv import load_dotenv
 from supabase import create_client
 from shareholders_scraper import get_shareholder_data, handle_percentage_and_duplicate
 import pandas as pd
+import logging
+from imp import reload
+import datetime
 
 load_dotenv()
+
+def initiate_logging(LOG_FILENAME):
+    reload(logging)
+
+    formatLOG = '%(asctime)s - %(levelname)s: %(message)s'
+    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO, format=formatLOG)
+    logging.info('The shareholders data additional scraper program started')
 
 if __name__ == "__main__":
   url_supabase = os.getenv("SUPABASE_URL")
@@ -17,6 +27,10 @@ if __name__ == "__main__":
 
   file = open(failed_json_file)
   data = json.load(file)
+
+  LOG_FILENAME = 'scrapper.log'
+  initiate_logging(LOG_FILENAME)
+
 
   symbol_list = []
   if (len(data) > 0):
@@ -44,5 +58,8 @@ if __name__ == "__main__":
       )
     except Exception as e:
       raise Exception(f"Error upserting to database: {e}")
+    
+
+    logging.info(f"{datetime.datetime.now().strftime('%Y-%m-%d')} the additional shareholders data has been scrapped.")
     
 

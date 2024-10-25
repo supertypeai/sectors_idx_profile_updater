@@ -470,21 +470,6 @@ class IdxProfileUpdater:
         profile_dict["delisting_date"] = None
         
         return profile_dict
-
-    def _retrieve_underwriter(self, yf_symbol):
-        try:    
-            symbol = (yf_symbol.split(".")[0])
-            url = f"https://raw.githubusercontent.com/supertypeai/sectors_get_upcoming_ipo_data/main/ipo.csv"
-            df = pd.read_csv(url)
-            
-            underwriter = df[df['ticker_code'] == symbol]['underwriter']
-            print(symbol)
-            print(underwriter)
-            print(df[df['ticker_code'] == symbol])
-            return underwriter[0]
-        except Exception as e:
-            print(f"Error when retrieve underwriter: {e}")
-            return None
     
     def update_company_profile_data(self, update_new_symbols_only=True, target_symbols=None):
         """Update company profile data.
@@ -497,7 +482,6 @@ class IdxProfileUpdater:
             temp_row = row.copy()
             use_selenium = False
             profile_dict = self._retrieve_idx_profile(row["symbol"])
-            profile_dict["underwriter"] = self._retrieve_underwriter(row["symbol"])
             for key in profile_dict.keys():
                 temp_row[key] = profile_dict[key]
             print('new data',profile_dict)
@@ -691,10 +675,6 @@ class IdxProfileUpdater:
             self.current_data.to_csv('idx_company_profile_current.csv', index=False)
 
 
-        if save_current_data:
-            self.current_data.to_csv('idx_company_profile_current.csv', index=False)
-
-
 if __name__ == "__main__":
     load_dotenv()
     url, key = os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY')
@@ -706,5 +686,5 @@ if __name__ == "__main__":
         supabase_client=supabase_client,
         proxy = proxy
     )
-    updater.update_company_profile_data(update_new_symbols_only=False)
+    updater.update_company_profile_data(update_new_symbols_only=True)
     updater.upsert_to_db()

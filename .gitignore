@@ -1,4 +1,3 @@
-*.csv
 !idx_company_profile_current.csv
 *cache*
 *.ipynb

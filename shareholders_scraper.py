@@ -35,18 +35,11 @@ USER_AGENTS = [
     'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1'
 ]
 
-TEMP_COOKIES = [
-  "__cf_bm=Y2MCQLy._1SIN1Blodkwe4zVa3f0kjgWmAPUOg66phM-1730779491-1.0.1.1-Aep0HS_g8_LpTLAqA9gLpTztg5Et3PZjwMk6_QTxJ1BQeE7A8.m7q4e47wjOTv_q2EJhMAT6Xe3eYSbQWhaDwA; _cfuvid=OYD529XWSzRu.p5zMXbNYRVp.E62e4qAtAMMVQQVgOI-1730779491260-0.0.1.1-604800000",
-  "__cf_bm=PNOXueCdLmaWKpCRMkPrf9H40hufbaRqq4WEMRhh4EE-1730779379-1.0.1.1-.aCsJMifpZ5G9_thEacCbmiSUe6_Yv9M0l1Yw0X4l9LGuZ2G21wrOYbWx44rNV6XXQY01TbvEE4pCpfsg6PkrQ; _cfuvid=g2vaZoPoAlVHR7MslQHKHffylcjIXxdth87mRuPDKeA-1730779379078-0.0.1.1-604800000",
-  "__cf_bm=qJjjeCik5b2r8ugA_tJtjrlN0sjSNeP6kVytaTargZQ-1730779364-1.0.1.1-2039AULfkA5HQNN5OxMqRYScgWECSXYEvVydNvUChO9303FvzRPKyqZ418zWOtdfte1oyRasaxmMEQ53AF.k5Q; _cfuvid=GtOJ6dx2e6V.P9LHdYrelf_fTwRmccT03ly1D0Fg8VM-1730779364267-0.0.1.1-604800000"
-]
-
 HEADERS = {
         "User-Agent": choice(USER_AGENTS),
         "Accept": "*/*",
         "Accept-Language": "en-US,en;q=0.9",
         "Connection": "keep-alive",
-        "Cookie" : choice(TEMP_COOKIES),
         "Upgrade-Insecure-Requests": "1",
         "Sec-Fetch-Dest": "document",
         "Sec-Fetch-Mode": "navigate",
@@ -107,7 +100,7 @@ def get_new_shareholders_data(symbol, supabase):
     
     else:
       shareholders_data = data['PemegangSaham']
-      shareholders = [{key: str(value).strip().capitalize() if isinstance(value, str) else value 
+      shareholders = [{key: str(value).strip().title() if isinstance(value, str) else value 
                  for key, value in sub.items() if key != 'Pengendali'} 
                 for sub in shareholders_data]
       shareholders = _clean_dict(shareholders)

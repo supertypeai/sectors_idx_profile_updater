@@ -11,6 +11,7 @@ import logging
 from imp import reload
 import datetime
 from random import choice
+import re
 
 load_dotenv()
 
@@ -126,6 +127,8 @@ def get_new_shareholders_data(symbol, supabase):
                       'Masyarakat Lainnya': 'Other Public',
                       'Negara Republik Indonesia': 'Republic of Indonesia',
                       'NEGARA REPUBLIK INDONESIA': 'Republic of Indonesia',
+                      'Pemerintah Negara Republik Indonesia' : 'Republic of Indonesia',
+                      'Pemerintah Ri' : 'Republic of Indonesia',
                       'Kejaksaan Agung': 'Attorney General',
                       'KEJAKSAAN AGUNG': 'Attorney General',
                       'Direksi': 'Director',
@@ -171,6 +174,16 @@ SLEEP = 1.5
 CWD = os.getcwd()
 DATA_DIR = os.path.join(CWD, "data")
 
+# # Function to flush the state shareholders to be on the top of the list
+# def put_state_shareholders_on_top(df: pd.DataFrame) -> pd.DataFrame:
+#   swap_idx = 0
+#   pattern = r"\b(?:Republic of Indonesia|pemerintah|pemda|persero|negara|provinsi)\b"
+#   for index, row in df.iterrows():
+#      if (bool(re.match(pattern, row['name'], re.IGNORECASE))):
+#         df.iloc[swap_idx], df.iloc[index] =  df.iloc[index].copy(), df.iloc[swap_idx].copy()
+#         swap_idx += 1
+#   return df
+
 def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = False):
   retry = 0 
   i = 0 
@@ -182,6 +195,7 @@ def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = Fals
     try:
       print(f"Trying to get data from {ticker}")
       shareholders_df = get_new_shareholders_data(ticker,supabase)
+      # shareholders_df = put_state_shareholders_on_top(shareholders_df)
       if (shareholders_df is not None):
         records = shareholders_df.to_json(orient='records')
         data = pd.concat([data ,pd.DataFrame(data={'symbol':f"{ticker}.JK", 'shareholders':[records]})])

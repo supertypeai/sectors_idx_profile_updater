@@ -39,7 +39,8 @@ all_columns = [
     "yf_currency",
     "wsj_format",
     "current_source",
-    "updated_on"
+    "updated_on",
+    "alias"
 ]
 
 sub_sector_id_map = {
@@ -494,6 +495,11 @@ class IdxProfileUpdater:
             temp_row["updated_on"] = pd.Timestamp.now(tz="GMT").strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
+            
+            if temp_row["company_name"] != row["company_name"]:
+                print(f"Company name updated for {temp_row['symbol']}.")
+                temp_row["alias"] = row["alias"].append(row["company_name"])
+
                     
             return temp_row
                     
@@ -551,8 +557,7 @@ class IdxProfileUpdater:
                 "symbol in @retrieved_active_symbols and symbol in @target_symbols"
             ).index
             rows_to_update = company_profile_data.loc[active_filter].copy()
-            
-
+        
         if rows_to_update.empty:
             print("No rows to update.")
             return

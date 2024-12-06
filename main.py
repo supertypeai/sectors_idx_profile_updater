@@ -13,7 +13,10 @@ import urllib.request
 import os
 import json
 import time
-
+import argparse
+from fuzzywuzzy import fuzz
+import logging
+from imp import reload
 
 all_columns = [
     "symbol",
@@ -78,6 +81,13 @@ sub_sector_id_map = {
     "Logistics & Deliveries": 32,
     "Transportation": 33,
 }
+
+def initiate_logging(LOG_FILENAME):
+    reload(logging)
+
+    formatLOG = '%(asctime)s - %(levelname)s: %(message)s'
+    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO, format=formatLOG)
+    logging.info('Program started')
 
 class ProxyRequester:
     def __init__(self, proxy=None):
@@ -385,7 +395,7 @@ class IdxProfileUpdater:
         if response == False:
             raise Exception("Error retrieving active symbols from IDX json.")
         data = json.loads(response)['data']
-        active_symbols = [index['Code']+'.JK' for index in data]
+        active_symbols = {index['Code'] + '.JK': index['Name'] for index in data}
         print(len(active_symbols), 'active symbols')
 
         return active_symbols
@@ -517,7 +527,8 @@ class IdxProfileUpdater:
             return merged_updated_df
             
         try: 
-            retrieved_active_symbols = self._retrieve_active_symbols()
+            retrieved_active_company = self._retrieve_active_symbols()
+            retrieved_active_symbols = [symbol for symbol in retrieved_active_company]
             print(retrieved_active_symbols)
         except Exception as e:   
             print(e)
@@ -545,9 +556,26 @@ class IdxProfileUpdater:
         if update_new_symbols_only:
             if not target_symbols:
                 target_symbols = updated_new_symbols
+                
+            updated_company_name_symbols = []
+            for _, row in company_profile_data.iterrows():
+                try:
+                    similarity = fuzz.ratio(row['company_name'][0:30].lower(), retrieved_active_company[row['symbol']].lower())
+                    if similarity < 65:
+                        updated_company_name_symbols.append(row['symbol'])
+                except Exception as e:
+                    pass   
+            
+            print("Possible updated company name: ", updated_company_name_symbols)
+            
             updated_new_filter = company_profile_data.query(
                 "symbol in @updated_new_symbols and symbol in @target_symbols"
             ).index
+            
+            updated_new_filter = updated_new_filter.union(company_profile_data.query(
+                "symbol in @updated_company_name_symbols"
+            ).index)
+            
             rows_to_update = company_profile_data.loc[updated_new_filter].copy()
 
         else:
@@ -669,6 +697,8 @@ class IdxProfileUpdater:
             return records
         
         df = self.updated_rows.copy()
+        print(df)
+        logging.info(f"Upserting {df['symbol'].values} rows to idx_company_profile table.")
         df[["yf_currency", "wsj_format", "current_source"]] = df[["yf_currency", "wsj_format", "current_source"]].fillna(-1)
         df['nologo'] = df['nologo'].fillna(True)
         records = convert_df_to_records(df, int_cols=["sub_sector_id", "yf_currency", "wsj_format", "current_source"])
@@ -681,6 +711,13 @@ class IdxProfileUpdater:
 
 
 if __name__ == "__main__":
+    LOG_FILENAME = 'scrapper.log'
+    initiate_logging(LOG_FILENAME)
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--all_symbols', dest='all_symbols', type=bool, help='Check all symbols if this args enabled, otherwise only check new symbols. This args is set to False by default.')
+    args = parser.parse_args()
+
     load_dotenv()
     url, key = os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY')
     proxy = os.getenv("proxy")
@@ -691,5 +728,11 @@ if __name__ == "__main__":
         supabase_client=supabase_client,
         proxy = proxy
     )
-    updater.update_company_profile_data(update_new_symbols_only=True)
+    if args.all_symbols:
+        logging.info("Starting idx_profile_updater with all symbols")
+        updater.update_company_profile_data(update_new_symbols_only=False)
+    else:
+        logging.info("Starting idx_profile_updater with new symbols and deactivated symbols")
+        updater.update_company_profile_data(update_new_symbols_only=True)
     updater.upsert_to_db()
+    logging.info("idx_profile_updater finished")

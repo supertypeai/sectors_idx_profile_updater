@@ -9,3 +9,4 @@ requests_ratelimiter==0.7.0
 selenium==4.23.1
 supabase==2.6.0
 yfinance==0.2.41
+fuzzywuzzy==0.18.0

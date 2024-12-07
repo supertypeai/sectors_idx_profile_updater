@@ -27,3 +27,7 @@
 2024-12-06 07:56:30,674 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2024-12-06 07:56:57,165 - INFO: Upserting ['SMAR.JK' 'FILM.JK' 'NETV.JK' 'BTPN.JK' 'LABA.JK'] rows to idx_company_profile table.
 2024-12-06 07:56:58,121 - INFO: idx_profile_updater finished
+2024-12-07 18:17:36,159 - INFO: Program started
+2024-12-07 18:17:38,569 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2024-12-07 18:19:03,834 - INFO: Upserting ['SMAR.JK' 'NETV.JK'] rows to idx_company_profile table.
+2024-12-07 18:19:04,768 - INFO: idx_profile_updater finished

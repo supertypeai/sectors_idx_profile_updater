@@ -33,3 +33,7 @@
 2024-12-07 18:19:04,768 - INFO: idx_profile_updater finished
 2024-12-09 08:33:00,328 - INFO: The shareholders data additional scraper program started
 2024-12-09 09:44:44,201 - INFO: 2024-12-09 the additional shareholders data has been scrapped.
+2024-12-10 18:19:59,603 - INFO: Program started
+2024-12-10 18:20:02,421 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2024-12-10 18:20:21,239 - INFO: Upserting ['NETV.JK' 'SMAR.JK'] rows to idx_company_profile table.
+2024-12-10 18:20:22,170 - INFO: idx_profile_updater finished

@@ -373,7 +373,7 @@ class IdxProfileUpdater:
 
         elif supabase_client:
             response = (
-                supabase_client.table("idx_company_profile").select("*").execute()
+                supabase_client.table("idx_company_profile_duplicate").select("*").execute()
             )
             self.supabase_client = supabase_client
             self.current_data = pd.DataFrame(response.data, columns=all_columns)
@@ -506,11 +506,12 @@ class IdxProfileUpdater:
                 "%Y-%m-%d %H:%M:%S"
             )
             
-            if temp_row["company_name"] != row["company_name"]:
+            if not pd.isna(row["company_name"]) and temp_row["company_name"] != row["company_name"]:
+                print("isna")
                 print(f"Company name updated for {temp_row['symbol']}.")
+                print(f"Old name: {row['company_name']}")
                 temp_row["alias"] = row["alias"].append(row["company_name"])
-
-                    
+                
             return temp_row
                     
         ### Management & Shareholders Cleaning
@@ -558,7 +559,12 @@ class IdxProfileUpdater:
                 target_symbols = updated_new_symbols
                 
             updated_company_name_symbols = []
+
+            with open('bypass-symbols.json') as bypass_file:
+                bypass_symbols = json.load(bypass_file).get("symbols", [])
             for _, row in company_profile_data.iterrows():
+                if row["symbol"] in bypass_symbols:
+                    continue
                 try:
                     similarity = fuzz.ratio(row['company_name'][0:30].lower(), retrieved_active_company[row['symbol']].lower())
                     if similarity < 65:
@@ -702,7 +708,7 @@ class IdxProfileUpdater:
         df[["yf_currency", "wsj_format", "current_source"]] = df[["yf_currency", "wsj_format", "current_source"]].fillna(-1)
         df['nologo'] = df['nologo'].fillna(True)
         records = convert_df_to_records(df, int_cols=["sub_sector_id", "yf_currency", "wsj_format", "current_source"])
-        self.supabase_client.table("idx_company_profile").upsert(
+        self.supabase_client.table("idx_company_profile_duplicate").upsert(
             records, returning="minimal", on_conflict="symbol"
         ).execute()
         

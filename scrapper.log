@@ -23,3 +23,23 @@
 2024-12-01 03:48:56,334 - INFO: 2024-12-01 the additional shareholders data has been scrapped.
 2024-12-02 08:32:28,314 - INFO: The shareholders data additional scraper program started
 2024-12-02 09:44:42,354 - INFO: 2024-12-02 the additional shareholders data has been scrapped.
+2024-12-06 07:56:28,480 - INFO: Program started
+2024-12-06 07:56:30,674 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2024-12-06 07:56:57,165 - INFO: Upserting ['SMAR.JK' 'FILM.JK' 'NETV.JK' 'BTPN.JK' 'LABA.JK'] rows to idx_company_profile table.
+2024-12-06 07:56:58,121 - INFO: idx_profile_updater finished
+2024-12-07 18:17:36,159 - INFO: Program started
+2024-12-07 18:17:38,569 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2024-12-07 18:19:03,834 - INFO: Upserting ['SMAR.JK' 'NETV.JK'] rows to idx_company_profile table.
+2024-12-07 18:19:04,768 - INFO: idx_profile_updater finished
+2024-12-09 08:33:00,328 - INFO: The shareholders data additional scraper program started
+2024-12-09 09:44:44,201 - INFO: 2024-12-09 the additional shareholders data has been scrapped.
+2024-12-10 18:19:59,603 - INFO: Program started
+2024-12-10 18:20:02,421 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2024-12-10 18:20:21,239 - INFO: Upserting ['NETV.JK' 'SMAR.JK'] rows to idx_company_profile table.
+2024-12-10 18:20:22,170 - INFO: idx_profile_updater finished
+2024-12-13 18:19:14,362 - INFO: Program started
+2024-12-13 18:19:17,222 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2024-12-13 18:20:41,895 - INFO: Upserting ['NETV.JK' 'SMAR.JK' 'HERO.JK'] rows to idx_company_profile table.
+2024-12-13 18:20:42,778 - INFO: idx_profile_updater finished
+2024-12-16 08:33:12,993 - INFO: The shareholders data additional scraper program started
+2024-12-16 09:45:33,202 - INFO: 2024-12-16 the additional shareholders data has been scrapped.

@@ -511,6 +511,9 @@ class IdxProfileUpdater:
                 print(f"Company name updated for {temp_row['symbol']}.")
                 print(f"Old name: {row['company_name']}")
                 temp_row["alias"] = row["alias"].append(row["company_name"])
+            
+            if pd.isna(row["company_name"]):
+                temp_row["alias"] = []
                 
             return temp_row
                     

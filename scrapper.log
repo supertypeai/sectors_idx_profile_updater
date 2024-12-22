@@ -53,3 +53,7 @@
 2024-12-19 18:18:11,507 - INFO: Program started
 2024-12-19 18:18:14,251 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2024-12-19 18:18:37,608 - INFO: idx_profile_updater finished
+2024-12-22 18:16:09,891 - INFO: Program started
+2024-12-22 18:16:12,406 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2024-12-22 18:17:01,144 - INFO: Upserting ['MDIY.JK'] rows to idx_company_profile table.
+2024-12-22 18:17:01,996 - INFO: idx_profile_updater finished

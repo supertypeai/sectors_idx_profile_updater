@@ -59,3 +59,6 @@
 2024-12-22 18:17:01,996 - INFO: idx_profile_updater finished
 2024-12-23 08:29:17,559 - INFO: The shareholders data additional scraper program started
 2024-12-23 09:42:01,049 - INFO: 2024-12-23 the additional shareholders data has been scrapped.
+2024-12-25 18:17:16,313 - INFO: Program started
+2024-12-25 18:17:18,787 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2024-12-25 18:18:06,127 - INFO: idx_profile_updater finished

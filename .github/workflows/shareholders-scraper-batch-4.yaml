@@ -3,7 +3,7 @@ name: Scrape Shareholders Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 1 * *' # At 00:00 on day-of-month 1.
+    - cron: '0 0 28 * *' # At 00:00 on day-of-month 28.
 
 jobs:
   build:
@@ -29,8 +29,9 @@ jobs:
             SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
             proxy: ${{ secrets.proxy }}
         run: |
-          python shareholders_scraper.py
-          python shareholders_additional_handling.py
+          python shareholders_additional_handling.py 
+          python shareholders_scraper.py 3-4
+          
 
       - name: Pull changes
         run: git pull origin main

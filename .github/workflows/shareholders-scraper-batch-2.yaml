@@ -1,9 +1,9 @@
-name: Handling Null Shareholders Data
+name: Scrape Shareholders Data
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 8 * * 1' # At 08:00 on Monday.
+    - cron: '0 0 14 * *' # At 00:00 on day-of-month 14.
 
 jobs:
   build:
@@ -28,7 +28,10 @@ jobs:
             SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
             SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
             proxy: ${{ secrets.proxy }}
-        run: python shareholders_additional_handling.py
+        run: |
+          python shareholders_additional_handling.py 
+          python shareholders_scraper.py 1-2
+          
 
       - name: Pull changes
         run: git pull origin main

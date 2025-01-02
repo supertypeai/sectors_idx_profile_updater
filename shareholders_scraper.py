@@ -12,6 +12,8 @@ from imp import reload
 import datetime
 from random import choice
 import re
+import sys
+import requests
 
 load_dotenv()
 
@@ -49,9 +51,21 @@ HEADERS = {
         "Cache-Control": "max-age=0",
     }
 
-'''
-
-'''
+  
+PROXY_URL = os.getenv("proxy")
+PROXIES = {
+    'http': PROXY_URL,
+    'https': PROXY_URL,
+}
+def fetch_url_proxy(url):
+  response = requests.get(url, proxies=PROXIES, verify=False)   
+  status_code = response.status_code
+  if (status_code == 200):
+    data = response.json()
+    return data
+  else:
+    print(f"Failed to fetch from {url}. Get status code : {status_code}")
+    return None
 
 def fetch_url(url):
   req = urllib.request.Request(url, headers=HEADERS)
@@ -64,7 +78,8 @@ def fetch_url(url):
   else:
     print(f"Failed to fetch from {url}. Get status code : {status_code}")
     return None
-  
+
+
 TRUTH_DICT = {False:'No', True:'Yes'}
 SHAREHOLDERS_RENAMING = {
             'Nama':'name',
@@ -93,13 +108,15 @@ def _clean_dict(list_dict, key_name=None):
 
 def get_new_shareholders_data(symbol, supabase):    
     url = f"https://www.idx.co.id/primary/ListedCompany/GetCompanyProfilesDetail?KodeEmiten={symbol}&language=en-us"
-    data = fetch_url(url)
+    # data = fetch_url(url)
+    data = fetch_url_proxy(url)
     
     if (data['ResultCount'] == 0):
       # Case: ResultCount == 0
-      return None
+      return None, None, None
     
     else:
+      # Shareholders Data
       shareholders_data = data['PemegangSaham']
       shareholders = [{key: str(value).strip().title() if isinstance(value, str) else value 
                  for key, value in sub.items() if key != 'Pengendali'} 
@@ -166,23 +183,48 @@ def get_new_shareholders_data(symbol, supabase):
       shareholders_df = shareholders_df.sort_values("name")
 
       shareholders_df = shareholders_df.groupby("name").sum().reset_index(drop=False)
+
+      # Directors Data
+      try:
+        directors_data = data['Direktur']
+        directors_processed_data = []
+        for i in range(len(directors_data)):
+          temp_data = {}
+          temp_data['name'] = directors_data[i]['Nama'].title()
+          temp_data['position'] = directors_data[i]['Jabatan'].title()
+          if ("Vice Presiden" in temp_data['position']):
+            temp_data['position'].replace("Vice Presiden", "Vice President")
+          temp_data['affiliation'] = directors_data[i]['Afiliasi']
+          directors_processed_data.append(temp_data)
+        directors_df = pd.DataFrame(directors_processed_data)
+      except: 
+        directors_df = None
+          
+      # Commissioners Data
+      try:
+        commissioners_data = data['Komisaris']
+        commissioners_processed_data = []
+        for i in range(len(commissioners_data)):
+          temp_data = {}
+          temp_data['name'] = commissioners_data[i]['Nama'].title()
+          temp_data['position'] = commissioners_data[i]['Jabatan'].title()
+          if ("Vice Presiden" in temp_data['position']):
+            temp_data['position'].replace("Vice Presiden", "Vice President")
+          if ("Commisioner" in temp_data['position']):
+            temp_data['position'].replace("Commisioner", "Commissioner")
+          temp_data['independent'] = commissioners_data[i]['Independen']
+          commissioners_processed_data.append(temp_data)
+        commissioners_df = pd.DataFrame(commissioners_processed_data)
+      except:
+        commissioners_df = None
         
-      return shareholders_df
+      return shareholders_df, directors_df, commissioners_df
     
 MAX_ATTEMPT = 3
 SLEEP = 1.5
 CWD = os.getcwd()
 DATA_DIR = os.path.join(CWD, "data")
 
-# # Function to flush the state shareholders to be on the top of the list
-# def put_state_shareholders_on_top(df: pd.DataFrame) -> pd.DataFrame:
-#   swap_idx = 0
-#   pattern = r"\b(?:Republic of Indonesia|pemerintah|pemda|persero|negara|provinsi)\b"
-#   for index, row in df.iterrows():
-#      if (bool(re.match(pattern, row['name'], re.IGNORECASE))):
-#         df.iloc[swap_idx], df.iloc[index] =  df.iloc[index].copy(), df.iloc[swap_idx].copy()
-#         swap_idx += 1
-#   return df
 
 def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = False):
   retry = 0 
@@ -194,22 +236,33 @@ def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = Fals
     ticker = symbol_list[0]
     try:
       print(f"Trying to get data from {ticker}")
-      shareholders_df = get_new_shareholders_data(ticker,supabase)
-      # shareholders_df = put_state_shareholders_on_top(shareholders_df)
+      shareholders_df, directors_df, commissioners_df = get_new_shareholders_data(ticker, supabase) # This function includes search for directors and commissioners
+      
+      # Check for shareholders
       if (shareholders_df is not None):
-        records = shareholders_df.to_json(orient='records')
-        data = pd.concat([data ,pd.DataFrame(data={'symbol':f"{ticker}.JK", 'shareholders':[records]})])
-        print(f"Successfully get Shareholders data from {ticker}")
+        shareholders_records = shareholders_df.to_json(orient='records')
+
+        # Check for directors
+        directors_records = directors_df.to_json(orient="records") if directors_df is not None else None
+        if (directors_records is None): print(f"[NONE VALUE] None value detected for Directors data from {ticker}")
+        # Check for commisioners
+        commissioners_records = commissioners_df.to_json(orient="records") if commissioners_df is not None else None
+        if (commissioners_records is None): print(f"[NONE VALUE]None value detected for Commissioners data from {ticker}")
+
+
+        data = pd.concat([data ,pd.DataFrame(data={'symbol':f"{ticker}.JK", 'shareholders':[shareholders_records], 'directors' : [directors_records], 'commissioners' : [commissioners_records]})])
+        print(f"Successfully get data from {ticker}")
       else:
-        print(f"None value detected for Shareholders data from {ticker}")
+        print(f"[NONE VALUE] None value detected for Shareholders data from {ticker}")
         failed_list.append({
             "ticker" : ticker,
             "reason" : "None value detected"
             })
       symbol_list.remove(ticker)
       i += 1
-      print(f"Finished get Shareholders data from {ticker} and Removed {ticker}, this is ticker number {i}")
+      print(f"Finished getting data from {ticker} and Removed {ticker}, this is ticker number {i}")
       print("-------------------------------------------------------------------------------")
+      
     except Exception as e :
       print(f"Failed to get the data: {e}")
       retry += 1
@@ -220,10 +273,10 @@ def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = Fals
             })
           symbol_list.remove(ticker)
           retry = 0 
-          print(f"Failed to get Shareholders data from {ticker} after {MAX_ATTEMPT} attempts")
+          print(f"Failed to get data from {ticker} after {MAX_ATTEMPT} attempts")
           print("-------------------------------------------------------------------------------")
       else:
-          print(f"Failed to get Shareholders data from {ticker} on attempt {retry}. Retrying after {SLEEP} seconds...")
+          print(f"Failed to get data from {ticker} on attempt {retry}. Retrying after {SLEEP} seconds...")
           print("-------------------------------------------------------------------------------")
 
     time.sleep(SLEEP)
@@ -231,10 +284,9 @@ def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = Fals
   # Save the data
   if (not is_failure_handling):
     filename = os.path.join(DATA_DIR, f"shareholders_data.csv")
-    data.to_csv(filename, index=False)
   else:
     filename = os.path.join(DATA_DIR, f"additional_shareholders_data.csv")
-    data.to_csv(filename, index=False)
+  data.to_csv(filename, index=False)
 
   # Store failed data
   failed_filename = os.path.join(DATA_DIR, f"failed_data.json")
@@ -289,39 +341,61 @@ if __name__ == "__main__":
   # Start time
   start = time.time()
 
-  length_list = len(symbol)
-  i1 = int(length_list / 2)
+  # Check the argument, by default get the first quarter
+  # Split the argument to 4 batches
+  # First quarter => arg = 0-1
+  # Second quarter => arg = 1-2
+  # Third quarter => arg = 2-3
+  # Fourth quarter => arg = 3-4
+  arg = None
+  if (len(sys.argv) == 1):
+     arg = "0-1"
+  else:
+     arg = sys.argv[1]
 
-  get_shareholder_data(symbol, supabase) # COMMENT OUT THIS ONE TO TEST THE DB UPDATE
-
-  # Checkpoint
-  checkpoint = time.time()
-
-  CSV_FILE = os.path.join(DATA_DIR, "shareholders_data.csv")
-  df_scrapped = handle_percentage_and_duplicate(pd.read_csv(CSV_FILE))
-  records = df_scrapped.to_dict(orient="records")
-
-  # Update db
   try:
-    for record in records:
-      supabase.table("idx_company_profile").update(
-          {"shareholders": record['shareholders']}
-      ).eq("symbol", record['symbol']).execute()
-      print(f"Successfully updated shareholders data {record['symbol']}")
+    args = arg.split("-")
+    lower_bound = int(args[0])
+    upper_bound = int(args[1])
+    quarter_length = (len(symbol)// 4) + 1
+
+    start_idx = lower_bound * quarter_length
+    end_idx = min(len(symbol), upper_bound * quarter_length)
+    print(f"[FETCHING DATA] Scraping batch {upper_bound} from index {start_idx} to index {end_idx}")
+    logging.info(f"Scraping batch {upper_bound} from index {start_idx} to index {end_idx}")
+
+    get_shareholder_data(symbol[start_idx:end_idx][:2], supabase) 
+
+    # Checkpoint
+    checkpoint = time.time()
+
+    CSV_FILE = os.path.join(DATA_DIR, "shareholders_data.csv")
+    df_scrapped = handle_percentage_and_duplicate(pd.read_csv(CSV_FILE))
+    records = df_scrapped.to_dict(orient="records")
+
+    # # Update db
+    # try:
+    #   for record in records:
+    #     supabase.table("idx_company_profile").update(
+    #         {"shareholders": record['shareholders']}
+    #     ).eq("symbol", record['symbol']).execute()
+    #     print(f"Successfully updated shareholders data {record['symbol']}")
 
 
-    print(
-        f"Successfully updated {len(records)} data to database"
-    )
+    #   print(
+    #       f"Successfully updated {len(records)} data to database"
+    #   )
+    # except Exception as e:
+    #   raise Exception(f"Error upserting to database: {e}")
+    
+    # End
+    end = time.time()
+
+    print(f"Time elapsed for scraping : {time.strftime('%H:%M:%S', time.gmtime(int(checkpoint - start)))}")
+    print(f"Time elapsed to update the database : {time.strftime('%H:%M:%S', time.gmtime(int(end - checkpoint)))}")
+
+    logging.info(f"{datetime.datetime.now().strftime('%Y-%m-%d')} the shareholders data has been scrapped. Execution time: {time.strftime('%H:%M:%S', time.gmtime(end-start))}")
+
   except Exception as e:
-    raise Exception(f"Error upserting to database: {e}")
-  
-  # End
-  end = time.time()
-
-  print(f"Time elapsed for scraping : {time.strftime('%H:%M:%S', time.gmtime(int(checkpoint - start)))}")
-  print(f"Time elapsed to update the database : {time.strftime('%H:%M:%S', time.gmtime(int(end - checkpoint)))}")
-
-  logging.info(f"{datetime.datetime.now().strftime('%Y-%m-%d')} the shareholders data has been scrapped. Execution time: {time.strftime('%H:%M:%S', time.gmtime(end-start))}")
-
+    print(f"[ERROR] Invalid inputted argument : {e}")
 

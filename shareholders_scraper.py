@@ -364,7 +364,7 @@ if __name__ == "__main__":
     print(f"[FETCHING DATA] Scraping batch {upper_bound} from index {start_idx} to index {end_idx}")
     logging.info(f"Scraping batch {upper_bound} from index {start_idx} to index {end_idx}")
 
-    get_shareholder_data(symbol[start_idx:end_idx][:2], supabase) 
+    get_shareholder_data(symbol[start_idx:end_idx], supabase) 
 
     # Checkpoint
     checkpoint = time.time()
@@ -373,20 +373,22 @@ if __name__ == "__main__":
     df_scrapped = handle_percentage_and_duplicate(pd.read_csv(CSV_FILE))
     records = df_scrapped.to_dict(orient="records")
 
-    # # Update db
-    # try:
-    #   for record in records:
-    #     supabase.table("idx_company_profile").update(
-    #         {"shareholders": record['shareholders']}
-    #     ).eq("symbol", record['symbol']).execute()
-    #     print(f"Successfully updated shareholders data {record['symbol']}")
+    # Update db
+    try:
+      for record in records:
+        supabase.table("idx_company_profile").update(
+            {"shareholders": record['shareholders'], 
+             "directors": record['directors'], 
+             "commissioners": record['commissioners']}
+        ).eq("symbol", record['symbol']).execute()
+        print(f"Successfully updated shareholders data {record['symbol']}")
 
 
-    #   print(
-    #       f"Successfully updated {len(records)} data to database"
-    #   )
-    # except Exception as e:
-    #   raise Exception(f"Error upserting to database: {e}")
+      print(
+          f"Successfully updated {len(records)} data to database"
+      )
+    except Exception as e:
+      raise Exception(f"Error upserting to database: {e}")
     
     # End
     end = time.time()

@@ -1,4 +1,4 @@
-name: Scrape Shareholders Data
+name: Scrape Shareholders Data Batch 1
 
 on:
   workflow_dispatch:

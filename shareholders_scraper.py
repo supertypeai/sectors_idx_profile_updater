@@ -28,7 +28,12 @@ def initiate_logging(LOG_FILENAME):
 def get_management_data(supabase,symbol):
     id_data = supabase.table("idx_active_company_profile").select("symbol",'directors','comissioners').eq("symbol", symbol).execute()
     id_data = pd.DataFrame(id_data.data)
-    df = pd.concat([pd.DataFrame(id_data["comissioners"][0]),pd.DataFrame(id_data["directors"][0])])
+
+    # Handling for further stringified json
+    if (type(id_data["commissioners"][0]) == str):
+      df = pd.concat([pd.DataFrame(json.loads(id_data["comissioners"][0])),pd.DataFrame(json.loads(id_data["directors"][0]))])
+    else:
+      df = pd.concat([pd.DataFrame(id_data["comissioners"][0]),pd.DataFrame(id_data["directors"][0])])
     return df
 
 
@@ -307,7 +312,7 @@ def is_dict_in_list(dict_arg : dict, list_arg: list) -> bool:
       return True
   return False
 
-def handle_percentage_and_duplicate(df: pd.DataFrame):
+def handle_percentage_duplicate_stringified(df: pd.DataFrame):
   for index, row in df.iterrows():
     shareholder_list_data = row['shareholders']
     shareholder_list = json.loads(shareholder_list_data)
@@ -321,7 +326,13 @@ def handle_percentage_and_duplicate(df: pd.DataFrame):
     # Handle duplicate
     new_shareholder_list = [i for n, i in enumerate(shareholder_list) if not is_dict_in_list(i, shareholder_list[:n])]
 
+    # Handle stringified
+    director_list = json.loads(row['directors'])
+    commissioner_list = json.loads(row['commissioners'])
+
     df.at[index, 'shareholders'] = new_shareholder_list
+    df.at[index, 'directors'] = director_list
+    df.at[index, 'commissioners'] = commissioner_list
   return df
 
 if __name__ == "__main__":
@@ -370,7 +381,7 @@ if __name__ == "__main__":
     checkpoint = time.time()
 
     CSV_FILE = os.path.join(DATA_DIR, "shareholders_data.csv")
-    df_scrapped = handle_percentage_and_duplicate(pd.read_csv(CSV_FILE))
+    df_scrapped = handle_percentage_duplicate_stringified(pd.read_csv(CSV_FILE))
     records = df_scrapped.to_dict(orient="records")
 
     # Update db

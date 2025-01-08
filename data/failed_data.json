@@ -1,5 +1,13 @@
 [
   {
+    "ticker": "AYAM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "AALI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
     "ticker": "NETV",
     "reason": "Failed after maximum attempts"
   },

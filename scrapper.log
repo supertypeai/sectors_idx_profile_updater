@@ -92,3 +92,7 @@
 2025-01-08 16:55:54,404 - INFO: Scraping batch 1 from index 0 to index 236
 
 2025-01-08 17:26:11,557 - INFO: 2025-01-08 the shareholders data has been scrapped. Execution time: 00:13:04
+2025-01-10 18:18:02,795 - INFO: Program started
+2025-01-10 18:18:04,831 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-01-10 18:18:31,839 - INFO: Upserting ['KSIX.JK' 'BRRC.JK' 'HGII.JK' 'YOII.JK' 'RATU.JK'] rows to idx_company_profile table.
+2025-01-10 18:18:32,529 - INFO: idx_profile_updater finished

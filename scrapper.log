@@ -96,3 +96,6 @@
 2025-01-10 18:18:04,831 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-01-10 18:18:31,839 - INFO: Upserting ['KSIX.JK' 'BRRC.JK' 'HGII.JK' 'YOII.JK' 'RATU.JK'] rows to idx_company_profile table.
 2025-01-10 18:18:32,529 - INFO: idx_profile_updater finished
+2025-01-13 18:19:21,059 - INFO: Program started
+2025-01-13 18:19:23,266 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-01-13 18:19:26,309 - INFO: idx_profile_updater finished

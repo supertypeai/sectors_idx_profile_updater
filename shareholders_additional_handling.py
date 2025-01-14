@@ -2,7 +2,7 @@ import json
 import os
 from dotenv import load_dotenv
 from supabase import create_client
-from shareholders_scraper import get_shareholder_data, handle_percentage_and_duplicate
+from shareholders_scraper import get_shareholder_data, handle_percentage_duplicate_stringified
 import pandas as pd
 import logging
 from imp import reload
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     # Preparing to be inserted to db
     CSV_FILE = os.path.join(DATA_DIR, "additional_shareholders_data.csv")
-    df_scrapped = handle_percentage_and_duplicate(pd.read_csv(CSV_FILE))
+    df_scrapped = handle_percentage_duplicate_stringified(pd.read_csv(CSV_FILE))
     records = df_scrapped.to_dict(orient="records")
 
     # Update db

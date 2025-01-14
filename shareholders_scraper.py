@@ -30,7 +30,7 @@ def get_management_data(supabase,symbol):
     id_data = pd.DataFrame(id_data.data)
 
     # Handling for further stringified json
-    if (type(id_data["commissioners"][0]) == str):
+    if (type(id_data["comissioners"][0]) == str):
       df = pd.concat([pd.DataFrame(json.loads(id_data["comissioners"][0])),pd.DataFrame(json.loads(id_data["directors"][0]))])
     else:
       df = pd.concat([pd.DataFrame(id_data["comissioners"][0]),pd.DataFrame(id_data["directors"][0])])
@@ -202,7 +202,8 @@ def get_new_shareholders_data(symbol, supabase):
           temp_data['affiliation'] = directors_data[i]['Afiliasi']
           directors_processed_data.append(temp_data)
         directors_df = pd.DataFrame(directors_processed_data)
-      except: 
+      except Exception as e: 
+        print(f"Failed to get Directors data. Returning None: {e}")
         directors_df = None
           
       # Commissioners Data
@@ -221,6 +222,7 @@ def get_new_shareholders_data(symbol, supabase):
           commissioners_processed_data.append(temp_data)
         commissioners_df = pd.DataFrame(commissioners_processed_data)
       except:
+        print(f"Failed to get Commissioners data. Returning None: {e}")
         commissioners_df = None
         
       return shareholders_df, directors_df, commissioners_df

@@ -107,3 +107,6 @@
 2025-01-16 18:17:08,697 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-01-16 18:17:32,995 - INFO: Upserting ['PACK.JK' 'OBAT.JK' 'CBDK.JK' 'DGWG.JK'] rows to idx_company_profile table.
 2025-01-16 18:17:33,677 - INFO: idx_profile_updater finished
+2025-01-19 18:15:29,604 - INFO: Program started
+2025-01-19 18:15:31,479 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-01-19 18:15:34,132 - INFO: idx_profile_updater finished

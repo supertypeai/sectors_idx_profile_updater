@@ -1,1 +1,66 @@
-[]
+[
+  {
+    "ticker": "CBDK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "TFAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "JAWA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "JMAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MDLN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MAMI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BLUE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SMMT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CBRE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BIPI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ZBRA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PIPA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "TBIG",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "COCO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BRRC",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "AYAM",
+    "reason": "Failed after maximum attempts"
+  }
+]

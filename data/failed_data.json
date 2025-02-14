@@ -1,66 +1,70 @@
 [
   {
-    "ticker": "CBDK",
+    "ticker": "FLMC",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "TFAS",
+    "ticker": "GDYR",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "JAWA",
+    "ticker": "SDRA",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "JMAS",
+    "ticker": "MAGP",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "MDLN",
+    "ticker": "BUKK",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "MAMI",
+    "ticker": "TUGU",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "BLUE",
+    "ticker": "AMAG",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "SMMT",
+    "ticker": "MGLV",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "CBRE",
+    "ticker": "BNGA",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "BIPI",
+    "ticker": "PDES",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "ZBRA",
+    "ticker": "PEHA",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "PIPA",
+    "ticker": "CTTH",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "TBIG",
+    "ticker": "FORZ",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "COCO",
+    "ticker": "TCPI",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "BRRC",
+    "ticker": "BSML",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "AYAM",
+    "ticker": "SWID",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "GOTO",
     "reason": "Failed after maximum attempts"
   }
 ]

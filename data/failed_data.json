@@ -1,70 +1,890 @@
 [
   {
-    "ticker": "FLMC",
+    "ticker": "BIKE",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "GDYR",
+    "ticker": "SDMU",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "SDRA",
+    "ticker": "EKAD",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "MAGP",
+    "ticker": "TLDN",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "BUKK",
+    "ticker": "ADRO",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "TUGU",
+    "ticker": "MBMA",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "AMAG",
+    "ticker": "HILL",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "MGLV",
+    "ticker": "KAYU",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "BNGA",
+    "ticker": "CARE",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "PDES",
+    "ticker": "CSMI",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "PEHA",
+    "ticker": "TOTO",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "CTTH",
+    "ticker": "PPGL",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "FORZ",
+    "ticker": "KETR",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "TCPI",
+    "ticker": "PAMG",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "BSML",
+    "ticker": "PTMP",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "SWID",
+    "ticker": "TIRT",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "GOTO",
+    "ticker": "MPPA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "EURO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MDKI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KKES",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BMAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CTRA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MORA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PPRO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BSBK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DRMA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "INRU",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTMH",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SRAJ",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "FPNI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "WTON",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LION",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "TGKA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NAYZ",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PWON",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BELI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "AISA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "IRSX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PRAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KDSI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CANI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "WINE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MPXL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "RAAM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ARTO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LOPI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "VKTR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DEAL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTFN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "AKKU",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NASA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "AGAR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SINI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KONI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DEFI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CITA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "HKMU",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "AMFG",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "HOME",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "STAR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "TRIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CFIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DSFI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CINT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KKGI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KJEN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BEER",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PURE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "GZCO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BKSL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "HRUM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PSKT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BELL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "INAI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "TRIS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SCPI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BEKS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BLTZ",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "INTD",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPPS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "IKBI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "GLVA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "WAPO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "WIRG",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MGRO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KOPI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LMSH",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DGIK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CPIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SMIL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SMKL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CPRI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "IBFN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DEWI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ENZO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KIJA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PGUN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MFMI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPGI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CHEM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SOTS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPCK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KMTR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CASA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SMKM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BISI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "TOTL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ESTA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DFAM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "GPSO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BPII",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BHAT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NINE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ALDO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MYOH",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BBKP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPLI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "GOLL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SOCI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CBUT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BCAP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BEBS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MARK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DOID",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SOSS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ESTI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "GWSA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "INET",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SGRO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MKNT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "INDS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SMDR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "POLI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BANK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KPIG",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PDPP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MPRO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DMMX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "POLA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SPTO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "EMTK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "FUTR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CMNP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ENAK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ESSA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "TARA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "IFII",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KUAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "GDST",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "INPS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "JECC",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CLEO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BHIT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MKPI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CSIS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MPMX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "RISE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MMLP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "IFSH",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "INDY",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "TOBA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ABMM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "IPTV",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BRNA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ASPI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPKR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PRIM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "INCI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "JAST",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "TRAM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LMAX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BIPP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PURA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DCII",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MBAP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BAJA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SMDM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LUCY",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "UNVR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BDKR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "HELI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "INOV",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "WMPP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PNBS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DADA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DIVA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "SONA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ARGO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KLIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BBHI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "HRTA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MSKY",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ADHI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BIMA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "HOKI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MAIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "RMKO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "IMPC",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "GMFI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ARCI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "WOMF",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BPTR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ATIC",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NATO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTLA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CMRY",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "INKP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTSM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BATA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "RBMS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "RAJA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTWI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "RIGS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CSRA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DEPO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "IPCM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "RDTX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NICK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BALI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "FORU",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ASBI",
     "reason": "Failed after maximum attempts"
   }
 ]

@@ -177,3 +177,7 @@
 2025-03-07 01:28:40,234 - INFO: The shareholders data scraper program started
 2025-03-07 01:28:40,235 - INFO: Scraping batch 1 from index 0 to index 238
 2025-03-07 01:48:07,952 - INFO: 2025-03-07 the shareholders data has been scrapped. Execution time: 00:19:27
+2025-03-07 18:18:28,079 - INFO: Program started
+2025-03-07 18:18:29,593 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-03-07 18:18:37,618 - INFO: Upserting ['FUTR.JK'] rows to idx_company_profile table.
+2025-03-07 18:18:38,318 - INFO: idx_profile_updater finished

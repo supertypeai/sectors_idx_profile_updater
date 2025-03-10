@@ -181,3 +181,6 @@
 2025-03-07 18:18:29,593 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-03-07 18:18:37,618 - INFO: Upserting ['FUTR.JK'] rows to idx_company_profile table.
 2025-03-07 18:18:38,318 - INFO: idx_profile_updater finished
+2025-03-10 18:17:26,227 - INFO: Program started
+2025-03-10 18:17:28,578 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-03-10 18:17:32,168 - INFO: idx_profile_updater finished

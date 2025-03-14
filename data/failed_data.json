@@ -1,1 +1,6 @@
-[]
+[
+  {
+    "ticker": "KETR",
+    "reason": "Failed after maximum attempts"
+  }
+]

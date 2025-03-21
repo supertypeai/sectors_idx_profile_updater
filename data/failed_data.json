@@ -1,6 +1,70 @@
 [
   {
-    "ticker": "KETR",
+    "ticker": "KREN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LAJU",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LIFE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MANG",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MAXI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MFIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MGLV",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MICE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MNCN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MPRO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NEST",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NPGF",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PDES",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PGEO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "POLI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PPRE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PTBA",
     "reason": "Failed after maximum attempts"
   }
 ]

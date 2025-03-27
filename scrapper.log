@@ -199,3 +199,7 @@
 2025-03-25 18:19:24,890 - INFO: Program started
 2025-03-25 18:19:27,299 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-03-25 18:19:29,088 - INFO: idx_profile_updater finished
+2025-03-27 01:33:51,879 - INFO: Program started
+2025-03-27 01:33:54,381 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-03-27 01:34:42,106 - INFO: Upserting ['YUPI.JK'] rows to idx_company_profile table.
+2025-03-27 01:34:43,065 - INFO: idx_profile_updater finished

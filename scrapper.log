@@ -245,3 +245,7 @@
 2025-04-14 07:28:40,551 - INFO: Program started
 2025-04-14 07:28:42,804 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-04-14 07:28:44,476 - INFO: idx_profile_updater finished
+2025-04-16 18:20:44,801 - INFO: Program started
+2025-04-16 18:20:47,357 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-04-16 18:20:58,707 - INFO: Upserting ['FORE.JK' 'MDLA.JK'] rows to idx_company_profile table.
+2025-04-16 18:20:59,570 - INFO: idx_profile_updater finished

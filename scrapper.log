@@ -281,3 +281,6 @@
 2025-05-10 18:17:55,520 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-05-10 18:18:06,770 - INFO: Upserting ['DKHH.JK'] rows to idx_company_profile table.
 2025-05-10 18:18:07,447 - INFO: idx_profile_updater finished
+2025-05-13 18:21:15,129 - INFO: Program started
+2025-05-13 18:21:18,248 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-05-13 18:21:20,382 - INFO: idx_profile_updater finished

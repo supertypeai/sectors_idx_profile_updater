@@ -153,6 +153,7 @@ def get_new_shareholders_data(symbol, supabase):
                       'Pemerintah Ri' : 'Republic of Indonesia',
                       'Kejaksaan Agung': 'Attorney General',
                       'KEJAKSAAN AGUNG': 'Attorney General',
+                      'Biro klasifikasi indonesia, pt.': 'Pt Biro Klasifikasi Indonesia',
                       'Direksi': 'Director',
                       'AFILIASI PENGENDALI':'Controlling Affiliate',
                       'Pihak Afiliasi ':'Affiliate Parties',

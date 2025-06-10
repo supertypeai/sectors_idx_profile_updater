@@ -158,6 +158,11 @@ def get_new_shareholders_data(symbol, supabase):
                       'AFILIASI PENGENDALI':'Controlling Affiliate',
                       'Pihak Afiliasi ':'Affiliate Parties',
                       'Pihak Afilasi':'Affiliate Parties',
+                      'Pt. Asabri (Persero)':'Pt Asabri (Persero)',
+                      'Asabri (Persero),Pt':'Pt Asabri (Persero)',
+                      'Pt Asabri (Persero) Dapen Polri':'Pt Asabri (Persero)',
+                      'Pt Asabri':'Pt Asabri (Persero)',
+                      'Pt Asabri - Dapen':'Pt Asabri (Persero)',
                       '0': np.nan,
                       '-': np.nan,
                       '': np.nan}

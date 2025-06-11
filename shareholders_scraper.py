@@ -192,6 +192,9 @@ def get_new_shareholders_data(symbol, supabase):
           shareholders_df["type"] = shareholders_df.apply(lambda x: "Scripless Public Share" if x["name"] == "Public (Scripless)"	else (
                                                               "Scrip Public Share" if x["name"] == "Public (Scrip)" else x['type']),axis=1)
           shareholders_df = shareholders_df[["name","type","share_amount","share_percentage"]]
+      
+      if round(shareholders_df['share_percentage'].sum(),0) > 100:
+        shareholders_df['share_percentage'] = (shareholders_df['share_amount']/sum(shareholders_df['share_amount']))*100
 
       shareholders_df = shareholders_df.sort_values("name")
 

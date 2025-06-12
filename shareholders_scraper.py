@@ -163,6 +163,7 @@ def get_new_shareholders_data(symbol, supabase):
                       'Pt Asabri (Persero) Dapen Polri':'Pt Asabri (Persero)',
                       'Pt Asabri':'Pt Asabri (Persero)',
                       'Pt Asabri - Dapen':'Pt Asabri (Persero)',
+                      'Pt Asabri (Persero) - Dapen Tni':'Pt Asabri (Persero)',
                       'Pt Danantara Asset Management (Persero)':'Pt Danantara Asset Management',
                       'Pt Danantara Aset Manajemen (Persero)':'Pt Danantara Asset Management',
                       '0': np.nan,

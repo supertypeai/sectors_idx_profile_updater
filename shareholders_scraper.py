@@ -154,6 +154,7 @@ def get_new_shareholders_data(symbol, supabase):
                       'Kejaksaan Agung': 'Attorney General',
                       'KEJAKSAAN AGUNG': 'Attorney General',
                       'Biro klasifikasi indonesia, pt.': 'Pt Biro Klasifikasi Indonesia',
+                      'Pt Biro Klasifikasi Indonesia Persero Tbk': 'Pt Biro Klasifikasi Indonesia',
                       'Direksi': 'Director',
                       'AFILIASI PENGENDALI':'Controlling Affiliate',
                       'Pihak Afiliasi ':'Affiliate Parties',

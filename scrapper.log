@@ -377,3 +377,7 @@
 2025-07-04 18:20:28,968 - INFO: Program started
 2025-07-04 18:20:31,528 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-07-04 18:20:36,364 - INFO: idx_profile_updater finished
+2025-07-07 01:19:21,791 - INFO: The shareholders data additional scraper program started
+2025-07-07 01:19:23,409 - INFO: The shareholders data scraper program started
+2025-07-07 01:19:23,409 - INFO: Scraping batch 1 from index 0 to index 240
+2025-07-07 01:42:25,818 - INFO: 2025-07-07 the shareholders data has been scrapped. Execution time: 00:23:02

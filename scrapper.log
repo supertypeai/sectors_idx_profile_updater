@@ -388,3 +388,7 @@
 2025-07-10 18:22:02,034 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-07-10 18:22:33,284 - INFO: Upserting ['RONY.JK' 'CDIA.JK' 'ASPR.JK' 'PSAT.JK' 'COIN.JK'] rows to idx_company_profile table.
 2025-07-10 18:22:34,186 - INFO: idx_profile_updater finished
+2025-07-13 18:20:05,618 - INFO: Program started
+2025-07-13 18:20:07,549 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-07-13 18:20:34,418 - INFO: Upserting ['CHEK.JK' 'BLOG.JK' 'PMUI.JK' 'MERI.JK'] rows to idx_company_profile table.
+2025-07-13 18:20:35,088 - INFO: idx_profile_updater finished

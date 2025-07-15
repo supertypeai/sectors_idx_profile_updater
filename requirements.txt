@@ -7,6 +7,6 @@ ratelimit==2.2.1
 Requests==2.32.3
 requests_ratelimiter==0.7.0
 selenium==4.23.1
-supabase==2.6.0
-yfinance==0.2.54
+supabase==2.16.0
+yfinance==0.2.59
 fuzzywuzzy==0.18.0

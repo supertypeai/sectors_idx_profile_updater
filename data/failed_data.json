@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "ticker": "KPAL",
+    "reason": "None value detected"
+  },
+  {
+    "ticker": "KPAS",
+    "reason": "None value detected"
+  },
+  {
+    "ticker": "KRAH",
+    "reason": "None value detected"
+  },
+  {
+    "ticker": "MAMI",
+    "reason": "None value detected"
+  },
+  {
+    "ticker": "MYRX",
+    "reason": "None value detected"
+  },
+  {
+    "ticker": "NIPS",
+    "reason": "None value detected"
+  },
+  {
+    "ticker": "PRAS",
+    "reason": "None value detected"
+  }
+]

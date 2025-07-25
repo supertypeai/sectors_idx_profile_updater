@@ -51,8 +51,7 @@ def get_delist_data():
         for data in datas: 
             code_emiten = data.get('KodeEmiten')
             date = data.get('TanggalPencatatan')
-            date_dt = datetime.fromisoformat(date)
-            date_clean = date_dt.strftime('%Y-%m-%d')   
+            date_clean = date.split("T")[0]
             
             if date and code_emiten:
                 # Add the .JK suffix to match with data in db

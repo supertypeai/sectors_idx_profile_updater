@@ -6,7 +6,7 @@ import json
 import requests 
 import datetime
 import logging 
-import datetime
+from datetime import datetime
 
 
 # Setup Logging

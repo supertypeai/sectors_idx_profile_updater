@@ -42,6 +42,7 @@ def process_url() -> str:
     api_url = f"https://www.idx.co.id/primary/ListingActivity/GetIssuedHistory?caType=DELIST&dateFrom={date_str}&dateTo={date_str}&start=0&length=999"
     return api_url
 
+
 def get_delist_data():
     """ 
     Fetches delisting data from IDX API and returns a dictionary

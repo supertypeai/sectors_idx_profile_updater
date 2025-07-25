@@ -61,10 +61,10 @@ def get_delist_data():
         return delist_dict
     
     except requests.exceptions.RequestException as error:
-        LOGGER(f"Error fetching data from IDX API: {error}")
+        LOGGER.error(f"Error fetching data from IDX API: {error}")
         return {}
     except json.JSONDecodeError:
-        LOGGER("Error decoding JSON from IDX response.")
+        LOGGER.error("Error decoding JSON from IDX response.")
         return {}
 
 
@@ -79,7 +79,7 @@ def update_delisting_dates_db(delist_data: dict):
     """
 
     if not delist_data:
-        LOGGER("No delist data to process.")
+        LOGGER.info("No delist data to process.")
         return
 
     db_headers = {
@@ -100,7 +100,7 @@ def update_delisting_dates_db(delist_data: dict):
             
             # If the company exists and its delisting_date is empty (null)
             if db_records and db_records[0].get('delisting_date') is None:
-                LOGGER(f"Found company '{ticker}' with no delisting date. Preparing to update")
+                LOGGER.info(f"Found company '{ticker}' with no delisting date. Preparing to update")
 
                 # Perform the update
                 update_url = f"{SUPABASE_URL}/rest/v1/idx_company_profile?symbol=eq.{ticker}"
@@ -109,18 +109,18 @@ def update_delisting_dates_db(delist_data: dict):
                 update_response = requests.patch(update_url, headers=db_headers, json=update_payload)
                 update_response.raise_for_status()
                 
-                LOGGER(f"Successfully updated delisting date for '{ticker}' to '{delist_date}'.")
+                LOGGER.info(f"Successfully updated delisting date for '{ticker}' to '{delist_date}'.")
                 updates_to_perform += 1
 
             elif not db_records:
-                LOGGER(f"Warning: Ticker '{ticker}' from IDX was not found in the database. Skipping.")
+                LOGGER.info(f"Warning: Ticker '{ticker}' from IDX was not found in the database. Skipping.")
 
         except requests.exceptions.RequestException as error:
-            LOGGER(f"Error processing ticker '{ticker}': {error}")
+            LOGGER.error(f"Error processing ticker '{ticker}': {error}")
             if error.response is not None:
-                LOGGER(f"Response content: {error.response.text}")
+                LOGGER.error(f"Response content: {error.response.text}")
 
-    LOGGER(f"\nUpdate process finished. Performed {updates_to_perform} updates.")
+    LOGGER.info(f"\nUpdate process finished. Performed {updates_to_perform} updates.")
 
 
 if __name__ == "__main__":

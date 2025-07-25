@@ -44,3 +44,6 @@
 2025-07-25 08:10:28 [INFO] - Warning: Ticker 'PROD.JK' from IDX was not found in the database. Skipping.
 2025-07-25 08:10:28 [INFO] - 
 Update process finished. Performed 0 updates.
+2025-07-25 08:43:41 [INFO] - Init Global Variable
+2025-07-25 08:43:41 [INFO] - Checking for delistings on date: 20250725
+2025-07-25 08:43:42 [INFO] - No delist data to process.

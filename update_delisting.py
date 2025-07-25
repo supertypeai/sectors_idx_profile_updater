@@ -6,6 +6,7 @@ import json
 import requests 
 import datetime
 import logging 
+import datetime
 
 
 # Setup Logging
@@ -30,9 +31,16 @@ SUPABASE_URL = os.getenv('SUPABASE_URL')
 # Requester api url from main.py
 REQUESTER = ProxyRequester(proxy=PROXY)
 
-# Main API url
-API_URL = "https://www.idx.co.id/primary/ListingActivity/GetIssuedHistory?caType=DELIST&dateFrom=&dateTo=&start=0&length=9999"
 
+def process_url() -> str: 
+    today = datetime.now()
+
+    # Format the date into the 'YYYYMMDD' format required by the API
+    date_str = today.strftime('%Y%m%d')
+    LOGGER.info(f"Checking for delistings on date: {date_str}")
+
+    api_url = f"https://www.idx.co.id/primary/ListingActivity/GetIssuedHistory?caType=DELIST&dateFrom={date_str}&dateTo={date_str}&start=0&length=999"
+    return api_url
 
 def get_delist_data():
     """ 
@@ -40,8 +48,10 @@ def get_delist_data():
     with ticker as key and delisting date as value.
     The date is formatted as 'YYYY-MM-DD'.
     """
-    try:
-        response = REQUESTER.fetch_url(API_URL)
+    api_url = process_url()
+    
+    try: 
+        response = REQUESTER.fetch_url(api_url)
         if response == False:
             raise Exception("Error retrieving active symbols from IDX json.")
         datas = json.loads(response)['data']

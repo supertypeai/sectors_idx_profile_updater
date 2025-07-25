@@ -3,7 +3,7 @@ name: Update Delisting Dates Daily
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 18 * * *' # runs at 18:00 UTC every day
+    - cron: '0 18 * * 1-5' # runs at 18:00 UTC, Monday through Friday
 
 jobs:
   build:

@@ -436,3 +436,7 @@
 2025-08-07 18:25:11,909 - INFO: Program started
 2025-08-07 18:25:13,977 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-08-07 18:25:16,684 - INFO: idx_profile_updater finished
+2025-08-10 18:20:21,181 - INFO: Program started
+2025-08-10 18:20:23,414 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-08-10 18:20:34,089 - INFO: Upserting ['KPIG.JK'] rows to idx_company_profile table.
+2025-08-10 18:20:34,776 - INFO: idx_profile_updater finished

@@ -1,21 +1,69 @@
-import numpy as np
-import pandas as pd
-from dotenv import load_dotenv
-from supabase import create_client
-import ssl
+from dotenv     import load_dotenv
+from supabase   import create_client
+from fuzzywuzzy import process
+from importlib  import reload
+from random     import choice
+
 import urllib.request
 import os
 import time
 import json
 import logging
-from imp import reload
-import datetime
-from random import choice
 import re
 import sys
 import requests
+import datetime
+import numpy as np
+import pandas as pd
+
 
 load_dotenv()
+
+
+USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1'
+]
+
+HEADERS = {
+        "User-Agent": choice(USER_AGENTS),
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Cache-Control": "max-age=0",
+    }
+  
+PROXY_URL = os.getenv("proxy")
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY') 
+
+PROXIES = {
+    'http': PROXY_URL,
+    'https': PROXY_URL,
+}
+
+TRUTH_DICT = {False:'No', True:'Yes'}
+SHAREHOLDERS_RENAMING = {
+            'Nama':'name',
+            'Jabatan':'position',
+            'Afiliasi':'affiliated',
+            'Independen':'independent',
+            'Jumlah':'share_amount',
+            'Kategori':'type',
+            'Persentase':'share_percentage'
+        }
+
+MAX_ATTEMPT = 3
+SLEEP = 1.5
+CWD = os.getcwd()
+DATA_DIR = os.path.join(CWD, "data")
+
 
 def initiate_logging(LOG_FILENAME):
     reload(logging)
@@ -37,31 +85,6 @@ def get_management_data(supabase,symbol):
     return df
 
 
-USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1'
-]
-
-HEADERS = {
-        "User-Agent": choice(USER_AGENTS),
-        "Accept": "*/*",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "Cache-Control": "max-age=0",
-    }
-
-  
-PROXY_URL = os.getenv("proxy")
-PROXIES = {
-    'http': PROXY_URL,
-    'https': PROXY_URL,
-}
 def fetch_url_proxy(url):
   response = requests.get(url, proxies=PROXIES, verify=False)   
   status_code = response.status_code
@@ -71,6 +94,7 @@ def fetch_url_proxy(url):
   else:
     print(f"Failed to fetch from {url}. Get status code : {status_code}")
     return None
+
 
 def fetch_url(url):
   req = urllib.request.Request(url, headers=HEADERS)
@@ -85,21 +109,11 @@ def fetch_url(url):
     return None
 
 
-TRUTH_DICT = {False:'No', True:'Yes'}
-SHAREHOLDERS_RENAMING = {
-            'Nama':'name',
-            'Jabatan':'position',
-            'Afiliasi':'affiliated',
-            'Independen':'independent',
-            'Jumlah':'share_amount',
-            'Kategori':'type',
-            'Persentase':'share_percentage'
-        }
-
 def _change_bool_to_string(list_dict, key_name): 
     for i in range(len(list_dict)):
         list_dict[i][key_name] = TRUTH_DICT.get(list_dict[i][key_name])
     return list_dict
+
 
 def _clean_dict(list_dict, key_name=None):
     if not list_dict:
@@ -111,7 +125,20 @@ def _clean_dict(list_dict, key_name=None):
             dct[SHAREHOLDERS_RENAMING.get(key, key)] = dct.pop(key)
     return list_dict
 
-def get_new_shareholders_data(symbol, supabase):    
+
+def get_company(supabase_client, table_name: str = 'idx_company_profile') -> list[dict[str]]:
+    try:
+        response = supabase_client.table(table_name)\
+                             .select('symbol','company_name')\
+                             .execute() 
+        return response.data if response.data else []
+    except Exception as error:
+        print(f'Erro fetching data from db: {error}') 
+
+
+def get_new_shareholders_data(symbol, supabase, 
+                              ticker_map_standardized: dict, 
+                              ticker_map_original: dict):    
     url = f"https://www.idx.co.id/primary/ListedCompany/GetCompanyProfilesDetail?KodeEmiten={symbol}&language=en-us"
     # data = fetch_url(url)
     data = fetch_url_proxy(url)
@@ -123,10 +150,37 @@ def get_new_shareholders_data(symbol, supabase):
     else:
       # Shareholders Data
       shareholders_data = data['PemegangSaham']
-      shareholders = [{key: str(value).strip().title() if isinstance(value, str) else value 
-                 for key, value in sub.items() if key != 'Pengendali'} 
-                for sub in shareholders_data]
-      shareholders = _clean_dict(shareholders)
+      processed_shareholders = []
+
+      company_name_choices = list(ticker_map_original.keys())
+
+      for shareholder_data in shareholders_data:
+        record =  {key: str(value).strip().title() if isinstance(value, str) else value 
+                    for key, value in shareholder_data.items() if key != 'Pengendali'}
+      
+        # Get the shareholder's name for the lookup
+        shareholder_name = record.get('Nama', '')
+
+        # Check matching ticker
+        cleaned_shareholder_key = standardize_name_for_matching(shareholder_name)
+        found_ticker = ticker_map_standardized.get(cleaned_shareholder_key, None)
+        print(f"found ticker: {found_ticker}")
+
+        if found_ticker:
+           record['ticker'] = found_ticker
+        
+        # Check ticker with fuzzy
+        if not found_ticker and 'tbk' in shareholder_name.lower():
+          best_match = process.extractOne(shareholder_name, company_name_choices)
+          print(f"best match fuzzy: {best_match}")
+          if best_match and best_match[1] >= 90:
+              matched_name = best_match[0]
+              found_ticker = ticker_map_original[matched_name]
+              record['ticker'] = found_ticker
+
+        processed_shareholders.append(record)
+      
+      shareholders = _clean_dict(processed_shareholders)
       shareholders_df = pd.DataFrame(shareholders)
 
       name_mapping = {'Saham Treasury'        : 'Treasury Stock',
@@ -186,21 +240,40 @@ def get_new_shareholders_data(symbol, supabase):
           shareholders_df["position"] = shareholders_df.apply(lambda x: "Scripless Public Share" if x["name"] == "Public (Scripless)"	else (
                                                               "Scrip Public Share" if x["name"] == "Public (Scrip)" else x['position']),axis=1)
           
-          shareholders_df = shareholders_df[["name","position","share_amount","share_percentage"]]
+          # shareholders_df = shareholders_df[["name","position","share_amount","share_percentage"]]
+          columns_to_keep = ["name", "position", "share_amount", "share_percentage"]
+          if 'ticker' in shareholders_df.columns:
+              columns_to_keep.append('ticker')
+          shareholders_df = shareholders_df[columns_to_keep]
 
           shareholders_df.rename(columns={"position":"type"},inplace=True)
 
       else:
           shareholders_df["type"] = shareholders_df.apply(lambda x: "Scripless Public Share" if x["name"] == "Public (Scripless)"	else (
                                                               "Scrip Public Share" if x["name"] == "Public (Scrip)" else x['type']),axis=1)
-          shareholders_df = shareholders_df[["name","type","share_amount","share_percentage"]]
+          # shareholders_df = shareholders_df[["name","type","share_amount","share_percentage"]]
+          columns_to_keep = ["name", "type", "share_amount", "share_percentage"]
+          if 'ticker' in shareholders_df.columns:
+              columns_to_keep.append('ticker')
+          shareholders_df = shareholders_df[columns_to_keep]
       
       if round(shareholders_df['share_percentage'].sum(),0) > 100:
         shareholders_df['share_percentage'] = (shareholders_df['share_amount']/sum(shareholders_df['share_amount']))*100
 
       shareholders_df = shareholders_df.sort_values("name")
 
-      shareholders_df = shareholders_df.groupby("name").sum().reset_index(drop=False)
+      # shareholders_df = shareholders_df.groupby("name").sum().reset_index(drop=False)
+      agg_rules = {
+          'share_amount': 'sum',
+          'share_percentage': 'sum',
+          'type': 'first' # Take the first value for the 'type' column
+      }
+
+      # Dynamically add the 'ticker' rule only if the column exists
+      if 'ticker' in shareholders_df.columns:
+          agg_rules['ticker'] = 'first' # Take the first value for the 'ticker' column
+
+      shareholders_df = shareholders_df.groupby('name').agg(agg_rules).reset_index()
 
       # Directors Data
       try:
@@ -239,14 +312,11 @@ def get_new_shareholders_data(symbol, supabase):
         commissioners_df = None
         
       return shareholders_df, directors_df, commissioners_df
-    
-MAX_ATTEMPT = 3
-SLEEP = 1.5
-CWD = os.getcwd()
-DATA_DIR = os.path.join(CWD, "data")
 
 
-def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = False):
+def get_shareholder_data(symbol_list: list, supabase, 
+                         ticker_map_standardize: dict, ticker_map_original: dict, 
+                         is_failure_handling = False):
   retry = 0 
   i = 0 
   failed_list = []
@@ -256,11 +326,16 @@ def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = Fals
     ticker = symbol_list[0]
     try:
       print(f"Trying to get data from {ticker}")
-      shareholders_df, directors_df, commissioners_df = get_new_shareholders_data(ticker, supabase) # This function includes search for directors and commissioners
-      
+      shareholders_df, directors_df, commissioners_df = get_new_shareholders_data(ticker, supabase,
+                                                                                  ticker_map_standardize, 
+                                                                                  ticker_map_original) # This function includes search for directors and commissioners
       # Check for shareholders
       if (shareholders_df is not None):
-        shareholders_records = shareholders_df.to_json(orient='records')
+        shareholders_records = shareholders_df.to_dict(orient='records')
+        for record in shareholders_records:
+          if 'ticker' in record and pd.isna(record['ticker']):
+                record.pop('ticker')
+        shareholders_records = json.dumps(shareholders_records)
 
         # Check for directors
         directors_records = directors_df.to_json(orient="records") if directors_df is not None else None
@@ -313,6 +388,7 @@ def get_shareholder_data(symbol_list: list, supabase, is_failure_handling = Fals
   with open(failed_filename, "w") as final:
     json.dump(failed_list, final, indent=2)
 
+
 def is_same_dict(dict1: dict, dict2: dict) -> bool :
   for key, val in dict1.items():
     if (key in dict2 and val == dict2[key]):
@@ -321,11 +397,13 @@ def is_same_dict(dict1: dict, dict2: dict) -> bool :
       return False
   return True
 
+
 def is_dict_in_list(dict_arg : dict, list_arg: list) -> bool:
   for dict_itr in list_arg:
     if (is_same_dict(dict_arg, dict_itr)):
       return True
   return False
+
 
 def handle_percentage_duplicate_stringified(df: pd.DataFrame):
   for index, row in df.iterrows():
@@ -350,10 +428,41 @@ def handle_percentage_duplicate_stringified(df: pd.DataFrame):
     df.at[index, 'commissioners'] = commissioner_list
   return df
 
+
+def standardize_name_for_matching(name: str) -> str:
+    if not isinstance(name, str): return ""
+    name = name.lower()
+    name = re.sub(r'\b(pt|tbk|persero)\b', '', name)
+    name = re.sub(r'[,.]', '', name)
+    words = sorted(name.split())
+    return " ".join(words).strip()
+
+
+def get_ticker_map(company_lists: list[str]):
+  standardized_name_map = {}
+  reverse_ticker_map = {}
+
+  for company in company_lists:
+    company_name = company.get('company_name')
+    company_symbol = company.get('symbol')
+    if company_name:
+      cleaned_name = standardize_name_for_matching(company_name)
+      standardized_name_map[cleaned_name] = company_symbol
+      reverse_ticker_map[company_name] = company_symbol
+  
+  return standardized_name_map, reverse_ticker_map
+
 if __name__ == "__main__":
   url_supabase = os.getenv("SUPABASE_URL")
   key = os.getenv("SUPABASE_KEY")
   supabase = create_client(url_supabase, key)
+
+  # Get all symbol and company_name from db idx_company_profile
+  company_lists = get_company(supabase)
+  print(f'company list check: {company_lists[:10]}')
+
+  # Get ticker map for shareholder maping ticker field
+  standardized_name_map, reverse_ticker_map = get_ticker_map(company_lists)
 
   # Preparing to scrape
   symbol = supabase.table("idx_active_company_profile").select("symbol").execute()
@@ -390,7 +499,12 @@ if __name__ == "__main__":
     print(f"[FETCHING DATA] Scraping batch {upper_bound} from index {start_idx} to index {end_idx}")
     logging.info(f"Scraping batch {upper_bound} from index {start_idx} to index {end_idx}")
 
-    get_shareholder_data(symbol[start_idx:end_idx], supabase) 
+    symbol_debug = symbol[start_idx:end_idx]
+    print(f"symbol to check {symbol_debug}")
+
+    get_shareholder_data(symbol_list=symbol[start_idx:end_idx], 
+                         supabase=supabase, ticker_map_standardize=standardized_name_map, 
+                         ticker_map_original=reverse_ticker_map) 
 
     # Checkpoint
     checkpoint = time.time()

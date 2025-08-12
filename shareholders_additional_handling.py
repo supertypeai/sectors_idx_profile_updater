@@ -1,14 +1,21 @@
+from dotenv     import load_dotenv
+from supabase   import create_client
+from importlib  import reload
+
+
+from shareholders_scraper import (get_shareholder_data, 
+                                  handle_percentage_duplicate_stringified, 
+                                  get_ticker_map, get_company)
+
 import json
 import os
-from dotenv import load_dotenv
-from supabase import create_client
-from shareholders_scraper import get_shareholder_data, handle_percentage_duplicate_stringified
 import pandas as pd
 import logging
-from imp import reload
 import datetime
 
+
 load_dotenv()
+
 
 def initiate_logging(LOG_FILENAME):
     reload(logging)
@@ -16,6 +23,7 @@ def initiate_logging(LOG_FILENAME):
     formatLOG = '%(asctime)s - %(levelname)s: %(message)s'
     logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO, format=formatLOG)
     logging.info('The shareholders data additional scraper program started')
+
 
 if __name__ == "__main__":
   url_supabase = os.getenv("SUPABASE_URL")
@@ -31,6 +39,8 @@ if __name__ == "__main__":
   LOG_FILENAME = 'scrapper.log'
   initiate_logging(LOG_FILENAME)
 
+  company_lists = get_company(supabase)
+  standardized_name_map, reverse_ticker_map = get_ticker_map(company_lists)
 
   symbol_list = []
   if (len(data) > 0):
@@ -38,7 +48,8 @@ if __name__ == "__main__":
     for dict_data in data:
       symbol_list.append(dict_data['ticker'])
 
-    get_shareholder_data(symbol_list, supabase, True) # COMMENT OUT THIS ONE TO TEST THE DB UPDATE
+    get_shareholder_data(symbol_list=symbol_list, supabase=supabase, ticker_map_standardize=standardized_name_map, 
+                         ticker_map_original=reverse_ticker_map, is_failure_handling=True) # COMMENT OUT THIS ONE TO TEST THE DB UPDATE
 
     # Preparing to be inserted to db
     CSV_FILE = os.path.join(DATA_DIR, "additional_shareholders_data.csv")

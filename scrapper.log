@@ -440,3 +440,7 @@
 2025-08-10 18:20:23,414 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-08-10 18:20:34,089 - INFO: Upserting ['KPIG.JK'] rows to idx_company_profile table.
 2025-08-10 18:20:34,776 - INFO: idx_profile_updater finished
+2025-08-12 02:48:35,897 - INFO: The shareholders data additional scraper program started
+2025-08-12 02:48:39,812 - INFO: The shareholders data scraper program started
+2025-08-12 02:48:39,812 - INFO: Scraping batch 1 from index 0 to index 239
+2025-08-12 03:09:51,853 - INFO: 2025-08-12 the shareholders data has been scrapped. Execution time: 00:21:12

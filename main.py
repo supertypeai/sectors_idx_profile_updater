@@ -16,7 +16,9 @@ import time
 import argparse
 from fuzzywuzzy import fuzz
 import logging
-from imp import reload
+import re
+# from imp import reload
+from importlib import reload
 
 all_columns = [
     "symbol",
@@ -400,6 +402,34 @@ class IdxProfileUpdater:
 
         return active_symbols
     
+    def _clean_company_name(self, company_name: str) -> str:
+        needs_cleaning = False
+
+        upper_count = sum(1 for char in company_name if char.isupper())
+        lower_count = sum(1 for char in company_name if char.islower())
+
+        # Check if the string is mostly uppercase
+        if upper_count > lower_count:
+            needs_cleaning = True
+        
+        # Check if all words are capitalized
+        words = company_name.split()
+        if not needs_cleaning and not all(word[0].isupper() for word in words if word):
+            needs_cleaning = True
+        
+        # Check if last letter of the last word capitalized
+        if not needs_cleaning and words:
+            last_word = words[-1]
+            if last_word and last_word[-1].isalpha() and last_word[-1].isupper():
+                needs_cleaning = True
+
+        if needs_cleaning:
+            cleaned_name = company_name.title()
+            cleaned_name = re.sub(r'\bPt\.?\b', 'PT', cleaned_name)
+            return cleaned_name.strip()
+        else:
+            return company_name
+    
     @limits(calls=2, period=4)
     def _retrieve_idx_profile(self, yf_symbol):
         symbol = (yf_symbol.split(".")[0]).lower()
@@ -442,9 +472,15 @@ class IdxProfileUpdater:
         for key, value in profiles.items():
             if key.lower() == "subsektor":
                 profile_dict["sub_sector_id"] = sub_sector_id_map.get(value, None)
+
             elif key in key_renaming.keys():
                 renamed_key = key_renaming.get(key, key)
-                profile_dict[renamed_key] = str(value).strip()
+                raw_value = str(value).strip()
+
+                if renamed_key == 'company_name':
+                    profile_dict[renamed_key] = self._clean_company_name(raw_value)
+                else:
+                    profile_dict[renamed_key] = raw_value
                 
         def _change_bool_to_string(list_dict, key_name): 
             for i in range(len(list_dict)):
@@ -479,7 +515,6 @@ class IdxProfileUpdater:
         profile_dict['shareholders'] = shareholders
         
         profile_dict["delisting_date"] = None
-        
         return profile_dict
     
     def update_company_profile_data(self, update_new_symbols_only=True, target_symbols=None):
@@ -743,5 +778,6 @@ if __name__ == "__main__":
     else:
         logging.info("Starting idx_profile_updater with new symbols and deactivated symbols")
         updater.update_company_profile_data(update_new_symbols_only=True)
+    
     updater.upsert_to_db()
     logging.info("idx_profile_updater finished")

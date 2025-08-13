@@ -136,6 +136,35 @@ def get_company(supabase_client, table_name: str = 'idx_company_profile') -> lis
         print(f'Erro fetching data from db: {error}') 
 
 
+def clean_company_name(company_name: str) -> str:
+        needs_cleaning = False
+
+        upper_count = sum(1 for char in company_name if char.isupper())
+        lower_count = sum(1 for char in company_name if char.islower())
+
+        # Check if the string is mostly uppercase
+        if upper_count > lower_count:
+            needs_cleaning = True
+        
+        # Check if all words are capitalized
+        words = company_name.split()
+        if not needs_cleaning and not all(word[0].isupper() for word in words if word):
+            needs_cleaning = True
+        
+        # Check if last letter of the last word capitalized
+        if not needs_cleaning and words:
+            last_word = words[-1]
+            if last_word and last_word[-1].isalpha() and last_word[-1].isupper():
+                needs_cleaning = True
+
+        if needs_cleaning:
+            cleaned_name = company_name.title()
+            cleaned_name = re.sub(r'\bPt\.?\b', 'PT', cleaned_name)
+            return cleaned_name.strip()
+        else:
+            return company_name
+        
+
 def get_new_shareholders_data(symbol, supabase, 
                               ticker_map_standardized: dict, 
                               ticker_map_original: dict):    
@@ -155,9 +184,22 @@ def get_new_shareholders_data(symbol, supabase,
       company_name_choices = list(ticker_map_original.keys())
 
       for shareholder_data in shareholders_data:
-        record =  {key: str(value).strip().title() if isinstance(value, str) else value 
-                    for key, value in shareholder_data.items() if key != 'Pengendali'}
-      
+        record = {}
+        
+        for key, value in shareholder_data.items():
+          if key == 'Pengendali':
+            continue 
+          if isinstance(value, str):
+            if key == "Nama" :
+                if "pt" in value.strip().lower():
+                  record[key] = clean_company_name(value.strip())  
+                else:
+                  record[key] = value.strip().title()
+            else:
+                record[key] = value.strip().title()
+          else:
+              record[key] = value
+
         # Get the shareholder's name for the lookup
         shareholder_name = record.get('Nama', '')
 
@@ -177,7 +219,7 @@ def get_new_shareholders_data(symbol, supabase,
               matched_name = best_match[0]
               found_ticker = ticker_map_original[matched_name]
               record['symbol'] = found_ticker
-
+           
         processed_shareholders.append(record)
       
       shareholders = _clean_dict(processed_shareholders)

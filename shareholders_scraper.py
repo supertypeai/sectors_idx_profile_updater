@@ -185,7 +185,7 @@ def get_new_shareholders_data(symbol, supabase,
 
       for shareholder_data in shareholders_data:
         record = {}
-        
+        # Loop dict and check for standardize format
         for key, value in shareholder_data.items():
           if key == 'Pengendali':
             continue 

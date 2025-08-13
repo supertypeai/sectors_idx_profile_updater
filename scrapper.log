@@ -460,3 +460,7 @@
 2025-08-13 08:54:04,319 - INFO: The shareholders data scraper program started
 2025-08-13 08:54:04,319 - INFO: Scraping batch 1 from index 0 to index 239
 2025-08-13 09:15:01,449 - INFO: 2025-08-13 the shareholders data has been scrapped. Execution time: 00:20:57
+2025-08-13 09:18:19,478 - INFO: The shareholders data additional scraper program started
+2025-08-13 09:18:23,121 - INFO: The shareholders data scraper program started
+2025-08-13 09:18:23,122 - INFO: Scraping batch 2 from index 239 to index 478
+2025-08-13 09:35:59,229 - INFO: 2025-08-13 the shareholders data has been scrapped. Execution time: 00:17:36

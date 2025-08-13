@@ -164,10 +164,10 @@ def get_new_shareholders_data(symbol, supabase,
         # Check matching ticker
         cleaned_shareholder_key = standardize_name_for_matching(shareholder_name)
         found_ticker = ticker_map_standardized.get(cleaned_shareholder_key, None)
-        print(f"found ticker: {found_ticker}")
+        print(f"found symbol: {found_ticker}")
 
         if found_ticker:
-           record['ticker'] = found_ticker
+           record['symbol'] = found_ticker
         
         # Check ticker with fuzzy
         if not found_ticker and 'tbk' in shareholder_name.lower():
@@ -176,7 +176,7 @@ def get_new_shareholders_data(symbol, supabase,
           if best_match and best_match[1] >= 90:
               matched_name = best_match[0]
               found_ticker = ticker_map_original[matched_name]
-              record['ticker'] = found_ticker
+              record['symbol'] = found_ticker
 
         processed_shareholders.append(record)
       
@@ -242,8 +242,8 @@ def get_new_shareholders_data(symbol, supabase,
           
           # shareholders_df = shareholders_df[["name","position","share_amount","share_percentage"]]
           columns_to_keep = ["name", "position", "share_amount", "share_percentage"]
-          if 'ticker' in shareholders_df.columns:
-              columns_to_keep.append('ticker')
+          if 'symbol' in shareholders_df.columns:
+              columns_to_keep.append('symbol')
           shareholders_df = shareholders_df[columns_to_keep]
 
           shareholders_df.rename(columns={"position":"type"},inplace=True)
@@ -253,8 +253,8 @@ def get_new_shareholders_data(symbol, supabase,
                                                               "Scrip Public Share" if x["name"] == "Public (Scrip)" else x['type']),axis=1)
           # shareholders_df = shareholders_df[["name","type","share_amount","share_percentage"]]
           columns_to_keep = ["name", "type", "share_amount", "share_percentage"]
-          if 'ticker' in shareholders_df.columns:
-              columns_to_keep.append('ticker')
+          if 'symbol' in shareholders_df.columns:
+              columns_to_keep.append('symbol')
           shareholders_df = shareholders_df[columns_to_keep]
       
       if round(shareholders_df['share_percentage'].sum(),0) > 100:
@@ -270,8 +270,8 @@ def get_new_shareholders_data(symbol, supabase,
       }
 
       # Dynamically add the 'ticker' rule only if the column exists
-      if 'ticker' in shareholders_df.columns:
-          agg_rules['ticker'] = 'first' # Take the first value for the 'ticker' column
+      if 'symbol' in shareholders_df.columns:
+          agg_rules['symbol'] = 'first' # Take the first value for the 'ticker' column
 
       shareholders_df = shareholders_df.groupby('name').agg(agg_rules).reset_index()
 

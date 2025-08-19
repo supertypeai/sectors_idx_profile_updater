@@ -483,3 +483,6 @@
 2025-08-16 18:19:53,665 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-08-16 18:20:03,829 - INFO: Upserting ['BBKP.JK'] rows to idx_company_profile table.
 2025-08-16 18:20:04,706 - INFO: idx_profile_updater finished
+2025-08-19 18:20:41,338 - INFO: Program started
+2025-08-19 18:20:43,939 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-08-19 18:20:46,744 - INFO: idx_profile_updater finished

@@ -494,3 +494,6 @@
 2025-08-22 18:20:44,151 - INFO: Program started
 2025-08-22 18:20:46,565 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-08-22 18:20:53,931 - INFO: idx_profile_updater finished
+2025-08-25 18:22:07,563 - INFO: Program started
+2025-08-25 18:22:10,103 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-08-25 18:22:15,069 - INFO: idx_profile_updater finished

@@ -431,7 +431,7 @@ class IdxProfileUpdater:
             return company_name
     
     def _normalize_company_format(self, company_name: str) -> str: 
-        company_clean = company_clean = re.sub(r'Tbk\.', 'Tbk', company_name, flags=re.IGNORECASE)
+        company_clean = re.sub(r'Tbk\.+', 'Tbk', company_name, flags=re.IGNORECASE)
         company_clean = re.sub(r'\bTbk\b(?=.*\bTbk\b)', '', company_clean, flags=re.IGNORECASE)
         company_clean = re.sub(r'\s+', ' ', company_clean).strip()
 

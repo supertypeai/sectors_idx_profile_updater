@@ -402,7 +402,7 @@ class IdxProfileUpdater:
 
         return active_symbols
     
-    def _clean_company_name(self, company_name: str) -> str:
+    def _normalize_company_case(self, company_name: str) -> str:
         needs_cleaning = False
 
         upper_count = sum(1 for char in company_name if char.isupper())
@@ -430,6 +430,13 @@ class IdxProfileUpdater:
         else:
             return company_name
     
+    def _normalize_company_format(self, company_name: str) -> str: 
+        company_clean = company_clean = re.sub(r'Tbk\.', 'Tbk', company_name, flags=re.IGNORECASE)
+        company_clean = re.sub(r'\bTbk\b(?=.*\bTbk\b)', '', company_clean, flags=re.IGNORECASE)
+        company_clean = re.sub(r'\s+', ' ', company_clean).strip()
+
+        return company_clean.strip()
+
     @limits(calls=2, period=4)
     def _retrieve_idx_profile(self, yf_symbol):
         symbol = (yf_symbol.split(".")[0]).lower()
@@ -478,7 +485,9 @@ class IdxProfileUpdater:
                 raw_value = str(value).strip()
 
                 if renamed_key == 'company_name':
-                    profile_dict[renamed_key] = self._clean_company_name(raw_value)
+                    clean_company_case = self._normalize_company_case(raw_value)
+                    clean_company = self._normalize_company_format(clean_company_case)
+                    profile_dict[renamed_key] = clean_company
                 else:
                     profile_dict[renamed_key] = raw_value
                 

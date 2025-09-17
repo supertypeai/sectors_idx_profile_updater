@@ -614,7 +614,7 @@ class IdxProfileUpdater:
                     continue
                 try:
                     similarity = fuzz.ratio(row['company_name'][0:30].lower(), retrieved_active_company[row['symbol']].lower())
-                    if similarity < 65:
+                    if similarity <= 85:
                         updated_company_name_symbols.append(row['symbol'])
                 except Exception as e:
                     pass   

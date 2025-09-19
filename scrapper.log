@@ -538,3 +538,8 @@
 2025-09-17 08:01:30,289 - INFO: Upserting ['KOCI.JK' 'ADMR.JK' 'TMAS.JK' 'TINS.JK' 'SHID.JK' 'PEHA.JK' 'HILL.JK'
  'JSMR.JK' 'ESTI.JK' 'RIGS.JK' 'ISAT.JK' 'TGRA.JK' 'UANG.JK'] rows to idx_company_profile table.
 2025-09-17 08:01:31,388 - INFO: idx_profile_updater finished
+2025-09-19 18:20:13,488 - INFO: Program started
+2025-09-19 18:20:16,461 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-09-19 18:21:51,943 - INFO: Upserting ['KOCI.JK' 'HILL.JK' 'TMAS.JK' 'TINS.JK' 'SHID.JK' 'PEHA.JK' 'JSMR.JK'
+ 'ESTI.JK' 'RIGS.JK' 'ISAT.JK' 'TGRA.JK' 'UANG.JK'] rows to idx_company_profile table.
+2025-09-19 18:21:53,000 - INFO: idx_profile_updater finished

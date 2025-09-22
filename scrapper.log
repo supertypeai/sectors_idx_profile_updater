@@ -547,3 +547,8 @@
 2025-09-21 01:50:18,595 - INFO: The shareholders data scraper program started
 2025-09-21 01:50:18,595 - INFO: Scraping batch 3 from index 478 to index 717
 2025-09-21 02:17:25,222 - INFO: 2025-09-21 the shareholders data has been scrapped. Execution time: 00:27:06
+2025-09-22 18:20:38,203 - INFO: Program started
+2025-09-22 18:20:40,819 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-09-22 18:22:29,266 - INFO: Upserting ['KOCI.JK' 'HILL.JK' 'TINS.JK' 'JSMR.JK' 'ESTI.JK' 'TMAS.JK' 'SHID.JK'
+ 'PEHA.JK' 'RIGS.JK' 'ISAT.JK' 'TGRA.JK' 'UANG.JK'] rows to idx_company_profile table.
+2025-09-22 18:22:30,058 - INFO: idx_profile_updater finished

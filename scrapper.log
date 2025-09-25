@@ -561,3 +561,7 @@
 2025-09-23 08:40:05,174 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-09-23 08:40:27,669 - INFO: Upserting ['JSMR.JK' 'ESTI.JK' 'EMAS.JK'] rows to idx_company_profile table.
 2025-09-23 08:40:28,116 - INFO: idx_profile_updater finished
+2025-09-25 18:21:32,590 - INFO: Program started
+2025-09-25 18:21:35,502 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-09-25 18:21:47,971 - INFO: Upserting ['JSMR.JK' 'ESTI.JK'] rows to idx_company_profile table.
+2025-09-25 18:21:48,863 - INFO: idx_profile_updater finished

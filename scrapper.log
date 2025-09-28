@@ -565,3 +565,7 @@
 2025-09-25 18:21:35,502 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2025-09-25 18:21:47,971 - INFO: Upserting ['JSMR.JK' 'ESTI.JK'] rows to idx_company_profile table.
 2025-09-25 18:21:48,863 - INFO: idx_profile_updater finished
+2025-09-28 00:52:19,321 - INFO: The shareholders data additional scraper program started
+2025-09-28 00:52:22,392 - INFO: The shareholders data scraper program started
+2025-09-28 00:52:22,392 - INFO: Scraping batch 4 from index 717 to index 955
+2025-09-28 01:08:32,733 - INFO: 2025-09-28 the shareholders data has been scrapped. Execution time: 00:16:10

@@ -268,9 +268,23 @@ def get_new_shareholders_data(symbol, supabase,
                       '': np.nan}
       shareholders_df = shareholders_df.replace({'name': name_mapping})
 
-
       shareholders_df["share_amount"] = shareholders_df["share_amount"].apply(lambda x: int(float(x)))
       shareholders_df["share_percentage"] = shareholders_df["share_percentage"].astype('float')
+      
+      # Fixing share_amount where it's 0 but share_percentage > 0
+      rows_to_fix = shareholders_df[(shareholders_df['share_amount'] == 0) & (shareholders_df['share_percentage'] > 0)]
+      if not rows_to_fix.empty:
+          reference_rows = shareholders_df[(shareholders_df['share_amount'] > 0) & (shareholders_df['share_percentage'] > 0)]
+          if not reference_rows.empty:
+            reference_row = reference_rows.iloc[0]
+              
+            if reference_row['share_percentage'] > 0:
+              share_value = reference_row['share_amount'] / (reference_row['share_percentage'] / 100) 
+                
+              for index, row in rows_to_fix.iterrows():
+                calculated_amount = share_value * (row['share_percentage'] / 100)
+                shareholders_df.loc[index, 'share_amount'] = calculated_amount
+              
       shareholders_df = shareholders_df[shareholders_df.share_amount > 0]
       
       df = get_management_data(supabase,f"{symbol}.JK")

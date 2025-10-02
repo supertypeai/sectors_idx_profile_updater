@@ -281,6 +281,19 @@ class OwnershipCleaner:
             convert_share_amount
         )
 
+        # Fixing share_amount_new where it's 0 but share_percentage_new > 0
+        for symbol in shareholders_df["symbol"].unique():
+            symbol_df = shareholders_df[shareholders_df['symbol'] == symbol] 
+
+            reference_row = symbol_df[(symbol_df['share_amount_new'] > 0) & (symbol_df['share_percentage_new'] > 0)].iloc[0]
+            rows_to_fix = symbol_df[(symbol_df['share_amount_new'] == 0) & (symbol_df['share_percentage_new'] > 0)]
+            
+            if not rows_to_fix.empty:
+                share_value = reference_row['share_amount_new'] / reference_row['share_percentage_new']
+                for index, row in rows_to_fix.iterrows():
+                    calculated_amount = share_value * row['share_percentage_new']
+                    shareholders_df.loc[index, 'share_amount_new'] = calculated_amount
+
         shareholders_df.loc[shareholders_df["name"] == "Saham Treasury", "type"] = (
             "Treasury Stock"
         )

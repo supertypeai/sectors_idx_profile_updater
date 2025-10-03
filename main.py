@@ -18,6 +18,7 @@ from fuzzywuzzy import fuzz
 import logging
 import re
 from datetime import date
+from fuzzywuzzy import process
 
 # from imp import reload
 from importlib import reload
@@ -93,6 +94,45 @@ def initiate_logging(LOG_FILENAME):
     formatLOG = "%(asctime)s - %(levelname)s: %(message)s"
     logging.basicConfig(filename=LOG_FILENAME, level=logging.INFO, format=formatLOG)
     logging.info("Program started")
+
+
+def normalize_company_case(company_name: str) -> str:
+    needs_cleaning = False
+
+    upper_count = sum(1 for char in company_name if char.isupper())
+    lower_count = sum(1 for char in company_name if char.islower())
+
+    # Check if the string is mostly uppercase
+    if upper_count > lower_count:
+        needs_cleaning = True
+
+    # Check if all words are capitalized
+    words = company_name.split()
+    if not needs_cleaning and not all(word[0].isupper() for word in words if word):
+        needs_cleaning = True
+
+    # Check if last letter of the last word capitalized
+    if not needs_cleaning and words:
+        last_word = words[-1]
+        if last_word and last_word[-1].isalpha() and last_word[-1].isupper():
+            needs_cleaning = True
+
+    if needs_cleaning:
+        cleaned_name = company_name.title()
+        cleaned_name = re.sub(r"\bPt\.?\b", "PT", cleaned_name)
+        return cleaned_name.strip()
+    else:
+        return company_name
+
+
+def normalize_company_format(company_name: str) -> str:
+    company_clean = re.sub(r"Tbk\.+", "Tbk", company_name, flags=re.IGNORECASE)
+    company_clean = re.sub(
+        r"\bTbk\b(?=.*\bTbk\b)", "", company_clean, flags=re.IGNORECASE
+    )
+    company_clean = re.sub(r"\s+", " ", company_clean).strip()
+
+    return company_clean.strip()
 
 
 class ProxyRequester:
@@ -171,7 +211,33 @@ class OwnershipCleaner:
         temp_df.columns = temp_df.columns.str.lower()
         temp_df = temp_df.dropna(axis=1, how="all")
         return temp_df
+    
+    def _standardize_name_for_matching(self, name: str) -> str:
+        if not isinstance(name, str): return ""
+        name = name.lower()
+        name = re.sub(r'\b(pt|tbk|persero)\b', '', name)
+        name = re.sub(r'[,.]', '', name)
+        words = sorted(name.split())
+        return " ".join(words).strip()
 
+    def _get_ticker_maps(self, supabase_client) -> dict | dict:
+        company_lists = supabase_client.table('idx_company_profile')\
+                                     .select('symbol, company_name')\
+                                     .execute().data
+        
+        standardized_name_map = {}
+        reverse_ticker_map = {}
+
+        for company in company_lists:
+            company_name = company.get('company_name')
+            company_symbol = company.get('symbol')
+            if company_name:
+                cleaned_name = self._standardize_name_for_matching(company_name)
+                standardized_name_map[cleaned_name] = company_symbol
+                reverse_ticker_map[company_name] = company_symbol
+        
+        return standardized_name_map, reverse_ticker_map
+    
     def _process_management_col_to_df(self, df, col_name):
         """Processes the management column (directors, commissioners, or audit_committees) in the dataframe to a new dataframe
 
@@ -226,7 +292,7 @@ class OwnershipCleaner:
 
         return temp_df
 
-    def _process_shareholder_col_to_df(self, df, col_name):
+    def _process_shareholder_col_to_df(self, df, col_name, supabase_client):
         """Processes the shareholder column in the dataframe to a new dataframe
 
         Args:
@@ -282,17 +348,23 @@ class OwnershipCleaner:
         )
 
         # Fixing share_amount_new where it's 0 but share_percentage_new > 0
+        count_symbols_fixed = 0
         for symbol in shareholders_df["symbol"].unique():
             symbol_df = shareholders_df[shareholders_df['symbol'] == symbol] 
-
-            reference_row = symbol_df[(symbol_df['share_amount_new'] > 0) & (symbol_df['share_percentage_new'] > 0)].iloc[0]
+            
+            valid_references = symbol_df[(symbol_df['share_amount_new'] > 0) & (symbol_df['share_percentage_new'] > 0)]
+            reference_row = valid_references.loc[valid_references['share_percentage_new'].idxmax()]
             rows_to_fix = symbol_df[(symbol_df['share_amount_new'] == 0) & (symbol_df['share_percentage_new'] > 0)]
             
             if not rows_to_fix.empty:
+                count_symbols_fixed += 1
                 share_value = reference_row['share_amount_new'] / reference_row['share_percentage_new']
                 for index, row in rows_to_fix.iterrows():
                     calculated_amount = share_value * row['share_percentage_new']
                     shareholders_df.loc[index, 'share_amount_new'] = calculated_amount
+        
+        if count_symbols_fixed > 0:
+            logging.info(f"Fixed {count_symbols_fixed} total symbols with 0 share_amount but >0 share_percentage")
 
         shareholders_df.loc[shareholders_df["name"] == "Saham Treasury", "type"] = (
             "Treasury Stock"
@@ -322,7 +394,10 @@ class OwnershipCleaner:
             "": np.nan,
         }
         shareholders_df = shareholders_df.replace({"name": name_mapping})
-        shareholders_df = shareholders_df.loc[shareholders_df["share_amount_new"] > 0]
+        shareholders_df = shareholders_df.loc[
+            (shareholders_df["share_amount_new"] > 0) & 
+            (shareholders_df["share_percentage_new"] > 0)
+        ]
 
         type_mapping = {
             "Direksi": "Director",
@@ -338,6 +413,7 @@ class OwnershipCleaner:
         }
 
         shareholders_df = shareholders_df.replace({"type": type_mapping})
+
         shareholders_df["name"] = shareholders_df["name"].str.title()
 
         directors_df = self._process_management_col_to_df(df, "directors")
@@ -377,6 +453,37 @@ class OwnershipCleaner:
             merged_df["position_comm"],
             merged_df["type"],
         )
+
+        # Symbol identification for shareholders 
+        if supabase_client:
+            standardized_map, reverse_map = self._get_ticker_maps(supabase_client) 
+            company_name_choices = list(reverse_map.keys())
+
+            merged_df['ticker'] = None 
+
+            for index, row in merged_df.iterrows():
+                shareholder_name = row['name']
+
+                cleaned_shareholder_key = self._standardize_name_for_matching(shareholder_name)
+                found_ticker = standardized_map.get(cleaned_shareholder_key)
+                print(f"Matching {shareholder_name} with cleaned key {cleaned_shareholder_key} to ticker {found_ticker}")
+
+                if found_ticker:
+                    merged_df.loc[index, 'ticker'] = found_ticker
+
+                if not found_ticker and 'tbk' in shareholder_name.lower():
+                    best_match = process.extractOne(shareholder_name, company_name_choices)
+                    print(f"best match fuzzy: {best_match}")
+                    if best_match and best_match[1] >= 90:
+                        matched_name = best_match[0]
+                        found_ticker = reverse_map[matched_name]
+                        merged_df.loc[index, 'ticker'] = found_ticker
+
+        # Normalize name case and format
+        company_mask = merged_df['name'].str.lower().str.contains('pt', na=False)
+        merged_df.loc[company_mask, 'name'] = merged_df.loc[company_mask, 'name'].apply(normalize_company_case)
+        merged_df.loc[company_mask, 'name'] = merged_df.loc[company_mask, 'name'].apply(normalize_company_format)
+
         merged_df = (
             merged_df.groupby(["symbol", "name_lower", "type"])
             .agg(
@@ -384,13 +491,13 @@ class OwnershipCleaner:
                     "name": "first",
                     "share_amount_new": "sum",
                     "share_percentage_new": "sum",
+                    "ticker": "first"
                 }
             )
             .reset_index()
         )
 
         merged_df = merged_df.drop(columns=["name_lower"])
-
         merged_df = merged_df.rename(
             columns={
                 "share_amount_new": "share_amount",
@@ -401,19 +508,21 @@ class OwnershipCleaner:
 
         return merged_df
 
-    def process_ownership_col(self, df, col_name):
+    def process_ownership_col(self, df: pd.DataFrame, col_name: str, supabase_client=None) -> pd.DataFrame:
         """
         Process the ownership column (directors, commissioners, audit_committees or shareholders) in a dataframe to a json format
+        
         Args:
             df (pd.DataFrame): dataframe to be processed
             col_name (str): column name to be processed
+            supabase_client (Client, optional): Supabase client object for database interactions. Defaults to None.
         Returns:
             pd.DataFrame: processed dataframe containing the ownership column in json format
         """
         if col_name in ["directors", "commissioners", "audit_committees"]:
             temp_df = self._process_management_col_to_df(df, col_name)
         elif col_name == "shareholders":
-            temp_df = self._process_shareholder_col_to_df(df, col_name)
+            temp_df = self._process_shareholder_col_to_df(df, col_name, supabase_client)
 
         temp_df = temp_df.replace(np.nan, None)
         json_df = (
@@ -428,7 +537,9 @@ class OwnershipCleaner:
 
 class IdxProfileUpdater:
     def __init__(self, company_profile_csv_path=None, supabase_client=None, proxy=None):
-        """Class to update idx_company_profile table in supabase database.
+        """
+        Class to update idx_company_profile table in supabase database.
+        
         Args:
             company_profile_csv_path (str, optional): Path to the CSV file containing company profile data.
             supabase_client (Client, optional): Supabase client object for database interactions.
@@ -493,43 +604,6 @@ class IdxProfileUpdater:
 
         return new_symbols
 
-    def _normalize_company_case(self, company_name: str) -> str:
-        needs_cleaning = False
-
-        upper_count = sum(1 for char in company_name if char.isupper())
-        lower_count = sum(1 for char in company_name if char.islower())
-
-        # Check if the string is mostly uppercase
-        if upper_count > lower_count:
-            needs_cleaning = True
-
-        # Check if all words are capitalized
-        words = company_name.split()
-        if not needs_cleaning and not all(word[0].isupper() for word in words if word):
-            needs_cleaning = True
-
-        # Check if last letter of the last word capitalized
-        if not needs_cleaning and words:
-            last_word = words[-1]
-            if last_word and last_word[-1].isalpha() and last_word[-1].isupper():
-                needs_cleaning = True
-
-        if needs_cleaning:
-            cleaned_name = company_name.title()
-            cleaned_name = re.sub(r"\bPt\.?\b", "PT", cleaned_name)
-            return cleaned_name.strip()
-        else:
-            return company_name
-
-    def _normalize_company_format(self, company_name: str) -> str:
-        company_clean = re.sub(r"Tbk\.+", "Tbk", company_name, flags=re.IGNORECASE)
-        company_clean = re.sub(
-            r"\bTbk\b(?=.*\bTbk\b)", "", company_clean, flags=re.IGNORECASE
-        )
-        company_clean = re.sub(r"\s+", " ", company_clean).strip()
-
-        return company_clean.strip()
-
     @limits(calls=2, period=4)
     def _retrieve_idx_profile(self, yf_symbol):
         symbol = (yf_symbol.split(".")[0]).lower()
@@ -578,8 +652,8 @@ class IdxProfileUpdater:
                 raw_value = str(value).strip()
 
                 if renamed_key == "company_name":
-                    clean_company_case = self._normalize_company_case(raw_value)
-                    clean_company = self._normalize_company_format(clean_company_case)
+                    clean_company_case = normalize_company_case(raw_value)
+                    clean_company = normalize_company_format(clean_company_case)
                     profile_dict[renamed_key] = clean_company
                 else:
                     profile_dict[renamed_key] = raw_value
@@ -683,7 +757,7 @@ class IdxProfileUpdater:
 
             for col_name in columns:
                 temp_df = self.ownershipcleaner.process_ownership_col(
-                    profile_df, col_name
+                    profile_df, col_name, self.supabase_client
                 )
                 if merged_updated_df.empty:
                     merged_updated_df = temp_df.copy()
@@ -876,11 +950,23 @@ class IdxProfileUpdater:
             temp_df = temp_df.replace({np.nan: None})
             records = temp_df.to_dict("records")
 
-            for r in records:
-                for k, v in r.items():
+            for record in records:
+                for k, v in record.items():
                     if k in int_cols:
-                        r[k] = cast_int(v)
+                        record[k] = cast_int(v)
 
+                    if 'shareholders' in record and record['shareholders'] is not None: 
+                        final_shareholders = []
+                        for shareholder in record['shareholders']:
+                            if 'ticker' in shareholder:
+                                shareholder['symbol'] = shareholder.pop('ticker')
+                            
+                            if 'symbol' in shareholder and shareholder.get('symbol') is None:
+                                del shareholder['symbol']
+                            
+                            final_shareholders.append(shareholder)
+                
+                record['shareholders'] = final_shareholders
             return records
 
         df = self.updated_rows.copy()
@@ -896,6 +982,8 @@ class IdxProfileUpdater:
             df,
             int_cols=["sub_sector_id", "yf_currency", "wsj_format", "current_source"],
         )
+        print(f"Check records: {records}")
+        
         self.supabase_client.table("idx_company_profile").upsert(
             records, returning="minimal", on_conflict="symbol"
         ).execute()

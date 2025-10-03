@@ -272,11 +272,22 @@ def get_new_shareholders_data(symbol, supabase,
       shareholders_df["share_percentage"] = shareholders_df["share_percentage"].astype('float')
       
       # Fixing share_amount where it's 0 but share_percentage > 0
-      rows_to_fix = shareholders_df[(shareholders_df['share_amount'] == 0) & (shareholders_df['share_percentage'] > 0)]
+      share_amount_need_fix = False 
+      rows_to_fix = shareholders_df[
+         (shareholders_df['share_amount'] == 0) & 
+         (shareholders_df['share_percentage'] > 0)
+      ]
+      
       if not rows_to_fix.empty:
-          reference_rows = shareholders_df[(shareholders_df['share_amount'] > 0) & (shareholders_df['share_percentage'] > 0)]
-          if not reference_rows.empty:
-            reference_row = reference_rows.iloc[0]
+          logging.info(f"Fixing {len(rows_to_fix)} rows for symbol {symbol} where share_amount is 0 but share_percentage > 0")
+          share_amount_need_fix = True
+          valid_reference = shareholders_df[
+             (shareholders_df['share_amount'] > 0) & 
+             (shareholders_df['share_percentage'] > 0)
+          ]
+
+          if not valid_reference.empty:
+            reference_row = valid_reference.loc[valid_reference['share_percentage'].idxmax()]
               
             if reference_row['share_percentage'] > 0:
               share_value = reference_row['share_amount'] / (reference_row['share_percentage'] / 100) 
@@ -284,8 +295,8 @@ def get_new_shareholders_data(symbol, supabase,
               for index, row in rows_to_fix.iterrows():
                 calculated_amount = share_value * (row['share_percentage'] / 100)
                 shareholders_df.loc[index, 'share_amount'] = calculated_amount
-              
-      shareholders_df = shareholders_df[shareholders_df.share_amount > 0]
+      
+      shareholders_df = shareholders_df[(shareholders_df.share_amount > 0) & (shareholders_df.share_percentage > 0)]
       
       df = get_management_data(supabase,f"{symbol}.JK")
       
@@ -367,7 +378,7 @@ def get_new_shareholders_data(symbol, supabase,
         print(f"Failed to get Commissioners data. Returning None: {e}")
         commissioners_df = None
         
-      return shareholders_df, directors_df, commissioners_df
+      return shareholders_df, directors_df, commissioners_df, share_amount_need_fix
 
 
 def get_shareholder_data(symbol_list: list, supabase, 
@@ -375,6 +386,7 @@ def get_shareholder_data(symbol_list: list, supabase,
                          is_failure_handling = False):
   retry = 0 
   i = 0 
+  total_symbols_fixed = 0
   failed_list = []
   data = pd.DataFrame(columns=['symbol', 'shareholders'])
 
@@ -382,9 +394,14 @@ def get_shareholder_data(symbol_list: list, supabase,
     ticker = symbol_list[0]
     try:
       print(f"Trying to get data from {ticker}")
-      shareholders_df, directors_df, commissioners_df = get_new_shareholders_data(ticker, supabase,
+      # This function includes search for directors and commissioners
+      shareholders_df, directors_df, commissioners_df, is_shareamount_fixed = get_new_shareholders_data(ticker, supabase,
                                                                                   ticker_map_standardize, 
-                                                                                  ticker_map_original) # This function includes search for directors and commissioners
+                                                                                  ticker_map_original) 
+      # Check total share amount need to be fixed
+      if is_shareamount_fixed:
+         total_symbols_fixed += 1
+
       # Check for shareholders
       if (shareholders_df is not None):
         shareholders_records = shareholders_df.to_dict(orient='records')
@@ -431,6 +448,8 @@ def get_shareholder_data(symbol_list: list, supabase,
           print("-------------------------------------------------------------------------------")
 
     time.sleep(SLEEP)
+
+  logging.info(f"Total symbols with share_amount fixed: {total_symbols_fixed}")
 
   # Save the data
   if (not is_failure_handling):
@@ -556,7 +575,11 @@ if __name__ == "__main__":
     logging.info(f"Scraping batch {upper_bound} from index {start_idx} to index {end_idx}")
 
     symbol_debug = symbol[start_idx:end_idx]
-    print(f"symbol to check {symbol_debug}")
+    logging.info(
+        f"Symbols to be processed for batch {upper_bound} "
+        f"(total {len(symbol_debug)}) "
+        f"{symbol_debug}"
+    )
 
     get_shareholder_data(symbol_list=symbol[start_idx:end_idx], 
                          supabase=supabase, ticker_map_standardize=standardized_name_map, 

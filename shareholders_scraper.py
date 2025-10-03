@@ -405,10 +405,12 @@ def get_shareholder_data(symbol_list: list, supabase,
       # Check for shareholders
       if (shareholders_df is not None):
         shareholders_records = shareholders_df.to_dict(orient='records')
+        final_shareholders_list = []
         for record in shareholders_records:
-          if 'ticker' in record and pd.isna(record['ticker']):
-                record.pop('ticker')
-        shareholders_records = json.dumps(shareholders_records)
+          if 'symbol' in record and pd.isna(record['symbol']):
+                record.pop('symbol')
+          final_shareholders_list.append(record)
+        shareholders_records = json.dumps(final_shareholders_list)
 
         # Check for directors
         directors_records = directors_df.to_json(orient="records") if directors_df is not None else None

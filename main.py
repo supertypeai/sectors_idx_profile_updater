@@ -305,7 +305,7 @@ class OwnershipCleaner:
 
         def convert_share_percentage(x):
             try:
-                return round(float(x.replace("%", "")) / 100, 4)
+                return round(float(x.replace("%", "")) / 100, 5)
             except Exception as e:
                 print(f"Error: {e}. Value is {x}")
                 return None
@@ -348,24 +348,40 @@ class OwnershipCleaner:
         )
 
         # Fixing share_amount_new where it's 0 but share_percentage_new > 0
-        count_symbols_fixed = 0
+        count_amount_fixed = 0
+        count_percentage_fixed = 0
+
         for symbol in shareholders_df["symbol"].unique():
             symbol_df = shareholders_df[shareholders_df['symbol'] == symbol] 
             
             valid_references = symbol_df[(symbol_df['share_amount_new'] > 0) & (symbol_df['share_percentage_new'] > 0)]
             reference_row = valid_references.loc[valid_references['share_percentage_new'].idxmax()]
-            rows_to_fix = symbol_df[(symbol_df['share_amount_new'] == 0) & (symbol_df['share_percentage_new'] > 0)]
+
+            share_value = reference_row['share_amount_new'] / reference_row['share_percentage_new']
             
-            if not rows_to_fix.empty:
-                count_symbols_fixed += 1
-                share_value = reference_row['share_amount_new'] / reference_row['share_percentage_new']
-                for index, row in rows_to_fix.iterrows():
+            rows_amount_to_fix = symbol_df[
+                (symbol_df['share_amount_new'] == 0) & 
+                (symbol_df['share_percentage_new'] > 0)
+            ]
+            if not rows_amount_to_fix.empty:
+                count_amount_fixed += 1
+                for index, row in rows_amount_to_fix.iterrows():
                     calculated_amount = share_value * row['share_percentage_new']
                     shareholders_df.loc[index, 'share_amount_new'] = calculated_amount
-        
-        if count_symbols_fixed > 0:
-            logging.info(f"Fixed {count_symbols_fixed} total symbols with 0 share_amount but >0 share_percentage")
 
+            rows_percentage_to_fix = symbol_df[
+                (symbol_df['share_percentage_new'] == 0) & 
+                (symbol_df['share_amount_new'] > 0)
+            ]
+            if not rows_percentage_to_fix.empty:
+                count_percentage_fixed += 1
+                for index, row in rows_percentage_to_fix.iterrows():
+                    calculated_percentage = (row['share_amount_new'] / share_value)
+                    shareholders_df.loc[index, 'share_percentage_new'] = calculated_percentage
+        
+        logging.info(f"Fixed {count_amount_fixed} total symbols with 0 share_amount but >0 share_percentage")
+        logging.info(f"Fixed {count_percentage_fixed} total symbols with 0 share_percentage but >0 share_amount")
+        
         shareholders_df.loc[shareholders_df["name"] == "Saham Treasury", "type"] = (
             "Treasury Stock"
         )
@@ -394,10 +410,15 @@ class OwnershipCleaner:
             "": np.nan,
         }
         shareholders_df = shareholders_df.replace({"name": name_mapping})
+        
         shareholders_df = shareholders_df.loc[
             (shareholders_df["share_amount_new"] > 0) & 
             (shareholders_df["share_percentage_new"] > 0)
         ]
+        shareholders_df = shareholders_df.loc[
+            shareholders_df["share_percentage_new"] > 0.00001
+        ]
+
 
         type_mapping = {
             "Direksi": "Director",
@@ -964,6 +985,13 @@ class IdxProfileUpdater:
                             if 'symbol' in shareholder and shareholder.get('symbol') is None:
                                 del shareholder['symbol']
                             
+                            if 'share_percentage' in shareholder and shareholder['share_percentage'] is not None:
+                                share_percentage = shareholder.get('share_percentage')
+                                if share_percentage is not None:
+                                    share_percentage_str = str(share_percentage) 
+                                    if "e" in share_percentage_str or "E" in share_percentage_str:
+                                        shareholder['share_percentage'] = f"{share_percentage:.5f}".rstrip('0')
+
                             final_shareholders.append(shareholder)
                 
                 record['shareholders'] = final_shareholders

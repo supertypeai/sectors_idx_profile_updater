@@ -270,34 +270,54 @@ def get_new_shareholders_data(symbol, supabase,
 
       shareholders_df["share_amount"] = shareholders_df["share_amount"].apply(lambda x: int(float(x)))
       shareholders_df["share_percentage"] = shareholders_df["share_percentage"].astype('float')
-      
-      # Fixing share_amount where it's 0 but share_percentage > 0
-      share_amount_need_fix = False 
-      rows_to_fix = shareholders_df[
-         (shareholders_df['share_amount'] == 0) & 
-         (shareholders_df['share_percentage'] > 0)
-      ]
-      
-      if not rows_to_fix.empty:
-          logging.info(f"Fixing {len(rows_to_fix)} rows for symbol {symbol} where share_amount is 0 but share_percentage > 0")
-          share_amount_need_fix = True
-          valid_reference = shareholders_df[
-             (shareholders_df['share_amount'] > 0) & 
-             (shareholders_df['share_percentage'] > 0)
-          ]
 
-          if not valid_reference.empty:
-            reference_row = valid_reference.loc[valid_reference['share_percentage'].idxmax()]
-              
-            if reference_row['share_percentage'] > 0:
-              share_value = reference_row['share_amount'] / (reference_row['share_percentage'] / 100) 
-                
-              for index, row in rows_to_fix.iterrows():
-                calculated_amount = share_value * (row['share_percentage'] / 100)
-                shareholders_df.loc[index, 'share_amount'] = calculated_amount
+      share_amount_need_fix = False 
+      share_percentage_need_fix = False 
+
+      valid_references = shareholders_df[(shareholders_df['share_amount'] > 0) & (shareholders_df['share_percentage'] > 0)]
+
+      if not valid_references.empty:
+        reference_row = shareholders_df.loc[shareholders_df['share_percentage'].idxmax()]
+        if reference_row['share_percentage'] > 0:
+          total_company_shares = reference_row['share_amount'] / (reference_row['share_percentage'] / 100)
+
+          # Fixing rows with 0 share_amount but have share_percentage > 0
+          rows_to_fix_amount = shareholders_df[
+            (shareholders_df['share_amount'] == 0) & 
+            (shareholders_df['share_percentage'] > 0)
+          ]
+          if not rows_to_fix_amount.empty:
+            logging.info(f"Fixing {len(rows_to_fix_amount)} row(s) with missing share amount for {symbol}")
+
+            share_amount_need_fix = True 
+            for index, row in rows_to_fix_amount.iterrows():
+              calculated_amount = total_company_shares * (row['share_percentage'] / 100)
+              shareholders_df.loc[index, 'share_amount'] = calculated_amount
+
+          # Fixing rows with share_amount > 0 but have 0 share_percentage
+          rows_to_fix_percentage = shareholders_df[
+              (shareholders_df['share_amount'] > 0) & 
+              (shareholders_df['share_percentage'] == 0)
+          ]
+          if not rows_to_fix_percentage.empty: 
+            logging.info(f"Fixing {len(rows_to_fix_percentage)} row(s) with missing share percentage for {symbol}")
+
+            share_percentage_need_fix = True  
+            for index, row in rows_to_fix_percentage.iterrows():
+              calculated_percentage = (row['share_amount'] / total_company_shares) * 100
+              shareholders_df.loc[index, 'share_percentage'] = calculated_percentage
       
-      shareholders_df = shareholders_df[(shareholders_df.share_amount > 0) & (shareholders_df.share_percentage > 0)]
-      
+      # Filter out rows with 0 share_amount and 0 share_percentage
+      shareholders_df = shareholders_df[
+         (shareholders_df.share_amount > 0) & 
+         (shareholders_df.share_percentage > 0)
+      ]
+
+      # Filter out small percentage 10-5
+      shareholders_df = shareholders_df[
+        shareholders_df.share_percentage > 0.001
+      ]
+
       df = get_management_data(supabase,f"{symbol}.JK")
       
       if df.shape[0] != 0 :
@@ -378,7 +398,7 @@ def get_new_shareholders_data(symbol, supabase,
         print(f"Failed to get Commissioners data. Returning None: {e}")
         commissioners_df = None
         
-      return shareholders_df, directors_df, commissioners_df, share_amount_need_fix
+      return shareholders_df, directors_df, commissioners_df, share_amount_need_fix, share_percentage_need_fix
 
 
 def get_shareholder_data(symbol_list: list, supabase, 
@@ -386,7 +406,8 @@ def get_shareholder_data(symbol_list: list, supabase,
                          is_failure_handling = False):
   retry = 0 
   i = 0 
-  total_symbols_fixed = 0
+  total_amount_fixed = 0
+  total_percentage_fixed = 0
   failed_list = []
   data = pd.DataFrame(columns=['symbol', 'shareholders'])
 
@@ -395,12 +416,19 @@ def get_shareholder_data(symbol_list: list, supabase,
     try:
       print(f"Trying to get data from {ticker}")
       # This function includes search for directors and commissioners
-      shareholders_df, directors_df, commissioners_df, is_shareamount_fixed = get_new_shareholders_data(ticker, supabase,
-                                                                                  ticker_map_standardize, 
-                                                                                  ticker_map_original) 
+      shareholders_df, directors_df, commissioners_df, is_shareamount_fixed, is_percentage_fixed = get_new_shareholders_data(
+          ticker,
+          supabase,
+          ticker_map_standardize,
+          ticker_map_original,
+      )
+
       # Check total share amount need to be fixed
       if is_shareamount_fixed:
-         total_symbols_fixed += 1
+         total_amount_fixed += 1
+
+      if is_percentage_fixed:
+         total_percentage_fixed += 1
 
       # Check for shareholders
       if (shareholders_df is not None):
@@ -450,8 +478,9 @@ def get_shareholder_data(symbol_list: list, supabase,
           print("-------------------------------------------------------------------------------")
 
     time.sleep(SLEEP)
-
-  logging.info(f"Total symbols with share_amount fixed: {total_symbols_fixed}")
+  
+  logging.info(f"Total symbols with share_amount fixed: {total_amount_fixed}")
+  logging.info(f"Total symbols with share_percentage fixed: {total_percentage_fixed}")
 
   # Save the data
   if (not is_failure_handling):

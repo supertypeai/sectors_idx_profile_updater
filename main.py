@@ -305,7 +305,7 @@ class OwnershipCleaner:
 
         def convert_share_percentage(x):
             try:
-                return round(float(x.replace("%", "")) / 100, 5)
+                return round(float(x.replace("%", "")) / 100, 8)
             except Exception as e:
                 print(f"Error: {e}. Value is {x}")
                 return None
@@ -990,7 +990,7 @@ class IdxProfileUpdater:
                                 if share_percentage is not None:
                                     share_percentage_str = str(share_percentage) 
                                     if "e" in share_percentage_str or "E" in share_percentage_str:
-                                        shareholder['share_percentage'] = f"{share_percentage:.5f}".rstrip('0')
+                                        shareholder['share_percentage'] = f"{share_percentage:.8f}".rstrip('0')
 
                             final_shareholders.append(shareholder)
                 

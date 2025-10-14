@@ -1,1 +1,74 @@
-[]
+[
+  {
+    "ticker": "CSRA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CTBN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CTRA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CTTH",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CUAN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CYBR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DAAZ",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DADA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DART",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DATA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DAYA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DCII",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DEAL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DEFI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DEPO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DEWA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DEWI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "DFAM",
+    "reason": "Failed after maximum attempts"
+  }
+]

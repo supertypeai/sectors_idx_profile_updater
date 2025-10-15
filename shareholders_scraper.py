@@ -371,7 +371,7 @@ def get_new_shareholders_data(symbol, supabase,
           temp_data['name'] = directors_data[i]['Nama'].title()
           temp_data['position'] = directors_data[i]['Jabatan'].title()
           if ("Vice Presiden" in temp_data['position']):
-            temp_data['position'].replace("Vice Presiden", "Vice President")
+            temp_data['position'] = temp_data['position'].replace("Vice Presiden", "Vice President")
           temp_data['affiliation'] = directors_data[i]['Afiliasi']
           directors_processed_data.append(temp_data)
         directors_df = pd.DataFrame(directors_processed_data)
@@ -388,9 +388,9 @@ def get_new_shareholders_data(symbol, supabase,
           temp_data['name'] = commissioners_data[i]['Nama'].title()
           temp_data['position'] = commissioners_data[i]['Jabatan'].title()
           if ("Vice Presiden" in temp_data['position']):
-            temp_data['position'].replace("Vice Presiden", "Vice President")
+            temp_data['position'] = temp_data['position'].replace("Vice Presiden", "Vice President")
           if ("Commisioner" in temp_data['position']):
-            temp_data['position'].replace("Commisioner", "Commissioner")
+            temp_data['position'] = temp_data['position'].replace("Commisioner", "Commissioner")
           temp_data['independent'] = commissioners_data[i]['Independen']
           commissioners_processed_data.append(temp_data)
         commissioners_df = pd.DataFrame(commissioners_processed_data)

@@ -254,3 +254,6 @@ Update process finished. Performed 0 updates.
 2025-10-30 18:36:02 [INFO] - Successfully updated delisting date for 'MASA.JK' to '2025-10-30'.
 2025-10-30 18:36:02 [INFO] - 
 Update process finished. Performed 1 updates.
+2025-10-31 18:35:46 [INFO] - Init Global Variable
+2025-10-31 18:35:46 [INFO] - Checking for delistings on date: 20251031
+2025-10-31 18:35:49 [INFO] - No delist data to process.

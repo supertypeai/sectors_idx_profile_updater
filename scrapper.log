@@ -860,3 +860,9 @@
 2025-11-01 18:19:32,606 - INFO: Fixed 2 total symbols with 0 share_percentage but >0 share_amount
 2025-11-01 18:19:33,271 - INFO: Upserting ['ESTI.JK' 'JSMR.JK'] rows to idx_company_profile table.
 2025-11-01 18:19:33,590 - INFO: idx_profile_updater finished
+2025-11-04 18:22:14,183 - INFO: Program started
+2025-11-04 18:22:16,931 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-11-04 18:22:31,619 - INFO: Fixed 0 total symbols with 0 share_amount but >0 share_percentage
+2025-11-04 18:22:31,619 - INFO: Fixed 2 total symbols with 0 share_percentage but >0 share_amount
+2025-11-04 18:22:32,941 - INFO: Upserting ['ESTI.JK' 'JSMR.JK'] rows to idx_company_profile table.
+2025-11-04 18:22:33,277 - INFO: idx_profile_updater finished

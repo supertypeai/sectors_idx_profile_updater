@@ -135,10 +135,37 @@ def get_company(supabase_client, table_name: str = 'idx_company_profile') -> lis
     except Exception as error:
         print(f'Erro fetching data from db: {error}') 
 
+def remove_brackets_with_keywords(text):
+    """
+    Remove all brackets (parentheses) that contain specified keywords.
+    Keywords: sebelumnya, dahulu, dh, d/h (case insensitive)
+    
+    Args:
+        text: String to process
+        
+    Returns:
+        String with matching brackets removed
+    """
+    if not text:
+        return text
+    
+    # Pattern to match brackets containing the keywords (case insensitive)
+    # This will match any parentheses containing sebelumnya, dahulu, dh, or d/h
+    pattern = r'\([^)]*(?:sebelumnya|dahulu|\bd/h\b|\bdh\b)[^)]*\)'
+    
+    # Remove the matched brackets and clean up extra spaces
+    result = re.sub(pattern, '', text, flags=re.IGNORECASE)
+    
+    # Clean up multiple spaces and trim
+    result = re.sub(r'\s+', ' ', result).strip()
+    
+    return result
 
 def clean_company_name(company_name: str) -> str:
         needs_cleaning = False
 
+        company_name = remove_brackets_with_keywords(company_name)
+        
         upper_count = sum(1 for char in company_name if char.isupper())
         lower_count = sum(1 for char in company_name if char.islower())
 

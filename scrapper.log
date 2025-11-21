@@ -1136,3 +1136,48 @@
 2025-11-19 18:23:10,117 - INFO: Fixed 2 total symbols with 0 share_percentage but >0 share_amount
 2025-11-19 18:23:11,290 - INFO: Upserting ['ESTI.JK' 'JSMR.JK'] rows to idx_company_profile table.
 2025-11-19 18:23:11,635 - INFO: idx_profile_updater finished
+2025-11-21 01:49:47,775 - INFO: The shareholders data additional scraper program started
+2025-11-21 01:49:51,174 - INFO: The shareholders data scraper program started
+2025-11-21 01:49:51,174 - INFO: Scraping batch 3 from index 478 to index 717
+2025-11-21 01:49:51,174 - INFO: Symbols to be processed for batch 3 (total 239) ['KING', 'KINO', 'KIOS', 'KJEN', 'KKES', 'KKGI', 'KLAS', 'KLBF', 'KLIN', 'KMDS', 'KMTR', 'KOBX', 'KOCI', 'KOIN', 'KOKA', 'KONI', 'KOPI', 'KOTA', 'KPIG', 'KRAS', 'KREN', 'KRYA', 'KSIX', 'KUAS', 'LABA', 'LABS', 'LAJU', 'LAND', 'LAPD', 'LCGP', 'LCKM', 'LEAD', 'LFLO', 'LIFE', 'LINK', 'LION', 'LIVE', 'LMAS', 'LMAX', 'LMPI', 'LMSH', 'LOPI', 'LPCK', 'LPGI', 'LPIN', 'LPKR', 'LPLI', 'LPPF', 'LPPS', 'LRNA', 'LSIP', 'LTLS', 'LUCK', 'LUCY', 'MABA', 'MAGP', 'MAHA', 'MAIN', 'MANG', 'MAPA', 'MAPB', 'MAPI', 'MARI', 'MARK', 'MASB', 'MAXI', 'MAYA', 'MBAP', 'MBMA', 'MBSS', 'MBTO', 'MCAS', 'MCOL', 'MCOR', 'MDIA', 'MDIY', 'MDKA', 'MDKI', 'MDLA', 'MDLN', 'MDRN', 'MEDC', 'MEDS', 'MEGA', 'MEJA', 'MENN', 'MERI', 'MERK', 'META', 'MFMI', 'MGLV', 'MGNA', 'MGRO', 'MHKI', 'MICE', 'MIDI', 'MIKA', 'MINA', 'MINE', 'MIRA', 'MITI', 'MKAP', 'MKNT', 'MKPI', 'MKTR', 'MLBI', 'MLIA', 'MLPL', 'MLPT', 'MMIX', 'MMLP', 'MNCN', 'MOLI', 'MORA', 'MPIX', 'MPMX', 'MPOW', 'MPPA', 'MPRO', 'MPXL', 'MRAT', 'MREI', 'MSIE', 'MSIN', 'MSJA', 'MSKY', 'MSTI', 'MTDL', 'MTEL', 'MTFN', 'MTLA', 'MTMH', 'MTPS', 'MTRA', 'MTSM', 'MTWI', 'MUTU', 'MYOH', 'MYOR', 'MYTX', 'NAIK', 'NANO', 'NASA', 'NASI', 'NATO', 'NAYZ', 'NCKL', 'NELY', 'NEST', 'NETV', 'NFCX', 'NICE', 'NICK', 'NICL', 'NIKL', 'NINE', 'NIRO', 'NISP', 'NOBU', 'NPGF', 'NRCA', 'NSSS', 'NTBK', 'NUSA', 'NZIA', 'OASA', 'OBAT', 'OBMD', 'OCAP', 'OILS', 'OKAS', 'OLIV', 'OMED', 'OMRE', 'OPMS', 'PACK', 'PADA', 'PADI', 'PALM', 'PAMG', 'PANI', 'PANR', 'PANS', 'PART', 'PBID', 'PBRX', 'PBSA', 'PCAR', 'PDES', 'PDPP', 'PEGE', 'PEHA', 'PEVE', 'PGAS', 'PGEO', 'PGJO', 'PGLI', 'PGUN', 'PICO', 'PIPA', 'PJAA', 'PJHB', 'PKPK', 'PLAN', 'PLAS', 'PLIN', 'PMJS', 'PMMP', 'PMUI', 'PNBN', 'PNBS', 'PNGO', 'PNIN', 'PNLF', 'PNSE', 'POLA', 'POLI', 'POLL', 'POLU', 'POLY', 'POOL', 'PORT', 'POSA', 'POWR', 'PPGL', 'PPRE', 'PPRI', 'PPRO', 'PRAY', 'PRDA', 'PRIM', 'PSAB', 'PSAT', 'PSDN', 'PSGO', 'PSKT', 'PSSI', 'PTBA', 'PTDU']
+2025-11-21 01:50:20,777 - INFO: Fixing 11 row(s) with missing share percentage for KKGI
+2025-11-21 01:50:31,321 - INFO: Fixing 2 row(s) with missing share percentage for KLBF
+2025-11-21 01:51:19,778 - INFO: Fixing 1 row(s) with missing share percentage for KOTA
+2025-11-21 01:51:29,334 - INFO: Fixing 1 row(s) with missing share percentage for KRAS
+2025-11-21 01:52:13,456 - INFO: Fixing 1 row(s) with missing share percentage for LCGP
+2025-11-21 01:52:43,364 - INFO: Fixing 1 row(s) with missing share percentage for LMAS
+2025-11-21 01:52:50,542 - INFO: Fixing 1 row(s) with missing share percentage for LMPI
+2025-11-21 01:53:48,397 - INFO: Fixing 1 row(s) with missing share percentage for LUCY
+2025-11-21 01:53:52,275 - INFO: Fixing 2 row(s) with missing share percentage for MABA
+2025-11-21 01:54:15,411 - INFO: Fixing 1 row(s) with missing share percentage for MAPB
+2025-11-21 01:55:25,985 - INFO: Fixing 2 row(s) with missing share percentage for MDIY
+2025-11-21 01:56:23,118 - INFO: Fixing 1 row(s) with missing share percentage for MERI
+2025-11-21 01:56:30,946 - INFO: Fixing 1 row(s) with missing share percentage for META
+2025-11-21 01:57:31,288 - INFO: Fixing 1 row(s) with missing share percentage for MKNT
+2025-11-21 01:58:06,703 - INFO: Fixing 2 row(s) with missing share percentage for MNCN
+2025-11-21 01:58:29,710 - INFO: Fixing 1 row(s) with missing share percentage for MPPA
+2025-11-21 01:58:54,414 - INFO: Fixing 1 row(s) with missing share percentage for MSIN
+2025-11-21 01:59:15,773 - INFO: Fixing 1 row(s) with missing share percentage for MTEL
+2025-11-21 01:59:22,893 - INFO: Fixing 2 row(s) with missing share percentage for MTLA
+2025-11-21 01:59:26,662 - INFO: Fixing 1 row(s) with missing share percentage for MTMH
+2025-11-21 01:59:48,816 - INFO: Fixing 1 row(s) with missing share percentage for MYOH
+2025-11-21 01:59:54,537 - INFO: Fixing 2 row(s) with missing share percentage for MYOR
+2025-11-21 02:00:51,709 - INFO: Fixing 1 row(s) with missing share percentage for NEST
+2025-11-21 02:02:29,144 - INFO: Fixing 2 row(s) with missing share percentage for OCAP
+2025-11-21 02:02:49,672 - INFO: Fixing 1 row(s) with missing share percentage for OMED
+2025-11-21 02:03:54,760 - INFO: Fixing 1 row(s) with missing share percentage for PBSA
+2025-11-21 02:04:04,408 - INFO: Fixing 3 row(s) with missing share percentage for PDES
+2025-11-21 02:04:26,061 - INFO: Fixing 3 row(s) with missing share percentage for PGAS
+2025-11-21 02:04:42,450 - INFO: Fixing 2 row(s) with missing share percentage for PGLI
+2025-11-21 02:05:00,808 - INFO: Fixing 1 row(s) with missing share percentage for PJAA
+2025-11-21 02:06:04,477 - INFO: Fixing 1 row(s) with missing share percentage for PNBS
+2025-11-21 02:06:25,436 - INFO: Fixing 1 row(s) with missing share percentage for POLA
+2025-11-21 02:07:03,291 - INFO: Fixing 1 row(s) with missing share percentage for POWR
+2025-11-21 02:07:19,212 - INFO: Fixing 3 row(s) with missing share percentage for PPRO
+2025-11-21 02:07:22,923 - INFO: Fixing 1 row(s) with missing share percentage for PRAY
+2025-11-21 02:07:26,324 - INFO: Fixing 1 row(s) with missing share percentage for PRDA
+2025-11-21 02:07:57,844 - INFO: Fixing 3 row(s) with missing share percentage for PTBA
+2025-11-21 02:08:02,586 - INFO: Fixing 1 row(s) with missing share percentage for PTDU
+2025-11-21 02:08:04,400 - INFO: Total symbols with share_amount fixed: 0
+2025-11-21 02:08:04,401 - INFO: Total symbols with share_percentage fixed: 38
+2025-11-21 02:09:13,279 - INFO: 2025-11-21 the shareholders data has been scrapped. Execution time: 00:19:22

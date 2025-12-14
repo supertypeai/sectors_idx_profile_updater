@@ -1347,3 +1347,58 @@
 2025-12-13 18:21:02,783 - INFO: Fixed 2 total symbols with 0 share_percentage but >0 share_amount
 2025-12-13 18:21:04,012 - INFO: Upserting ['ESTI.JK' 'JSMR.JK'] rows to idx_company_profile table.
 2025-12-13 18:21:04,366 - INFO: idx_profile_updater finished
+2025-12-14 01:16:46,767 - INFO: The shareholders data additional scraper program started
+2025-12-14 01:16:49,644 - INFO: The shareholders data scraper program started
+2025-12-14 01:16:49,644 - INFO: Scraping batch 2 from index 239 to index 478
+2025-12-14 01:16:49,644 - INFO: Symbols to be processed for batch 2 (total 239) ['CSRA', 'CTBN', 'CTRA', 'CTTH', 'CUAN', 'CYBR', 'DAAZ', 'DADA', 'DART', 'DATA', 'DAYA', 'DCII', 'DEAL', 'DEFI', 'DEPO', 'DEWA', 'DEWI', 'DFAM', 'DGIK', 'DGNS', 'DGWG', 'DIGI', 'DILD', 'DIVA', 'DKFT', 'DKHH', 'DLTA', 'DMAS', 'DMMX', 'DMND', 'DNAR', 'DNET', 'DOID', 'DOOH', 'DOSS', 'DPNS', 'DPUM', 'DRMA', 'DSFI', 'DSNG', 'DSSA', 'DUCK', 'DUTI', 'DVLA', 'DWGL', 'DYAN', 'EAST', 'ECII', 'EDGE', 'EKAD', 'ELIT', 'ELPI', 'ELSA', 'ELTY', 'EMAS', 'EMDE', 'EMTK', 'ENAK', 'ENRG', 'ENVY', 'ENZO', 'EPAC', 'EPMT', 'ERAA', 'ERAL', 'ERTX', 'ESIP', 'ESSA', 'ESTA', 'ESTI', 'ETWA', 'EURO', 'EXCL', 'FAPA', 'FAST', 'FASW', 'FILM', 'FIMP', 'FIRE', 'FISH', 'FITT', 'FLMC', 'FMII', 'FOLK', 'FOOD', 'FORE', 'FORU', 'FPNI', 'FUJI', 'FUTR', 'FWCT', 'GAMA', 'GDST', 'GDYR', 'GEMA', 'GEMS', 'GGRM', 'GGRP', 'GHON', 'GIAA', 'GJTL', 'GLOB', 'GLVA', 'GMFI', 'GMTD', 'GOLD', 'GOLF', 'GOLL', 'GOOD', 'GOTO', 'GPRA', 'GPSO', 'GRIA', 'GRPH', 'GRPM', 'GSMF', 'GTBO', 'GTRA', 'GTSI', 'GULA', 'GUNA', 'GWSA', 'GZCO', 'HADE', 'HAIS', 'HAJJ', 'HALO', 'HATM', 'HBAT', 'HDFA', 'HDIT', 'HEAL', 'HELI', 'HERO', 'HEXA', 'HGII', 'HILL', 'HITS', 'HKMU', 'HMSP', 'HOKI', 'HOME', 'HOMI', 'HOPE', 'HOTL', 'HRME', 'HRTA', 'HRUM', 'HUMI', 'HYGN', 'IATA', 'IBFN', 'IBOS', 'IBST', 'ICBP', 'ICON', 'IDEA', 'IDPR', 'IFII', 'IFSH', 'IGAR', 'IIKP', 'IKAI', 'IKAN', 'IKBI', 'IKPM', 'IMAS', 'IMJS', 'IMPC', 'INAF', 'INAI', 'INCF', 'INCI', 'INCO', 'INDF', 'INDO', 'INDR', 'INDS', 'INDX', 'INDY', 'INET', 'INKP', 'INOV', 'INPC', 'INPP', 'INPS', 'INRU', 'INTA', 'INTD', 'INTP', 'IOTF', 'IPAC', 'IPCC', 'IPCM', 'IPOL', 'IPPE', 'IPTV', 'IRRA', 'IRSX', 'ISAP', 'ISAT', 'ISEA', 'ISSP', 'ITIC', 'ITMA', 'ITMG', 'JARR', 'JAST', 'JATI', 'JAWA', 'JAYA', 'JECC', 'JGLE', 'JIHD', 'JKON', 'JMAS', 'JPFA', 'JRPT', 'JSKY', 'JSMR', 'JSPT', 'JTPE', 'KAEF', 'KAQI', 'KARW', 'KAYU', 'KBAG', 'KBLI', 'KBLM', 'KBLV', 'KBRI', 'KDSI', 'KDTN', 'KEEN', 'KEJU', 'KETR', 'KIAS', 'KICI', 'KIJA']
+2025-12-14 01:17:01,754 - INFO: Fixing 1 row(s) with missing share percentage for CTBN
+2025-12-14 01:17:28,511 - INFO: Fixing 1 row(s) with missing share percentage for CYBR
+2025-12-14 01:17:42,456 - INFO: Fixing 1 row(s) with missing share amount for DADA
+2025-12-14 01:18:53,737 - INFO: Fixing 1 row(s) with missing share percentage for DGIK
+2025-12-14 01:19:07,667 - INFO: Fixing 1 row(s) with missing share percentage for DGWG
+2025-12-14 01:19:14,875 - INFO: Fixing 1 row(s) with missing share percentage for DIGI
+2025-12-14 01:19:35,590 - INFO: Fixing 1 row(s) with missing share percentage for DKFT
+2025-12-14 01:19:42,253 - INFO: Fixing 1 row(s) with missing share percentage for DKHH
+2025-12-14 01:20:02,508 - INFO: Fixing 1 row(s) with missing share percentage for DMMX
+2025-12-14 01:22:10,860 - INFO: Fixing 5 row(s) with missing share percentage for ECII
+2025-12-14 01:22:51,961 - INFO: Fixing 1 row(s) with missing share percentage for ELTY
+2025-12-14 01:24:00,527 - INFO: Fixing 1 row(s) with missing share percentage for ERAA
+2025-12-14 01:24:34,170 - INFO: Fixing 1 row(s) with missing share percentage for ESTA
+2025-12-14 01:24:40,827 - INFO: Fixing 1 row(s) with missing share percentage for ESTI
+2025-12-14 01:25:01,144 - INFO: Fixing 1 row(s) with missing share percentage for EXCL
+2025-12-14 01:26:22,278 - INFO: Fixing 1 row(s) with missing share percentage for FOOD
+2025-12-14 01:27:16,665 - INFO: Fixing 1 row(s) with missing share percentage for GDST
+2025-12-14 01:27:29,921 - INFO: Fixing 4 row(s) with missing share percentage for GEMA
+2025-12-14 01:28:03,943 - INFO: Fixing 4 row(s) with missing share percentage for GIAA
+2025-12-14 01:28:45,072 - INFO: Fixing 1 row(s) with missing share percentage for GOLD
+2025-12-14 01:28:58,964 - INFO: Fixing 1 row(s) with missing share percentage for GOLL
+2025-12-14 01:29:05,812 - INFO: Fixing 2 row(s) with missing share percentage for GOOD
+2025-12-14 01:29:12,603 - INFO: Fixing 2 row(s) with missing share percentage for GOTO
+2025-12-14 01:29:19,259 - INFO: Fixing 1 row(s) with missing share percentage for GPRA
+2025-12-14 01:30:33,407 - INFO: Fixing 1 row(s) with missing share percentage for GWSA
+2025-12-14 01:30:40,341 - INFO: Fixing 1 row(s) with missing share percentage for GZCO
+2025-12-14 01:31:34,077 - INFO: Fixing 1 row(s) with missing share percentage for HDIT
+2025-12-14 01:33:35,163 - INFO: Fixing 1 row(s) with missing share percentage for HUMI
+2025-12-14 01:34:15,587 - INFO: Fixing 1 row(s) with missing share percentage for ICBP
+2025-12-14 01:35:23,225 - INFO: Fixing 1 row(s) with missing share percentage for IKBI
+2025-12-14 01:35:44,532 - INFO: Fixing 1 row(s) with missing share percentage for IMJS
+2025-12-14 01:36:24,554 - INFO: Fixing 2 row(s) with missing share percentage for INCO
+2025-12-14 01:36:31,186 - INFO: Fixing 2 row(s) with missing share percentage for INDF
+2025-12-14 01:36:51,470 - INFO: Fixing 2 row(s) with missing share percentage for INDS
+2025-12-14 01:37:04,572 - INFO: Fixing 1 row(s) with missing share percentage for INDY
+2025-12-14 01:37:31,493 - INFO: Fixing 1 row(s) with missing share percentage for INPC
+2025-12-14 01:38:39,635 - INFO: Fixing 1 row(s) with missing share percentage for IPCM
+2025-12-14 01:39:27,342 - INFO: Fixing 1 row(s) with missing share percentage for ISAT
+2025-12-14 01:40:21,359 - INFO: Fixing 2 row(s) with missing share percentage for JATI
+2025-12-14 01:40:41,529 - INFO: Fixing 1 row(s) with missing share percentage for JECC
+2025-12-14 01:40:54,969 - INFO: Fixing 1 row(s) with missing share percentage for JIHD
+2025-12-14 01:41:01,654 - INFO: Fixing 1 row(s) with missing share percentage for JKON
+2025-12-14 01:41:14,909 - INFO: Fixing 3 row(s) with missing share percentage for JPFA
+2025-12-14 01:41:35,096 - INFO: Fixing 1 row(s) with missing share percentage for JSMR
+2025-12-14 01:41:41,825 - INFO: Fixing 2 row(s) with missing share percentage for JSPT
+2025-12-14 01:41:55,675 - INFO: Fixing 1 row(s) with missing share percentage for KAEF
+2025-12-14 01:42:02,166 - INFO: Fixing 2 row(s) with missing share percentage for KAQI
+2025-12-14 01:42:16,394 - INFO: Fixing 1 row(s) with missing share percentage for KAYU
+2025-12-14 01:43:47,252 - INFO: Total symbols with share_amount fixed: 1
+2025-12-14 01:43:47,252 - INFO: Total symbols with share_percentage fixed: 47
+2025-12-14 01:44:53,260 - INFO: 2025-12-14 the shareholders data has been scrapped. Execution time: 00:28:03

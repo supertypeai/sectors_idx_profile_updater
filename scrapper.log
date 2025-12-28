@@ -1529,3 +1529,9 @@
 2025-12-28 01:16:28,556 - INFO: Total symbols with share_amount fixed: 0
 2025-12-28 01:16:28,556 - INFO: Total symbols with share_percentage fixed: 46
 2025-12-28 01:17:35,842 - INFO: 2025-12-28 the shareholders data has been scrapped. Execution time: 00:17:15
+2025-12-28 18:22:58,258 - INFO: Program started
+2025-12-28 18:23:00,660 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2025-12-28 18:23:13,976 - INFO: Fixed 0 total symbols with 0 share_amount but >0 share_percentage
+2025-12-28 18:23:13,976 - INFO: Fixed 2 total symbols with 0 share_percentage but >0 share_amount
+2025-12-28 18:23:14,898 - INFO: Upserting ['JSMR.JK' 'ESTI.JK'] rows to idx_company_profile table.
+2025-12-28 18:23:15,182 - INFO: idx_profile_updater finished

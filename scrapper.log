@@ -2411,3 +2411,71 @@
 2026-03-28 18:33:19,985 - INFO: Fixed 1 total symbols with 0 share_percentage but >0 share_amount
 2026-03-28 18:33:21,110 - INFO: Upserting ['JSMR.JK' 'ESTI.JK'] rows to idx_company_profile table.
 2026-03-28 18:33:21,885 - INFO: idx_profile_updater finished
+2026-03-30 05:32:26,874 - INFO: The shareholders data additional scraper program started
+2026-03-30 05:32:30,924 - INFO: The shareholders data scraper program started
+2026-03-30 05:32:30,924 - INFO: Scraping batch 1 from index 0 to index 240
+2026-03-30 05:32:30,924 - INFO: Symbols to be processed for batch 1 (total 240) ['AADI', 'AALI', 'ABBA', 'ABDA', 'ABMM', 'ACES', 'ACRO', 'ACST', 'ADCP', 'ADES', 'ADHI', 'ADMF', 'ADMG', 'ADMR', 'ADRO', 'AEGS', 'AGAR', 'AGII', 'AGRO', 'AGRS', 'AHAP', 'AIMS', 'AISA', 'AKKU', 'AKPI', 'AKRA', 'AKSI', 'ALDO', 'ALII', 'ALKA', 'ALMI', 'ALTO', 'AMAG', 'AMAN', 'AMAR', 'AMFG', 'AMIN', 'AMMN', 'AMMS', 'AMOR', 'AMRT', 'ANDI', 'ANJT', 'ANTM', 'APEX', 'APIC', 'APII', 'APLI', 'APLN', 'ARCI', 'AREA', 'ARGO', 'ARII', 'ARKA', 'ARKO', 'ARMY', 'ARNA', 'ARTA', 'ARTI', 'ARTO', 'ASBI', 'ASDM', 'ASGR', 'ASHA', 'ASII', 'ASJT', 'ASLC', 'ASLI', 'ASMI', 'ASPI', 'ASPR', 'ASRI', 'ASRM', 'ASSA', 'ATAP', 'ATIC', 'ATLA', 'AUTO', 'AVIA', 'AWAN', 'AXIO', 'AYAM', 'AYLS', 'BABP', 'BABY', 'BACA', 'BAIK', 'BAJA', 'BALI', 'BANK', 'BAPA', 'BAPI', 'BATA', 'BATR', 'BAUT', 'BAYU', 'BBCA', 'BBHI', 'BBKP', 'BBLD', 'BBMD', 'BBNI', 'BBRI', 'BBRM', 'BBSI', 'BBSS', 'BBTN', 'BBYB', 'BCAP', 'BCIC', 'BCIP', 'BDKR', 'BDMN', 'BEBS', 'BEEF', 'BEER', 'BEKS', 'BELI', 'BELL', 'BESS', 'BEST', 'BFIN', 'BGTG', 'BHAT', 'BHIT', 'BIKA', 'BIKE', 'BIMA', 'BINA', 'BINO', 'BIPI', 'BIPP', 'BIRD', 'BISI', 'BJBR', 'BJTM', 'BKDP', 'BKSL', 'BKSW', 'BLES', 'BLOG', 'BLTA', 'BLTZ', 'BLUE', 'BMAS', 'BMBL', 'BMHS', 'BMRI', 'BMSR', 'BMTR', 'BNBA', 'BNBR', 'BNGA', 'BNII', 'BNLI', 'BOAT', 'BOBA', 'BOGA', 'BOLA', 'BOLT', 'BOSS', 'BPFI', 'BPII', 'BPTR', 'BRAM', 'BREN', 'BRIS', 'BRMS', 'BRNA', 'BRPT', 'BRRC', 'BSBK', 'BSDE', 'BSIM', 'BSML', 'BSSR', 'BSWD', 'BTEK', 'BTEL', 'BTON', 'BTPN', 'BTPS', 'BUAH', 'BUDI', 'BUKA', 'BUKK', 'BULL', 'BUMI', 'BUVA', 'BVIC', 'BWPT', 'BYAN', 'CAKK', 'CAMP', 'CANI', 'CARE', 'CARS', 'CASA', 'CASH', 'CASS', 'CBDK', 'CBMF', 'CBPE', 'CBRE', 'CBUT', 'CCSI', 'CDIA', 'CEKA', 'CENT', 'CFIN', 'CGAS', 'CHEK', 'CHEM', 'CHIP', 'CINT', 'CITA', 'CITY', 'CLAY', 'CLEO', 'CLPI', 'CMNP', 'CMNT', 'CMPP', 'CMRY', 'CNKO', 'CNMA', 'CNTX', 'COAL', 'COCO', 'COIN', 'COWL', 'CPIN', 'CPRI', 'CPRO', 'CRAB', 'CRSN', 'CSAP', 'CSIS', 'CSMI', 'CSRA']
+2026-03-30 05:32:48,417 - INFO: Fixing 4 row(s) with missing share percentage for ABDA
+2026-03-30 05:32:57,703 - INFO: Fixing 3 row(s) with missing share percentage for ACES
+2026-03-30 05:33:24,639 - INFO: Fixing 1 row(s) with missing share percentage for ADHI
+2026-03-30 05:33:38,893 - INFO: Fixing 1 row(s) with missing share percentage for ADMR
+2026-03-30 05:33:42,730 - INFO: Fixing 1 row(s) with missing share percentage for ADRO
+2026-03-30 05:33:59,229 - INFO: Fixing 1 row(s) with missing share percentage for AGRO
+2026-03-30 05:34:03,279 - INFO: Fixing 1 row(s) with missing share percentage for AGRS
+2026-03-30 05:34:42,599 - INFO: Fixing 2 row(s) with missing share percentage for ALII
+2026-03-30 05:34:58,972 - INFO: Fixing 1 row(s) with missing share percentage for AMAG
+2026-03-30 05:36:28,200 - INFO: Fixing 3 row(s) with missing share percentage for ANTM
+2026-03-30 05:37:00,485 - INFO: Fixing 1 row(s) with missing share percentage for ARGO
+2026-03-30 05:37:56,737 - INFO: Fixing 2 row(s) with missing share percentage for ASII
+2026-03-30 05:38:20,295 - INFO: Fixing 1 row(s) with missing share percentage for ASPI
+2026-03-30 05:38:53,166 - INFO: Fixing 1 row(s) with missing share percentage for AUTO
+2026-03-30 05:38:57,247 - INFO: Fixing 3 row(s) with missing share percentage for AVIA
+2026-03-30 05:39:25,373 - INFO: Fixing 2 row(s) with missing share percentage for BACA
+2026-03-30 05:39:43,263 - INFO: Fixing 1 row(s) with missing share percentage for BANK
+2026-03-30 05:40:12,709 - INFO: Fixing 2 row(s) with missing share percentage for BBCA
+2026-03-30 05:40:17,122 - INFO: Fixing 2 row(s) with missing share percentage for BBHI
+2026-03-30 05:40:20,976 - INFO: Fixing 6 row(s) with missing share percentage for BBKP
+2026-03-30 05:40:37,177 - INFO: Fixing 1 row(s) with missing share percentage for BBRI
+2026-03-30 05:40:49,181 - INFO: Fixing 1 row(s) with missing share percentage for BBSS
+2026-03-30 05:40:52,987 - INFO: Fixing 8 row(s) with missing share percentage for BBTN
+2026-03-30 05:41:00,742 - INFO: Fixing 1 row(s) with missing share percentage for BCAP
+2026-03-30 05:41:04,726 - INFO: Fixing 1 row(s) with missing share percentage for BCIC
+2026-03-30 05:41:08,651 - INFO: Fixing 1 row(s) with missing share percentage for BCIP
+2026-03-30 05:41:16,978 - INFO: Fixing 2 row(s) with missing share percentage for BDMN
+2026-03-30 05:41:21,015 - INFO: Fixing 1 row(s) with missing share percentage for BEBS
+2026-03-30 05:41:26,329 - INFO: Fixing 1 row(s) with missing share percentage for BEEF
+2026-03-30 05:41:30,201 - INFO: Fixing 1 row(s) with missing share percentage for BEER
+2026-03-30 05:41:33,884 - INFO: Fixing 2 row(s) with missing share percentage for BEKS
+2026-03-30 05:41:39,101 - INFO: Fixing 1 row(s) with missing share percentage for BELI
+2026-03-30 05:42:06,629 - INFO: Fixing 6 row(s) with missing share percentage for BHIT
+2026-03-30 05:42:32,262 - INFO: Fixing 1 row(s) with missing share percentage for BIPI
+2026-03-30 05:43:01,675 - INFO: Fixing 1 row(s) with missing share percentage for BJTM
+2026-03-30 05:43:31,893 - INFO: Fixing 2 row(s) with missing share percentage for BLTA
+2026-03-30 05:43:38,631 - INFO: Fixing 1 row(s) with missing share percentage for BLTZ
+2026-03-30 05:44:08,753 - INFO: Fixing 2 row(s) with missing share percentage for BMTR
+2026-03-30 05:44:12,820 - INFO: Fixing 3 row(s) with missing share percentage for BNBA
+2026-03-30 05:44:16,946 - INFO: Fixing 2 row(s) with missing share percentage for BNBR
+2026-03-30 05:44:29,069 - INFO: Fixing 2 row(s) with missing share percentage for BNLI
+2026-03-30 05:44:58,908 - INFO: Fixing 1 row(s) with missing share percentage for BOSS
+2026-03-30 05:45:25,956 - INFO: Fixing 8 row(s) with missing share percentage for BRIS
+2026-03-30 05:45:29,802 - INFO: Fixing 2 row(s) with missing share percentage for BRMS
+2026-03-30 05:45:39,043 - INFO: Fixing 5 row(s) with missing share percentage for BRPT
+2026-03-30 05:45:51,120 - INFO: Fixing 1 row(s) with missing share percentage for BSDE
+2026-03-30 05:46:25,934 - INFO: Fixing 1 row(s) with missing share percentage for BTPN
+2026-03-30 05:46:29,712 - INFO: Fixing 2 row(s) with missing share percentage for BTPS
+2026-03-30 05:47:03,971 - INFO: Fixing 1 row(s) with missing share percentage for BVIC
+2026-03-30 05:47:07,741 - INFO: Fixing 1 row(s) with missing share percentage for BWPT
+2026-03-30 05:47:12,463 - INFO: Fixing 1 row(s) with missing share percentage for BYAN
+2026-03-30 05:47:20,269 - INFO: Fixing 2 row(s) with missing share percentage for CAMP
+2026-03-30 05:47:24,132 - INFO: Fixing 1 row(s) with missing share percentage for CANI
+2026-03-30 05:48:16,161 - INFO: Fixing 2 row(s) with missing share percentage for CBUT
+2026-03-30 05:48:34,451 - INFO: Fixing 1 row(s) with missing share percentage for CENT
+2026-03-30 05:48:38,491 - INFO: Fixing 1 row(s) with missing share percentage for CFIN
+2026-03-30 05:48:53,384 - INFO: Fixing 1 row(s) with missing share percentage for CHIP
+2026-03-30 05:49:14,423 - INFO: Fixing 1 row(s) with missing share percentage for CLEO
+2026-03-30 05:49:34,135 - INFO: Fixing 1 row(s) with missing share percentage for CMRY
+2026-03-30 05:49:38,312 - INFO: Fixing 1 row(s) with missing share percentage for CNKO
+2026-03-30 05:50:14,018 - INFO: Fixing 3 row(s) with missing share percentage for CPRO
+2026-03-30 05:50:39,669 - INFO: Total symbols with share_amount fixed: 0
+2026-03-30 05:50:39,669 - INFO: Total symbols with share_percentage fixed: 61
+2026-03-30 05:51:32,850 - INFO: 2026-03-30 the shareholders data has been scrapped. Execution time: 00:19:01

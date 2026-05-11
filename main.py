@@ -11,8 +11,10 @@ from supabase import create_client
 import ssl
 import urllib.request
 import os
-import json
 import time
+import json
+import yfinance as yf
+import translators as ts
 import argparse
 from fuzzywuzzy import fuzz
 import logging
@@ -49,6 +51,7 @@ all_columns = [
     "current_source",
     "updated_on",
     "alias",
+    "subsidiaries",
 ]
 
 sub_sector_id_map = {
@@ -144,18 +147,37 @@ class ProxyRequester:
         """
         # Set up SSL context to unverified
         ssl._create_default_https_context = ssl._create_unverified_context
+        self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 
-        proxy_support = urllib.request.ProxyHandler({"http": proxy, "https": proxy})
-        opener = urllib.request.build_opener(proxy_support)
-        urllib.request.install_opener(opener)
+        if proxy:
+            proxy_support = urllib.request.ProxyHandler({"http": proxy, "https": proxy})
+            opener = urllib.request.build_opener(proxy_support)
+            urllib.request.install_opener(opener)
+        else:
+            # Install an opener without proxy support
+            opener = urllib.request.build_opener()
+            urllib.request.install_opener(opener)
 
     def fetch_url(self, url):
         # Use the installed opener to fetch the URL
         try:
-            with urllib.request.urlopen(url) as response:
-                return response.read().decode()
+            print(f"Fetching: {url}")
+            req = urllib.request.Request(
+                url,
+                headers={
+                    "User-Agent": self.user_agent,
+                    "Referer": "https://www.idx.co.id/en-us/listed-companies/company-profiles",
+                    "Accept": "application/json, text/plain, */*",
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "Connection": "keep-alive",
+                },
+            )
+            with urllib.request.urlopen(req) as response:
+                content = response.read().decode()
+                print(f"Success! Response length: {len(content)}")
+                return content
         except Exception as e:
-            print(f"Error fetching URL: {e}")
+            print(f"Error fetching URL {url}: {e}")
             return False
 
 
@@ -176,13 +198,7 @@ class OwnershipCleaner:
         Args:
             shareholders_df (pd.DataFrame): the dataframe containing the current shareholders data
         """
-        # if not shareholders_df.empty:
-        #     self.current_shareholders_data = self._convert_json_col_to_df(shareholders_df, 'shareholders')[['symbol','name','share_percentage']]
-        #     self.current_shareholders_data['name_lower'] = self.current_shareholders_data['name'].str.lower()
-        #     self.current_shareholders_data = self.current_shareholders_data.drop('name', axis=1)
-        # else:
-        #     columns = ['symbol','name_lower','share_percentage']
-        #     self.current_shareholders_data = pd.DataFrame(columns=columns)
+        self._ticker_maps_cache = None
 
     def _convert_json_col_to_df(self, df, col_name):
         """Converts a json column in a dataframe to a new dataframe
@@ -205,39 +221,49 @@ class OwnershipCleaner:
             pass
 
         temp_df = temp_df.explode(col_name)
+        temp_df = temp_df.dropna(subset=[col_name])
         temp_df = temp_df[col_name].apply(pd.Series, dtype="object")
 
         temp_df = temp_df.reset_index()
         temp_df.columns = temp_df.columns.str.lower()
         temp_df = temp_df.dropna(axis=1, how="all")
         return temp_df
-    
+
     def _standardize_name_for_matching(self, name: str) -> str:
-        if not isinstance(name, str): return ""
+        if not isinstance(name, str):
+            return ""
         name = name.lower()
-        name = re.sub(r'\b(pt|tbk|persero)\b', '', name)
-        name = re.sub(r'[,.]', '', name)
+        name = re.sub(r"\b(pt|tbk|persero|cv)\b", "", name)
+        # Remove all punctuation and symbols
+        name = re.sub(r"[^\w\s]", " ", name)
         words = sorted(name.split())
         return " ".join(words).strip()
 
     def _get_ticker_maps(self, supabase_client) -> dict | dict:
-        company_lists = supabase_client.table('idx_company_profile')\
-                                     .select('symbol, company_name')\
-                                     .execute().data
-        
+        if self._ticker_maps_cache:
+            return self._ticker_maps_cache
+
+        company_lists = (
+            supabase_client.table("idx_company_profile")
+            .select("symbol, company_name")
+            .execute()
+            .data
+        )
+
         standardized_name_map = {}
         reverse_ticker_map = {}
 
         for company in company_lists:
-            company_name = company.get('company_name')
-            company_symbol = company.get('symbol')
+            company_name = company.get("company_name")
+            company_symbol = company.get("symbol")
             if company_name:
                 cleaned_name = self._standardize_name_for_matching(company_name)
                 standardized_name_map[cleaned_name] = company_symbol
                 reverse_ticker_map[company_name] = company_symbol
-        
-        return standardized_name_map, reverse_ticker_map
-    
+
+        self._ticker_maps_cache = (standardized_name_map, reverse_ticker_map)
+        return self._ticker_maps_cache
+
     def _process_management_col_to_df(self, df, col_name):
         """Processes the management column (directors, commissioners, or audit_committees) in the dataframe to a new dataframe
 
@@ -330,10 +356,17 @@ class OwnershipCleaner:
         old_shareholders_df = shareholders_df[
             shareholders_df["share_amount"].notna()
         ].copy()
-        old_shareholders_df = old_shareholders_df.drop(columns=new_cols)
+        old_shareholders_df = old_shareholders_df.drop(
+            columns=new_cols, errors="ignore"
+        )
 
         shareholders_df = shareholders_df.drop(index=old_shareholders_df.index)
-        shareholders_df = shareholders_df.drop(columns=old_cols)
+        shareholders_df = shareholders_df.drop(columns=old_cols, errors="ignore")
+
+        # Ensure columns exist before processing
+        for col in new_cols:
+            if col not in shareholders_df.columns:
+                shareholders_df[col] = "0"
 
         shareholders_df[["share_amount_new", "share_percentage_new"]] = shareholders_df[
             ["share_amount_new", "share_percentage_new"]
@@ -352,36 +385,50 @@ class OwnershipCleaner:
         count_percentage_fixed = 0
 
         for symbol in shareholders_df["symbol"].unique():
-            symbol_df = shareholders_df[shareholders_df['symbol'] == symbol] 
-            
-            valid_references = symbol_df[(symbol_df['share_amount_new'] > 0) & (symbol_df['share_percentage_new'] > 0)]
-            reference_row = valid_references.loc[valid_references['share_percentage_new'].idxmax()]
+            symbol_df = shareholders_df[shareholders_df["symbol"] == symbol]
 
-            share_value = reference_row['share_amount_new'] / reference_row['share_percentage_new']
-            
+            valid_references = symbol_df[
+                (symbol_df["share_amount_new"] > 0)
+                & (symbol_df["share_percentage_new"] > 0)
+            ]
+            reference_row = valid_references.loc[
+                valid_references["share_percentage_new"].idxmax()
+            ]
+
+            share_value = (
+                reference_row["share_amount_new"]
+                / reference_row["share_percentage_new"]
+            )
+
             rows_amount_to_fix = symbol_df[
-                (symbol_df['share_amount_new'] == 0) & 
-                (symbol_df['share_percentage_new'] > 0)
+                (symbol_df["share_amount_new"] == 0)
+                & (symbol_df["share_percentage_new"] > 0)
             ]
             if not rows_amount_to_fix.empty:
                 count_amount_fixed += 1
                 for index, row in rows_amount_to_fix.iterrows():
-                    calculated_amount = share_value * row['share_percentage_new']
-                    shareholders_df.loc[index, 'share_amount_new'] = calculated_amount
+                    calculated_amount = share_value * row["share_percentage_new"]
+                    shareholders_df.loc[index, "share_amount_new"] = calculated_amount
 
             rows_percentage_to_fix = symbol_df[
-                (symbol_df['share_percentage_new'] == 0) & 
-                (symbol_df['share_amount_new'] > 0)
+                (symbol_df["share_percentage_new"] == 0)
+                & (symbol_df["share_amount_new"] > 0)
             ]
             if not rows_percentage_to_fix.empty:
                 count_percentage_fixed += 1
                 for index, row in rows_percentage_to_fix.iterrows():
-                    calculated_percentage = (row['share_amount_new'] / share_value)
-                    shareholders_df.loc[index, 'share_percentage_new'] = calculated_percentage
-        
-        logging.info(f"Fixed {count_amount_fixed} total symbols with 0 share_amount but >0 share_percentage")
-        logging.info(f"Fixed {count_percentage_fixed} total symbols with 0 share_percentage but >0 share_amount")
-        
+                    calculated_percentage = row["share_amount_new"] / share_value
+                    shareholders_df.loc[index, "share_percentage_new"] = (
+                        calculated_percentage
+                    )
+
+        logging.info(
+            f"Fixed {count_amount_fixed} total symbols with 0 share_amount but >0 share_percentage"
+        )
+        logging.info(
+            f"Fixed {count_percentage_fixed} total symbols with 0 share_percentage but >0 share_amount"
+        )
+
         shareholders_df.loc[shareholders_df["name"] == "Saham Treasury", "type"] = (
             "Treasury Stock"
         )
@@ -410,15 +457,14 @@ class OwnershipCleaner:
             "": np.nan,
         }
         shareholders_df = shareholders_df.replace({"name": name_mapping})
-        
+
         shareholders_df = shareholders_df.loc[
-            (shareholders_df["share_amount_new"] > 0) & 
-            (shareholders_df["share_percentage_new"] > 0)
+            (shareholders_df["share_amount_new"] > 0)
+            & (shareholders_df["share_percentage_new"] > 0)
         ]
         shareholders_df = shareholders_df.loc[
             shareholders_df["share_percentage_new"] > 0.00001
         ]
-
 
         type_mapping = {
             "Direksi": "Director",
@@ -475,35 +521,45 @@ class OwnershipCleaner:
             merged_df["type"],
         )
 
-        # Symbol identification for shareholders 
+        # Symbol identification for shareholders
         if supabase_client:
-            standardized_map, reverse_map = self._get_ticker_maps(supabase_client) 
+            standardized_map, reverse_map = self._get_ticker_maps(supabase_client)
             company_name_choices = list(reverse_map.keys())
 
-            merged_df['ticker'] = None 
+            merged_df["ticker"] = None
 
             for index, row in merged_df.iterrows():
-                shareholder_name = row['name']
+                shareholder_name = row["name"]
 
-                cleaned_shareholder_key = self._standardize_name_for_matching(shareholder_name)
+                cleaned_shareholder_key = self._standardize_name_for_matching(
+                    shareholder_name
+                )
                 found_ticker = standardized_map.get(cleaned_shareholder_key)
-                print(f"Matching {shareholder_name} with cleaned key {cleaned_shareholder_key} to ticker {found_ticker}")
+                print(
+                    f"Matching {shareholder_name} with cleaned key {cleaned_shareholder_key} to ticker {found_ticker}"
+                )
 
                 if found_ticker:
-                    merged_df.loc[index, 'ticker'] = found_ticker
+                    merged_df.loc[index, "ticker"] = found_ticker
 
-                if not found_ticker and 'tbk' in shareholder_name.lower():
-                    best_match = process.extractOne(shareholder_name, company_name_choices)
+                if not found_ticker and "tbk" in shareholder_name.lower():
+                    best_match = process.extractOne(
+                        shareholder_name, company_name_choices
+                    )
                     print(f"best match fuzzy: {best_match}")
                     if best_match and best_match[1] >= 90:
                         matched_name = best_match[0]
                         found_ticker = reverse_map[matched_name]
-                        merged_df.loc[index, 'ticker'] = found_ticker
+                        merged_df.loc[index, "ticker"] = found_ticker
 
         # Normalize name case and format
-        company_mask = merged_df['name'].str.lower().str.contains('pt', na=False)
-        merged_df.loc[company_mask, 'name'] = merged_df.loc[company_mask, 'name'].apply(normalize_company_case)
-        merged_df.loc[company_mask, 'name'] = merged_df.loc[company_mask, 'name'].apply(normalize_company_format)
+        company_mask = merged_df["name"].str.lower().str.contains("pt", na=False)
+        merged_df.loc[company_mask, "name"] = merged_df.loc[company_mask, "name"].apply(
+            normalize_company_case
+        )
+        merged_df.loc[company_mask, "name"] = merged_df.loc[company_mask, "name"].apply(
+            normalize_company_format
+        )
 
         merged_df = (
             merged_df.groupby(["symbol", "name_lower", "type"])
@@ -512,7 +568,7 @@ class OwnershipCleaner:
                     "name": "first",
                     "share_amount_new": "sum",
                     "share_percentage_new": "sum",
-                    "ticker": "first"
+                    "ticker": "first",
                 }
             )
             .reset_index()
@@ -529,10 +585,102 @@ class OwnershipCleaner:
 
         return merged_df
 
-    def process_ownership_col(self, df: pd.DataFrame, col_name: str, supabase_client=None) -> pd.DataFrame:
+    def _process_subsidiary_col_to_df(self, df, col_name, supabase_client):
+        """Processes the subsidiary column in the dataframe to a new dataframe
+
+        Args:
+            df (pd.DataFrame): the original dataframe
+            col_name (str): the name of the subsidiary column
+            supabase_client (Client): Supabase client object
+
+        Returns:
+            pd.DataFrame: the processed dataframe
+        """
+        subs_df = self._convert_json_col_to_df(df, col_name)
+        if subs_df is None or subs_df.empty:
+            return subs_df
+
+        subs_df["ticker"] = None
+
+        if supabase_client:
+            standardized_map, reverse_map = self._get_ticker_maps(supabase_client)
+            company_name_choices = list(reverse_map.keys())
+
+            for index, row in subs_df.iterrows():
+                sub_name = row.get("name")
+                if not sub_name or not isinstance(sub_name, str):
+                    continue
+
+                cleaned_sub_key = self._standardize_name_for_matching(sub_name)
+                found_ticker = standardized_map.get(cleaned_sub_key)
+
+                if not found_ticker:
+                    # User requested fuzzy search
+                    best_match = process.extractOne(sub_name, company_name_choices)
+                    if best_match and best_match[1] >= 90:
+                        found_ticker = reverse_map[best_match[0]]
+
+                if found_ticker:
+                    subs_df.loc[index, "ticker"] = found_ticker
+
+                if not found_ticker and "tbk" in sub_name.lower():
+                    best_match = process.extractOne(sub_name, company_name_choices)
+                    if best_match and best_match[1] >= 90:
+                        matched_name = best_match[0]
+                        found_ticker = reverse_map[matched_name]
+                        subs_df.loc[index, "ticker"] = found_ticker
+
+        # Process assets and units for all rows, regardless of supabase_client
+        for index, row in subs_df.iterrows():
+            try:
+                # Handle both '.' and ',' as separators.
+                # In ID format, '.' is thousands and ',' is decimal.
+                # However, IDX sometimes provides values like '8.578' which could be 8578.
+                raw_assets_str = str(row.get("total_assets", "0")).strip()
+
+                # If there's both a dot and a comma, it's likely standard ID format: 1.234,56
+                if "." in raw_assets_str and "," in raw_assets_str:
+                    raw_assets_str = raw_assets_str.replace(".", "").replace(",", ".")
+                # If there's only a dot, and it looks like a thousand separator (e.g. 3 digits after)
+                elif "." in raw_assets_str and len(raw_assets_str.split(".")[-1]) == 3:
+                    raw_assets_str = raw_assets_str.replace(".", "")
+                # If there's only a comma, it's likely a decimal separator
+                elif "," in raw_assets_str:
+                    raw_assets_str = raw_assets_str.replace(",", ".")
+
+                raw_assets = float(raw_assets_str)
+                unit = str(row.get("unit", "")).lower()
+
+                # Unit conversion logic
+                unit_multipliers = {
+                    "thousands": 1000,
+                    "millions": 1000000,
+                    "billions": 1000000000,
+                    "trillions": 1000000000000,
+                    "ribuan": 1000,
+                    "jutaan": 1000000,
+                    "miliaran": 1000000000,
+                    "triliunan": 1000000000000,
+                    "full": 1,
+                }
+                multiplier = unit_multipliers.get(unit, 1)
+                subs_df.loc[index, "total_assets"] = raw_assets * multiplier
+            except Exception as e:
+                # print(f"Error processing assets for {row.get('name')}: {e}")
+                subs_df.loc[index, "total_assets"] = 0
+
+        # Drop unit column as it's been incorporated into total_assets
+        if "unit" in subs_df.columns:
+            subs_df = subs_df.drop(columns=["unit"])
+
+        return subs_df
+
+    def process_ownership_col(
+        self, df: pd.DataFrame, col_name: str, supabase_client=None
+    ) -> pd.DataFrame:
         """
         Process the ownership column (directors, commissioners, audit_committees or shareholders) in a dataframe to a json format
-        
+
         Args:
             df (pd.DataFrame): dataframe to be processed
             col_name (str): column name to be processed
@@ -540,15 +688,30 @@ class OwnershipCleaner:
         Returns:
             pd.DataFrame: processed dataframe containing the ownership column in json format
         """
-        if col_name in ["directors", "commissioners", "audit_committees"]:
-            temp_df = self._process_management_col_to_df(df, col_name)
+        if col_name in [
+            "directors",
+            "commissioners",
+            "audit_committees",
+            "subsidiaries",
+        ]:
+            if col_name == "subsidiaries":
+                temp_df = self._process_subsidiary_col_to_df(
+                    df, col_name, supabase_client
+                )
+            else:
+                temp_df = self._process_management_col_to_df(df, col_name)
         elif col_name == "shareholders":
             temp_df = self._process_shareholder_col_to_df(df, col_name, supabase_client)
 
         temp_df = temp_df.replace(np.nan, None)
         json_df = (
             temp_df.groupby("symbol")
-            .apply(lambda x: x.drop(columns=["symbol"]).to_json(orient="records"))
+            .apply(
+                lambda x: x.rename(
+                    columns={"ticker": "symbol"}, errors="ignore"
+                ).to_json(orient="records"),
+                include_groups=False,
+            )
             .reset_index(name=col_name)
         )
         json_df[col_name] = json_df.apply(lambda x: json.loads(x[col_name]), axis=1)
@@ -560,7 +723,7 @@ class IdxProfileUpdater:
     def __init__(self, company_profile_csv_path=None, supabase_client=None, proxy=None):
         """
         Class to update idx_company_profile table in supabase database.
-        
+
         Args:
             company_profile_csv_path (str, optional): Path to the CSV file containing company profile data.
             supabase_client (Client, optional): Supabase client object for database interactions.
@@ -584,6 +747,10 @@ class IdxProfileUpdater:
             )
             self.supabase_client = supabase_client
             self.current_data = pd.DataFrame(response.data, columns=all_columns)
+            if not self.current_data.empty:
+                self.current_data = self.current_data.drop_duplicates(
+                    subset="symbol", keep="last"
+                )
 
         else:
             self.supabase_client = None
@@ -595,12 +762,14 @@ class IdxProfileUpdater:
         self.ownershipcleaner = OwnershipCleaner()
         self._session = LimiterSession()
         self._requester = ProxyRequester(proxy)
+        self._translation_cache = {}
 
     def _retrieve_active_symbols(self):
         url = "https://www.idx.co.id/primary/StockData/GetSecuritiesStock?start=0&length=9999&code=&sector=&board=&language=en-us"
         response = self._requester.fetch_url(url)
         if response == False:
             raise Exception("Error retrieving active symbols from IDX json.")
+
         data = json.loads(response)["data"]
         active_symbols = {index["Code"] + ".JK": index["Name"] for index in data}
         print(len(active_symbols), "active symbols")
@@ -631,11 +800,19 @@ class IdxProfileUpdater:
         url = f"https://www.idx.co.id/primary/ListedCompany/GetCompanyProfilesDetail?KodeEmiten={symbol}&language=en-us"
         response = self._requester.fetch_url(url)
         if response == False:
-            raise Exception("Error retrieving active symbols from IDX json.")
+            raise Exception(f"Failed to fetch profile for {yf_symbol} from IDX.")
 
         data = json.loads(response)
+
         profile_dict = {"symbol": yf_symbol}
-        profiles = data["Profiles"][0]
+
+        if data.get("Profiles") and len(data["Profiles"]) > 0:
+            profiles = data["Profiles"][0]
+        else:
+            profiles = {}
+            print(
+                f"WARNING: Profile data empty for {yf_symbol}. Using available details."
+            )
 
         key_renaming = {
             "Alamat": "address",
@@ -660,6 +837,37 @@ class IdxProfileUpdater:
             "Jumlah": "share_amount_new",
             "Kategori": "type",
             "Persentase": "share_percentage_new",
+        }
+
+        subsidiaries_renaming = {
+            "Nama": "name",
+            "BidangUsaha": "business_activity",
+            "JumlahAset": "total_assets",
+            "Lokasi": "location",
+            "MataUang": "currency",
+            "Persentase": "percentage",
+            "Satuan": "unit",
+            "StatusOperasi": "operation_status",
+            "TahunKomersil": "commercial_year",
+        }
+
+        status_mapping = {
+            "beroperasi": "Operating",
+            "aktif": "Operating",
+            "ya": "Operating",
+            "sudah beroperasi": "Operating",
+            "belum beroperasi": "Not Yet Operating",
+            "belum belum beroperasi": "Not Yet Operating",
+            "tidak beroperasi": "Non-Operating",
+            "tahap pengembangan": "Development Stage",
+            "pra-operasi": "Pre-Operating",
+        }
+
+        unit_mapping = {
+            "jutaan": "Millions",
+            "ribuan": "Thousands",
+            "satuan": "Units",
+            "penuh": "Full",
         }
 
         truth_dict = {False: "No", True: "Yes"}
@@ -706,7 +914,7 @@ class IdxProfileUpdater:
         audit_committees = _clean_dict(audit_committees)
         profile_dict["audit_committees"] = audit_committees
 
-        shareholders_data = data["PemegangSaham"]
+        shareholders_data = data.get("PemegangSaham", [])
         shareholders = [
             {
                 key: str(value).strip()
@@ -718,25 +926,92 @@ class IdxProfileUpdater:
         shareholders = _clean_dict(shareholders)
         profile_dict["shareholders"] = shareholders
 
+        subsidiaries_raw = data.get("AnakPerusahaan", [])
+        if subsidiaries_raw:
+            print(
+                f"DEBUG: Found {len(subsidiaries_raw)} entries in AnakPerusahaan for {yf_symbol}"
+            )
+        else:
+            print(f"DEBUG: No AnakPerusahaan found for {yf_symbol}")
+
+        subsidiaries = []
+        for sub in subsidiaries_raw:
+            renamed_sub = {}
+            for key, value in sub.items():
+                new_key = subsidiaries_renaming.get(key, key)
+                new_value = value
+
+                if new_key == "operation_status" and isinstance(value, str):
+                    new_value = status_mapping.get(value.lower().strip(), value)
+                elif new_key == "unit" and isinstance(value, str):
+                    new_value = unit_mapping.get(value.lower().strip(), value)
+                elif new_key == "commercial_year":
+                    if value == "0" or value == 0:
+                        new_value = ""
+                elif new_key == "business_activity" and value:
+                    val_str = str(value).strip()
+                    if val_str in self._translation_cache:
+                        new_value = self._translation_cache[val_str]
+                    else:
+                        # Retry logic for translation
+                        max_retries = 3
+                        for attempt in range(max_retries):
+                            try:
+                                # Use translate_text from translators library
+                                new_value = ts.translate_text(
+                                    val_str,
+                                    from_language="id",
+                                    to_language="en",
+                                    translator="google",
+                                )
+                                self._translation_cache[val_str] = new_value
+                                break
+                            except Exception as e:
+                                if attempt < max_retries - 1:
+                                    wait_time = (attempt + 1) * 2  # 2s, 4s
+                                    print(
+                                        f"Translation failed for '{val_str}', retrying in {wait_time}s... ({e})"
+                                    )
+                                    time.sleep(wait_time)
+                                else:
+                                    print(
+                                        f"Translation failed after {max_retries} attempts for '{val_str}': {e}"
+                                    )
+                                    new_value = val_str  # Fallback to original
+
+                if isinstance(new_value, str):
+                    # Clean up all whitespace including \r\n
+                    new_value = " ".join(new_value.split())
+
+                renamed_sub[new_key] = new_value
+            subsidiaries.append(renamed_sub)
+
+        profile_dict["subsidiaries"] = subsidiaries if subsidiaries else None
+
         profile_dict["delisting_date"] = None
         return profile_dict
 
     def update_company_profile_data(
-        self, update_new_symbols_only=True, target_symbols=None
+        self, update_new_symbols_only=True, target_symbols=None, limit=None
     ):
         """Update company profile data.
 
         Args:
             update_new_symbols_only (bool, optional): Whether to update only rows with new symbols or all rows. Defaults to True.
+            limit (int, optional): Limit the number of symbols to update.
         """
 
         def update_profile_for_row(row):
             temp_row = row.copy()
             use_selenium = False
-            profile_dict = self._retrieve_idx_profile(row["symbol"])
-            for key in profile_dict.keys():
-                temp_row[key] = profile_dict[key]
-            print("new data", profile_dict)
+            try:
+                profile_dict = self._retrieve_idx_profile(row["symbol"])
+                for key in profile_dict.keys():
+                    temp_row[key] = profile_dict[key]
+                print("new data", profile_dict)
+            except Exception as e:
+                print(f"Failed to update profile for {row['symbol']}: {e}")
+                return row  # Return original row if update fails
             time.sleep(3)
 
             # replace '-','0','' with None
@@ -788,14 +1063,28 @@ class IdxProfileUpdater:
                     )
             return merged_updated_df
 
+        retrieved_active_company = {}
+        retrieved_active_symbols = []
         try:
             retrieved_active_company = self._retrieve_active_symbols()
             retrieved_active_symbols = [symbol for symbol in retrieved_active_company]
-            print(retrieved_active_symbols)
+            print(f"Retrieved {len(retrieved_active_symbols)} active symbols")
+
+            # SAFEGUARD: Prevent mass delisting if API fails or returns suspiciously low symbols
+            if len(retrieved_active_symbols) < 800:
+                raise Exception(
+                    f"Suspicously low number of active symbols retrieved ({len(retrieved_active_symbols)}). IDX might be blocking us or API changed. Aborting delisting check to prevent data corruption."
+                )
+
         except Exception as e:
-            print(e)
+            print(f"Error fetching active symbols: {e}")
+            return
 
         company_profile_data = self.current_data.copy()
+        # Ensure no duplicates at the start
+        company_profile_data = company_profile_data.drop_duplicates(
+            subset="symbol", keep="last"
+        )
         table_active_symbols = company_profile_data.query("delisting_date.isnull()")[
             "symbol"
         ].unique()
@@ -822,6 +1111,19 @@ class IdxProfileUpdater:
             [company_profile_data, pd.DataFrame({"symbol": updated_new_symbols})],
             ignore_index=True,
         )
+
+        if target_symbols:
+            missing_target_symbols = list(
+                set(target_symbols) - set(company_profile_data["symbol"])
+            )
+            if missing_target_symbols:
+                company_profile_data = pd.concat(
+                    [
+                        company_profile_data,
+                        pd.DataFrame({"symbol": missing_target_symbols}),
+                    ],
+                    ignore_index=True,
+                )
 
         if update_new_symbols_only:
             if not target_symbols:
@@ -852,19 +1154,25 @@ class IdxProfileUpdater:
 
             updated_new_filter = updated_new_filter.union(
                 company_profile_data.query(
-                    "symbol in @updated_company_name_symbols"
+                    "symbol in @updated_company_name_symbols and symbol in @target_symbols"
                 ).index
             )
 
             rows_to_update = company_profile_data.loc[updated_new_filter].copy()
 
         else:
-            if not target_symbols:
-                target_symbols = retrieved_active_symbols
-            active_filter = company_profile_data.query(
-                "symbol in @retrieved_active_symbols and symbol in @target_symbols"
-            ).index
+            if target_symbols:
+                active_filter = company_profile_data.query(
+                    "symbol in @target_symbols"
+                ).index
+            else:
+                active_filter = company_profile_data.query(
+                    "symbol in @retrieved_active_symbols"
+                ).index
             rows_to_update = company_profile_data.loc[active_filter].copy()
+
+        if limit:
+            rows_to_update = rows_to_update.head(limit)
 
         if rows_to_update.empty:
             print("No rows to update.")
@@ -880,31 +1188,50 @@ class IdxProfileUpdater:
             "directors",
             "commissioners",
             "audit_committees",
+            "subsidiaries",
+        ]
+
+        # Columns to drop for DB upsert if cleaning fails (only those that are uncleaned)
+        # but we KEEP subsidiaries for the CSV output
+        cols_to_drop_for_db = [
+            c
+            for c in columns_to_clean
+            if c in rows_to_update.columns and c != "subsidiaries"
         ]
 
         try:
             cleaned_rows = clean_ownership(rows_to_update, columns_to_clean)
-
         except Exception as e:
-            print(
-                f"Failed to clean ownership columns. Dropping uncleaned columns for upsert and saving them to csv instead. Error message: {e}"
-            )
-            rows_to_update[columns_to_clean] = rows_to_update[
-                columns_to_clean
-            ].applymap(json.dumps)
-            rows_to_update[["symbol"] + columns_to_clean].to_csv(
-                "ownership_data_uncleaned.csv", index=False
-            )
-            rows_to_update = rows_to_update.drop(columns=columns_to_clean)
-
+            print(f"Failed to clean ownership columns: {e}")
+            # Map existing json columns to string for the uncleaned CSV if needed
+            # but we keep them as-is for the main saving logic
+            existing_cols = [c for c in columns_to_clean if c in rows_to_update.columns]
+            if existing_cols:
+                # We save a copy with dumped strings for the uncleaned log
+                temp_rows = rows_to_update[["symbol"] + existing_cols].copy()
+                temp_rows[existing_cols] = temp_rows[existing_cols].map(
+                    lambda x: json.dumps(x) if isinstance(x, (list, dict)) else x
+                )
+                temp_rows.to_csv("ownership_data_uncleaned.csv", index=False)
         else:
+            # Successfully cleaned
             rows_to_update.set_index("symbol", inplace=True)
-            rows_to_update.update(cleaned_rows.set_index("symbol"))
+            cleaned_rows_indexed = cleaned_rows.set_index("symbol")
+            rows_to_update.update(cleaned_rows_indexed)
             rows_to_update.reset_index(inplace=True)
 
-        company_profile_data.set_index("symbol", inplace=True)
-        company_profile_data.update(rows_to_update.set_index("symbol"))
-        company_profile_data.reset_index(inplace=True)
+        # Update company_profile_data safely
+        company_profile_data = company_profile_data.set_index("symbol")
+        rows_to_update_indexed = rows_to_update.set_index("symbol")
+        # Ensure object columns are handled correctly to avoid float64 warnings
+        # and make sure new columns like 'subsidiaries' are added if not present
+        for col in rows_to_update_indexed.columns:
+            if col not in company_profile_data.columns:
+                company_profile_data[col] = None
+            company_profile_data[col] = company_profile_data[col].astype(object)
+
+        company_profile_data.update(rows_to_update_indexed)
+        company_profile_data = company_profile_data.reset_index()
 
         self.new_data = company_profile_data
         self.updated_rows = self.new_data.query("symbol in @self.modified_symbols")
@@ -925,6 +1252,7 @@ class IdxProfileUpdater:
             "directors",
             "commissioners",
             "audit_committees",
+            "subsidiaries",
         ]
 
         date_now = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
@@ -932,6 +1260,7 @@ class IdxProfileUpdater:
         if updated_rows_only:
             if self.updated_rows is None:
                 print("No rows are updated. Your data is already up to date.")
+                return
             else:
                 df = self.updated_rows.copy()
                 filename = f"idx_company_profile_updated_rows_{date_now}.csv"
@@ -940,7 +1269,13 @@ class IdxProfileUpdater:
             df = self.new_data.copy()
             filename = f"idx_company_profile_all_rows_{date_now}.csv"
 
-        df[json_cols] = df[json_cols].applymap(json.dumps)
+        # Apply JSON dump to all list/dict columns, ignoring nulls
+        for col in json_cols:
+            if col in df.columns:
+                df[col] = df[col].apply(
+                    lambda x: json.dumps(x) if isinstance(x, (list, dict)) else x
+                )
+
         df.to_csv(filename, index=False)
 
     def upsert_to_db(self, save_current_data=True, supabase_client=None):
@@ -976,42 +1311,70 @@ class IdxProfileUpdater:
                     if k in int_cols:
                         record[k] = cast_int(v)
 
-                    if 'shareholders' in record and record['shareholders'] is not None: 
+                    if "shareholders" in record and record["shareholders"] is not None:
                         final_shareholders = []
-                        for shareholder in record['shareholders']:
-                            if 'ticker' in shareholder:
-                                shareholder['symbol'] = shareholder.pop('ticker')
-                            
-                            if 'symbol' in shareholder and shareholder.get('symbol') is None:
-                                del shareholder['symbol']
-                            
-                            if 'share_percentage' in shareholder and shareholder['share_percentage'] is not None:
-                                share_percentage = shareholder.get('share_percentage')
+                        for shareholder in record["shareholders"]:
+                            if "ticker" in shareholder:
+                                shareholder["symbol"] = shareholder.pop("ticker")
+
+                            if (
+                                "symbol" in shareholder
+                                and shareholder.get("symbol") is None
+                            ):
+                                del shareholder["symbol"]
+
+                            if (
+                                "share_percentage" in shareholder
+                                and shareholder["share_percentage"] is not None
+                            ):
+                                share_percentage = shareholder.get("share_percentage")
                                 if share_percentage is not None:
-                                    share_percentage_str = str(share_percentage) 
-                                    if "e" in share_percentage_str or "E" in share_percentage_str:
-                                        shareholder['share_percentage'] = f"{share_percentage:.8f}".rstrip('0')
+                                    share_percentage_str = str(share_percentage)
+                                    if (
+                                        "e" in share_percentage_str
+                                        or "E" in share_percentage_str
+                                    ):
+                                        shareholder["share_percentage"] = (
+                                            f"{share_percentage:.8f}".rstrip("0")
+                                        )
 
                             final_shareholders.append(shareholder)
-                
-                record['shareholders'] = final_shareholders
+
+                record["shareholders"] = final_shareholders
             return records
 
         df = self.updated_rows.copy()
-        print(df)
+
+        # Print specifically symbol, delisting_date, and subsidiaries for verification
+        print("\n" + "=" * 80)
+        print("PREVIEW: DATA TO BE UPSERTED TO SUPABASE")
+        print("=" * 80)
+        for _, row in df.iterrows():
+            print(f"SYMBOL: {row.get('symbol')}")
+            print(f"DELISTING DATE: {row.get('delisting_date')}")
+            subs = row.get("subsidiaries")
+            print("SUBSIDIARIES:")
+            if isinstance(subs, (list, dict)):
+                print(json.dumps(subs, indent=2))
+            else:
+                print(subs)
+            print("-" * 40)
+        print("=" * 80 + "\n")
         logging.info(
             f"Upserting {df['symbol'].values} rows to idx_company_profile table."
         )
-        df[["yf_currency", "wsj_format", "current_source"]] = df[
-            ["yf_currency", "wsj_format", "current_source"]
-        ].fillna(-1)
-        df["nologo"] = df["nologo"].fillna(True)
+        df[["yf_currency", "wsj_format", "current_source"]] = (
+            df[["yf_currency", "wsj_format", "current_source"]]
+            .fillna(-1)
+            .infer_objects(copy=False)
+        )
+        df["nologo"] = df["nologo"].fillna(True).infer_objects(copy=False)
         records = convert_df_to_records(
             df,
             int_cols=["sub_sector_id", "yf_currency", "wsj_format", "current_source"],
         )
-        print(f"Check records: {records}")
-        
+        # print(f"Check records: {records}")
+
         self.supabase_client.table("idx_company_profile").upsert(
             records, returning="minimal", on_conflict="symbol"
         ).execute()
@@ -1031,11 +1394,25 @@ if __name__ == "__main__":
         type=bool,
         help="Check all symbols if this args enabled, otherwise only check new symbols. This args is set to False by default.",
     )
+    parser.add_argument(
+        "--limit",
+        dest="limit",
+        type=int,
+        default=None,
+        help="Limit the number of symbols to check.",
+    )
+    parser.add_argument(
+        "--symbols",
+        dest="symbols",
+        type=str,
+        default=None,
+        help="Target specific symbols (comma-separated).",
+    )
     args = parser.parse_args()
 
     load_dotenv()
     url, key = os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY")
-    proxy = os.getenv("proxy")
+    proxy = os.getenv("PROXY_URL") or os.getenv("proxy")
     # print(proxy)
     supabase_client = create_client(url, key)
     updater = IdxProfileUpdater(
@@ -1043,14 +1420,26 @@ if __name__ == "__main__":
         supabase_client=supabase_client,
         proxy=proxy,
     )
+    target_symbols = None
+    if args.symbols:
+        target_symbols = [s.strip() for s in args.symbols.split(",")]
+
     if args.all_symbols:
         logging.info("Starting idx_profile_updater with all symbols")
-        updater.update_company_profile_data(update_new_symbols_only=False)
+        updater.update_company_profile_data(
+            update_new_symbols_only=False,
+            limit=args.limit,
+            target_symbols=target_symbols,
+        )
     else:
         logging.info(
             "Starting idx_profile_updater with new symbols and deactivated symbols"
         )
-        updater.update_company_profile_data(update_new_symbols_only=True)
+        updater.update_company_profile_data(
+            update_new_symbols_only=True,
+            limit=args.limit,
+            target_symbols=target_symbols,
+        )
 
     updater.upsert_to_db()
     logging.info("idx_profile_updater finished")

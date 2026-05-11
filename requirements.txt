@@ -10,3 +10,5 @@ selenium==4.23.1
 supabase==2.16.0
 yfinance==0.2.59
 fuzzywuzzy==0.18.0
+python-Levenshtein>=0.23.0
+translators>=5.9.4

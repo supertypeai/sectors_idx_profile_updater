@@ -2939,3 +2939,6 @@
 2026-05-14 03:00:57,432 - INFO: Total symbols with share_amount fixed: 0
 2026-05-14 03:00:57,433 - INFO: Total symbols with share_percentage fixed: 53
 2026-05-14 03:01:57,557 - INFO: 2026-05-14 the shareholders data has been scrapped. Execution time: 00:26:28
+2026-05-16 18:57:29,488 - INFO: Program started
+2026-05-16 18:57:31,869 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2026-05-16 18:57:34,780 - INFO: idx_profile_updater finished

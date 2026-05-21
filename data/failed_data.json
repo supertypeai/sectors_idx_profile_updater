@@ -1,1 +1,962 @@
-[]
+[
+  {
+    "ticker": "KIOS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KJEN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KKES",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KKGI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KLAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KLBF",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KLIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KMDS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KMTR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KOBX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KOCI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KOIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KOKA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KONI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KOPI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KOTA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KPIG",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KRAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KREN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KRYA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KSIX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "KUAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LABA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LABS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LAJU",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LAND",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LAPD",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LCGP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LCKM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LEAD",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LFLO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LIFE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LINK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LION",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LIVE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LMAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LMAX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LMPI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LMSH",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LOPI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPCK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPGI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPKR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPLI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPPF",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LPPS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LRNA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LSIP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LTLS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LUCK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "LUCY",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MABA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MAGP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MAHA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MAIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MANG",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MAPA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MAPB",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MAPI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MARI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MARK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MASB",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MAXI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MAYA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MBAP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MBMA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MBSS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MBTO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MCAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MCOL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MCOR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MDIA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MDIY",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MDKA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MDKI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MDLA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MDLN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MDRN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MEDC",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MEDS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MEGA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MEJA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MENN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MERI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MERK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "META",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MFMI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MGLV",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MGNA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MGRO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MHKI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MICE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MIDI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MIKA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MINA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MINE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MIRA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MITI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MKAP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MKNT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MKPI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MKTR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MLBI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MLIA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MLPL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MLPT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MMIX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MMLP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MNCN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MOLI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MORA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MPIX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MPMX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MPOW",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MPPA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MPRO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MPXL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MRAT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MREI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MSIE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MSIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MSJA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MSKY",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MSTI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTDL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTEL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTFN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTLA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTMH",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTPS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTRA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTSM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MTWI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MUTU",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MYOH",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MYOR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MYTX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NAIK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NANO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NASA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NASI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NATO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NAYZ",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NCKL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NELY",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NEST",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NETV",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NFCX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NICE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NICK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NICL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NIKL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NINE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NIRO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NISP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NOBU",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NPGF",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NRCA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NSSS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NTBK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NUSA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NZIA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "OASA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "OBAT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "OBMD",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "OCAP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "OILS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "OKAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "OLIV",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "OMED",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "OMRE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "OPMS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PACK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PADA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PADI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PALM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PAMG",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PANI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PANR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PANS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PART",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PBID",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PBRX",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PBSA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PCAR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PDES",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PDPP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PEGE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PEHA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PEVE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PGAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PGEO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PGJO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PGLI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PGUN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PICO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PIPA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PJAA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PJHB",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PKPK",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PLAN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PLAS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PLIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PMJS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PMMP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PMUI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PNBN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PNBS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PNGO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PNIN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PNLF",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PNSE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "POLA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "POLI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "POLL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "POLU",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "POLY",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "POOL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PORT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "POSA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "POWR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PPGL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PPRE",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PPRI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PPRO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PRAY",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PRDA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PRIM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PSAB",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PSAT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PSDN",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PSGO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PSKT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PSSI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PTBA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PTDU",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PTIS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PTMP",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PTMR",
+    "reason": "Failed after maximum attempts"
+  }
+]

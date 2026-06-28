@@ -3293,3 +3293,58 @@
 2026-06-25 19:51:21,492 - INFO: Program started
 2026-06-25 19:51:23,935 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2026-06-25 19:51:29,097 - INFO: idx_profile_updater finished
+2026-06-28 02:13:49,759 - INFO: The shareholders data additional scraper program started
+2026-06-28 02:13:55,286 - INFO: Total symbols with share_amount fixed: 0
+2026-06-28 02:13:55,287 - INFO: Total symbols with share_percentage fixed: 0
+2026-06-28 02:13:55,557 - INFO: 2026-06-28 the additional shareholders data has been scrapped.
+2026-06-28 02:13:57,696 - INFO: The shareholders data scraper program started
+2026-06-28 02:13:57,696 - INFO: Scraping batch 4 from index 720 to index 957
+2026-06-28 02:13:57,696 - INFO: Symbols to be processed for batch 4 (total 237) ['PTPP', 'PTPS', 'PTPW', 'PTRO', 'PTSN', 'PTSP', 'PUDP', 'PURA', 'PURE', 'PURI', 'PWON', 'PYFA', 'PZZA', 'RAAM', 'RAFI', 'RAJA', 'RALS', 'RANC', 'RATU', 'RBMS', 'RCCC', 'RDTX', 'REAL', 'RELF', 'RELI', 'RGAS', 'RICY', 'RIGS', 'RIMO', 'RISE', 'RLCO', 'RMKE', 'RMKO', 'ROCK', 'RODA', 'RONY', 'ROTI', 'RSCH', 'RSGK', 'RUIS', 'RUNS', 'SAFE', 'SAGE', 'SAME', 'SAMF', 'SAPX', 'SATU', 'SBAT', 'SBMA', 'SCCO', 'SCMA', 'SCNP', 'SCPI', 'SDMU', 'SDPC', 'SDRA', 'SEMA', 'SFAN', 'SGER', 'SGRO', 'SHID', 'SHIP', 'SICO', 'SIDO', 'SILO', 'SIMA', 'SIMP', 'SINI', 'SIPD', 'SKBM', 'SKLT', 'SKRN', 'SKYB', 'SLIS', 'SMAR', 'SMBR', 'SMCB', 'SMDM', 'SMDR', 'SMGA', 'SMGR', 'SMIL', 'SMKL', 'SMKM', 'SMLE', 'SMMA', 'SMMT', 'SMRA', 'SMRU', 'SMSM', 'SNLK', 'SOCI', 'SOFA', 'SOHO', 'SOLA', 'SONA', 'SOSS', 'SOTS', 'SOUL', 'SPMA', 'SPRE', 'SPTO', 'SQMI', 'SRAJ', 'SRIL', 'SRSN', 'SRTG', 'SSIA', 'SSMS', 'SSTM', 'STAA', 'STAR', 'STRK', 'STTP', 'SUGI', 'SULI', 'SUNI', 'SUPA', 'SUPR', 'SURE', 'SURI', 'SWAT', 'SWID', 'TALF', 'TAMA', 'TAMU', 'TAPG', 'TARA', 'TAXI', 'TAYS', 'TBIG', 'TBLA', 'TBMS', 'TCID', 'TCPI', 'TDPM', 'TEBE', 'TECH', 'TELE', 'TFAS', 'TFCO', 'TGKA', 'TGRA', 'TGUK', 'TIFA', 'TINS', 'TIRA', 'TIRT', 'TKIM', 'TLDN', 'TLKM', 'TMAS', 'TMPO', 'TNCA', 'TOBA', 'TOOL', 'TOPS', 'TOSK', 'TOTL', 'TOTO', 'TOWR', 'TOYS', 'TPIA', 'TPMA', 'TRAM', 'TRGU', 'TRIL', 'TRIM', 'TRIN', 'TRIO', 'TRIS', 'TRJA', 'TRON', 'TRST', 'TRUE', 'TRUK', 'TRUS', 'TSPC', 'TUGU', 'TYRE', 'UANG', 'UCID', 'UDNG', 'UFOE', 'ULTJ', 'UNIC', 'UNIQ', 'UNIT', 'UNSP', 'UNTD', 'UNTR', 'UNVR', 'URBN', 'UVCR', 'VAST', 'VERN', 'VICI', 'VICO', 'VINS', 'VISI', 'VIVA', 'VKTR', 'VOKS', 'VRNA', 'VTNY', 'WAPO', 'WBSA', 'WEGE', 'WEHA', 'WGSH', 'WICO', 'WIDI', 'WIFI', 'WIIM', 'WIKA', 'WINE', 'WINR', 'WINS', 'WIRG', 'WMPP', 'WMUU', 'WOMF', 'WOOD', 'WOWS', 'WSBP', 'WSKT', 'WTON', 'YELO', 'YOII', 'YPAS', 'YULE', 'YUPI', 'ZATA', 'ZBRA', 'ZINC', 'ZONE', 'ZYRX']
+2026-06-28 02:14:00,188 - INFO: Fixing 2 row(s) with missing share percentage for PTPP
+2026-06-28 02:14:40,588 - INFO: Fixing 1 row(s) with missing share percentage for PURE
+2026-06-28 02:14:55,319 - INFO: Fixing 1 row(s) with missing share percentage for PWON
+2026-06-28 02:15:29,212 - INFO: Fixing 2 row(s) with missing share percentage for RATU
+2026-06-28 02:15:54,960 - INFO: Fixing 1 row(s) with missing share percentage for RELI
+2026-06-28 02:16:15,340 - INFO: Fixing 1 row(s) with missing share percentage for RISE
+2026-06-28 02:16:26,140 - INFO: Fixing 1 row(s) with missing share percentage for RMKO
+2026-06-28 02:16:37,926 - INFO: Fixing 1 row(s) with missing share percentage for RONY
+2026-06-28 02:17:13,728 - INFO: Fixing 6 row(s) with missing share percentage for SAME
+2026-06-28 02:17:35,038 - INFO: Fixing 2 row(s) with missing share percentage for SCCO
+2026-06-28 02:17:38,429 - INFO: Fixing 1 row(s) with missing share percentage for SCMA
+2026-06-28 02:17:45,145 - INFO: Fixing 1 row(s) with missing share amount for SCPI
+2026-06-28 02:17:48,663 - INFO: Fixing 1 row(s) with missing share percentage for SDMU
+2026-06-28 02:17:56,416 - INFO: Fixing 1 row(s) with missing share percentage for SDRA
+2026-06-28 02:18:04,384 - INFO: Fixing 1 row(s) with missing share percentage for SFAN
+2026-06-28 02:18:26,304 - INFO: Fixing 2 row(s) with missing share percentage for SIDO
+2026-06-28 02:18:29,951 - INFO: Fixing 1 row(s) with missing share percentage for SILO
+2026-06-28 02:18:36,740 - INFO: Fixing 2 row(s) with missing share percentage for SIMP
+2026-06-28 02:18:47,383 - INFO: Fixing 2 row(s) with missing share percentage for SKBM
+2026-06-28 02:18:50,618 - INFO: Fixing 1 row(s) with missing share percentage for SKLT
+2026-06-28 02:19:12,594 - INFO: Fixing 2 row(s) with missing share percentage for SMBR
+2026-06-28 02:19:16,915 - INFO: Fixing 1 row(s) with missing share percentage for SMCB
+2026-06-28 02:19:24,196 - INFO: Fixing 1 row(s) with missing share percentage for SMDR
+2026-06-28 02:20:18,651 - INFO: Fixing 1 row(s) with missing share percentage for SMRU
+2026-06-28 02:21:13,900 - INFO: Fixing 1 row(s) with missing share percentage for SQMI
+2026-06-28 02:21:24,728 - INFO: Fixing 1 row(s) with missing share percentage for SRSN
+2026-06-28 02:21:43,527 - INFO: Fixing 1 row(s) with missing share percentage for STAA
+2026-06-28 02:22:05,532 - INFO: Fixing 2 row(s) with missing share percentage for SULI
+2026-06-28 02:22:22,907 - INFO: Fixing 1 row(s) with missing share percentage for SURI
+2026-06-28 02:22:34,981 - INFO: Fixing 1 row(s) with missing share percentage for TALF
+2026-06-28 02:22:38,707 - INFO: Fixing 1 row(s) with missing share percentage for TAMA
+2026-06-28 02:22:42,491 - INFO: Fixing 1 row(s) with missing share percentage for TAMU
+2026-06-28 02:24:19,561 - INFO: Fixing 1 row(s) with missing share percentage for TLKM
+2026-06-28 02:25:23,776 - INFO: Fixing 7 row(s) with missing share percentage for TPIA
+2026-06-28 02:25:32,527 - INFO: Fixing 1 row(s) with missing share percentage for TRAM
+2026-06-28 02:25:49,597 - INFO: Fixing 2 row(s) with missing share percentage for TRIN
+2026-06-28 02:27:13,424 - INFO: Fixing 2 row(s) with missing share percentage for UNTR
+2026-06-28 02:27:22,468 - INFO: Fixing 1 row(s) with missing share percentage for URBN
+2026-06-28 02:27:56,209 - INFO: Fixing 1 row(s) with missing share percentage for VKTR
+2026-06-28 02:28:22,283 - INFO: Fixing 1 row(s) with missing share percentage for WEHA
+2026-06-28 02:28:38,195 - INFO: Fixing 1 row(s) with missing share percentage for WIFI
+2026-06-28 02:28:46,462 - INFO: Fixing 1 row(s) with missing share percentage for WIKA
+2026-06-28 02:29:31,103 - INFO: Fixing 1 row(s) with missing share percentage for WSBP
+2026-06-28 02:29:36,604 - INFO: Fixing 2 row(s) with missing share percentage for WSKT
+2026-06-28 02:30:17,165 - INFO: Fixing 1 row(s) with missing share percentage for ZATA
+2026-06-28 02:30:33,603 - INFO: Total symbols with share_amount fixed: 1
+2026-06-28 02:30:33,603 - INFO: Total symbols with share_percentage fixed: 44
+2026-06-28 02:31:40,606 - INFO: 2026-06-28 the shareholders data has been scrapped. Execution time: 00:17:42

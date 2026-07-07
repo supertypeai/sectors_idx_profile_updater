@@ -3426,3 +3426,9 @@
 2026-07-07 02:54:20,720 - INFO: Total symbols with share_amount fixed: 0
 2026-07-07 02:54:20,720 - INFO: Total symbols with share_percentage fixed: 62
 2026-07-07 02:55:14,181 - INFO: 2026-07-07 the shareholders data has been scrapped. Execution time: 00:18:06
+2026-07-07 19:47:22,983 - INFO: Program started
+2026-07-07 19:47:25,140 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2026-07-07 19:47:47,867 - INFO: Fixed 0 total symbols with 0 share_amount but >0 share_percentage
+2026-07-07 19:47:47,867 - INFO: Fixed 0 total symbols with 0 share_percentage but >0 share_amount
+2026-07-07 19:47:49,238 - INFO: Upserting ['JELI.JK' 'JECX.JK'] rows to idx_company_profile table.
+2026-07-07 19:47:49,498 - INFO: idx_profile_updater finished

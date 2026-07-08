@@ -3432,3 +3432,9 @@
 2026-07-07 19:47:47,867 - INFO: Fixed 0 total symbols with 0 share_percentage but >0 share_amount
 2026-07-07 19:47:49,238 - INFO: Upserting ['JELI.JK' 'JECX.JK'] rows to idx_company_profile table.
 2026-07-07 19:47:49,498 - INFO: idx_profile_updater finished
+2026-07-08 09:10:44,334 - INFO: Program started
+2026-07-08 09:10:46,411 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2026-07-08 09:11:09,337 - INFO: Fixed 0 total symbols with 0 share_amount but >0 share_percentage
+2026-07-08 09:11:09,337 - INFO: Fixed 0 total symbols with 0 share_percentage but >0 share_amount
+2026-07-08 09:11:10,450 - INFO: Upserting ['EMMI.JK' 'BACH.JK'] rows to idx_company_profile table.
+2026-07-08 09:11:10,753 - INFO: idx_profile_updater finished

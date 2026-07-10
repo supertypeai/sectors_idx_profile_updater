@@ -3444,3 +3444,6 @@
 2026-07-10 09:02:56,642 - INFO: Fixed 0 total symbols with 0 share_percentage but >0 share_amount
 2026-07-10 09:02:57,885 - INFO: Upserting ['RANS.JK' 'PRDL.JK'] rows to idx_company_profile table.
 2026-07-10 09:02:58,527 - INFO: idx_profile_updater finished
+2026-07-10 19:20:38,157 - INFO: Program started
+2026-07-10 19:20:40,258 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2026-07-10 19:20:46,300 - INFO: idx_profile_updater finished

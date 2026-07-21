@@ -1,1 +1,6 @@
-[]
+[
+  {
+    "ticker": "MNCN",
+    "reason": "Failed after maximum attempts"
+  }
+]

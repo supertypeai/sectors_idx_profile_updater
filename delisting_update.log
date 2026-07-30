@@ -831,3 +831,9 @@ Update process finished. Performed 0 updates.
 2026-07-29 19:24:42 [INFO] - Init Global Variable
 2026-07-29 19:24:42 [INFO] - Checking for delistings on date: 20260729
 2026-07-29 19:24:45 [INFO] - No delist data to process.
+2026-07-30 19:40:53 [INFO] - Init Global Variable
+2026-07-30 19:40:53 [INFO] - Checking for delistings on date: 20260730
+2026-07-30 19:40:55 [INFO] - Found company 'CNTX.JK' with no delisting date. Preparing to update
+2026-07-30 19:40:56 [INFO] - Successfully updated delisting date for 'CNTX.JK' to '2026-07-30'.
+2026-07-30 19:40:56 [INFO] - 
+Update process finished. Performed 1 updates.

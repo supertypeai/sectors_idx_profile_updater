@@ -3659,3 +3659,6 @@
 2026-08-01 19:00:38,086 - INFO: Program started
 2026-08-01 19:00:40,473 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2026-08-01 19:00:47,099 - INFO: idx_profile_updater finished
+2026-08-04 19:23:09,637 - INFO: Program started
+2026-08-04 19:23:11,823 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2026-08-04 19:23:15,219 - INFO: idx_profile_updater finished

@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "ticker": "BMSR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CSMI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CSRA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CTBN",
+    "reason": "Failed after maximum attempts"
+  }
+]

@@ -1,10 +1,14 @@
 [
   {
-    "ticker": "IGAR",
+    "ticker": "MINE",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "ISAT",
+    "ticker": "OMED",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PSGO",
     "reason": "Failed after maximum attempts"
   }
 ]

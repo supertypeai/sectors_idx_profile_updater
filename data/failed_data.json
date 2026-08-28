@@ -1,14 +1,1 @@
-[
-  {
-    "ticker": "MINE",
-    "reason": "Failed after maximum attempts"
-  },
-  {
-    "ticker": "OMED",
-    "reason": "Failed after maximum attempts"
-  },
-  {
-    "ticker": "PSGO",
-    "reason": "Failed after maximum attempts"
-  }
-]
+[]

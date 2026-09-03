@@ -276,6 +276,12 @@ class OwnershipCleaner:
         """
         temp_df = self._convert_json_col_to_df(df, col_name)
         temp_df = temp_df.dropna(subset=["name", "position"])
+
+        # IDX sometimes returns placeholder rows (e.g. {"name": "-"}). Drop them so
+        # they never reach the DB.
+        clean_names = temp_df["name"].astype(str).str.strip()
+        temp_df = temp_df[~clean_names.str.fullmatch(r"-*")]
+
         temp_df["position"] = temp_df["position"].str.title()
         temp_df["name"] = temp_df["name"].str.title()
 

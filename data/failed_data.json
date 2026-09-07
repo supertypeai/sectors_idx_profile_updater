@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "ticker": "ABMM",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BINA",
+    "reason": "Failed after maximum attempts"
+  }
+]

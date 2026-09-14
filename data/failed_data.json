@@ -1,10 +1,6 @@
 [
   {
-    "ticker": "ABMM",
-    "reason": "Failed after maximum attempts"
-  },
-  {
-    "ticker": "BINA",
+    "ticker": "HKMU",
     "reason": "Failed after maximum attempts"
   }
 ]

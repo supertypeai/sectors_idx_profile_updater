@@ -4045,3 +4045,70 @@
 2026-09-13 20:10:02,165 - INFO: Program started
 2026-09-13 20:10:04,485 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2026-09-13 20:10:20,741 - INFO: idx_profile_updater finished
+2026-09-14 02:50:28,297 - INFO: The shareholders data additional scraper program started
+2026-09-14 02:50:41,586 - INFO: Total symbols with share_amount fixed: 0
+2026-09-14 02:50:41,586 - INFO: Total symbols with share_percentage fixed: 0
+2026-09-14 02:50:43,176 - INFO: 2026-09-14 the additional shareholders data has been scrapped.
+2026-09-14 02:50:45,683 - INFO: The shareholders data scraper program started
+2026-09-14 02:50:45,683 - INFO: Scraping batch 2 from index 241 to index 482
+2026-09-14 02:50:45,683 - INFO: Symbols to be processed for batch 2 (total 241) ['CTRA', 'CTTH', 'CUAN', 'CYBR', 'DAAZ', 'DADA', 'DART', 'DATA', 'DAYA', 'DCII', 'DEAL', 'DEFI', 'DEPO', 'DEWA', 'DEWI', 'DFAM', 'DGIK', 'DGNS', 'DGWG', 'DIGI', 'DILD', 'DIVA', 'DKFT', 'DKHH', 'DLTA', 'DMAS', 'DMMX', 'DMND', 'DNAR', 'DNET', 'DOID', 'DOOH', 'DOSS', 'DPNS', 'DPUM', 'DRMA', 'DSFI', 'DSNG', 'DSSA', 'DUCK', 'DUTI', 'DVLA', 'DWGL', 'DYAN', 'EAST', 'ECII', 'EDGE', 'EKAD', 'ELIT', 'ELPI', 'ELSA', 'ELTY', 'EMAS', 'EMDE', 'EMMI', 'EMTK', 'ENAK', 'ENRG', 'ENVY', 'ENZO', 'EPAC', 'EPMT', 'ERAA', 'ERAL', 'ERTX', 'ESIP', 'ESSA', 'ESTA', 'ESTI', 'ETWA', 'EURO', 'EXCL', 'FAPA', 'FAST', 'FASW', 'FILM', 'FIMP', 'FIRE', 'FISH', 'FITT', 'FLMC', 'FMII', 'FOLK', 'FOOD', 'FORE', 'FORU', 'FPNI', 'FUJI', 'FUTR', 'FWCT', 'GAMA', 'GDST', 'GDYR', 'GEMA', 'GEMS', 'GGRM', 'GGRP', 'GHON', 'GIAA', 'GJTL', 'GLOB', 'GLVA', 'GMFI', 'GMTD', 'GOLD', 'GOLF', 'GOLL', 'GOOD', 'GOTO', 'GPRA', 'GPSO', 'GRIA', 'GRPH', 'GRPM', 'GSMF', 'GTBO', 'GTRA', 'GTSI', 'GULA', 'GUNA', 'GWSA', 'GZCO', 'HADE', 'HAIS', 'HAJJ', 'HALO', 'HATM', 'HBAT', 'HDFA', 'HDIT', 'HEAL', 'HELI', 'HERO', 'HEXA', 'HGII', 'HILL', 'HITS', 'HKMU', 'HMSP', 'HOKI', 'HOME', 'HOMI', 'HOPE', 'HOTL', 'HRME', 'HRTA', 'HRUM', 'HUMI', 'HYGN', 'IATA', 'IBFN', 'IBOS', 'IBST', 'ICBP', 'ICON', 'IDEA', 'IDPR', 'IFII', 'IFSH', 'IGAR', 'IIKP', 'IKAI', 'IKAN', 'IKBI', 'IKPM', 'IMAS', 'IMJS', 'IMPC', 'INAF', 'INAI', 'INCF', 'INCI', 'INCO', 'INDF', 'INDO', 'INDR', 'INDS', 'INDX', 'INDY', 'INET', 'INKP', 'INOV', 'INPC', 'INPP', 'INPS', 'INRU', 'INTA', 'INTD', 'INTP', 'IOTF', 'IPAC', 'IPCC', 'IPCM', 'IPOL', 'IPPE', 'IPTV', 'IRRA', 'IRSX', 'ISAP', 'ISAT', 'ISEA', 'ISSP', 'ITIC', 'ITMA', 'ITMG', 'JARR', 'JAST', 'JATI', 'JAWA', 'JAYA', 'JECC', 'JECX', 'JELI', 'JGLE', 'JIHD', 'JKON', 'JMAS', 'JPFA', 'JRPT', 'JSKY', 'JSMR', 'JSPT', 'JTPE', 'KAEF', 'KAQI', 'KARW', 'KAYU', 'KBAG', 'KBLI', 'KBLM', 'KBLV', 'KBRI', 'KDSI', 'KDTN', 'KEEN', 'KEJU', 'KETR', 'KIAS', 'KICI', 'KIJA', 'KING']
+2026-09-14 02:51:54,060 - INFO: Fixing 2 row(s) with missing share percentage for CYBR
+2026-09-14 02:52:05,940 - INFO: Fixing 1 row(s) with missing share percentage for DAAZ
+2026-09-14 02:53:49,439 - INFO: Fixing 1 row(s) with missing share percentage for DEWA
+2026-09-14 02:54:35,455 - INFO: Fixing 1 row(s) with missing share percentage for DGWG
+2026-09-14 02:54:48,459 - INFO: Fixing 1 row(s) with missing share percentage for DIGI
+2026-09-14 02:55:13,395 - INFO: Fixing 1 row(s) with missing share percentage for DKFT
+2026-09-14 02:55:21,329 - INFO: Fixing 1 row(s) with missing share percentage for DKHH
+2026-09-14 02:55:42,175 - INFO: Fixing 1 row(s) with missing share percentage for DMMX
+2026-09-14 02:58:57,863 - INFO: Fixing 6 row(s) with missing share percentage for ECII
+2026-09-14 03:02:28,424 - INFO: Fixing 1 row(s) with missing share percentage for ERAA
+2026-09-14 03:03:42,252 - INFO: Fixing 1 row(s) with missing share percentage for ESTI
+2026-09-14 03:04:54,875 - INFO: Fixing 1 row(s) with missing share percentage for FILM
+2026-09-14 03:05:08,737 - INFO: Fixing 1 row(s) with missing share percentage for FIRE
+2026-09-14 03:05:17,126 - INFO: Fixing 1 row(s) with missing share percentage for FISH
+2026-09-14 03:07:08,508 - INFO: Fixing 1 row(s) with missing share percentage for FOOD
+2026-09-14 03:09:11,960 - INFO: Fixing 1 row(s) with missing share percentage for GDST
+2026-09-14 03:09:23,235 - INFO: Fixing 2 row(s) with missing share percentage for GEMA
+2026-09-14 03:09:35,741 - INFO: Fixing 1 row(s) with missing share percentage for GGRM
+2026-09-14 03:09:53,698 - INFO: Fixing 1 row(s) with missing share percentage for GGRP
+2026-09-14 03:10:21,345 - INFO: Fixing 3 row(s) with missing share percentage for GIAA
+2026-09-14 03:11:52,744 - INFO: Fixing 4 row(s) with missing share percentage for GMFI
+2026-09-14 03:12:47,055 - INFO: Fixing 1 row(s) with missing share percentage for GOLL
+2026-09-14 03:13:04,830 - INFO: Fixing 1 row(s) with missing share percentage for GOOD
+2026-09-14 03:13:12,097 - INFO: Fixing 2 row(s) with missing share percentage for GOTO
+2026-09-14 03:13:22,407 - INFO: Fixing 1 row(s) with missing share percentage for GPRA
+2026-09-14 03:13:30,939 - INFO: Fixing 1 row(s) with missing share percentage for GPSO
+2026-09-14 03:15:14,082 - INFO: Fixing 1 row(s) with missing share percentage for GWSA
+2026-09-14 03:15:22,016 - INFO: Fixing 1 row(s) with missing share percentage for GZCO
+2026-09-14 03:17:27,577 - INFO: Fixing 1 row(s) with missing share percentage for HDIT
+2026-09-14 03:22:06,325 - INFO: Fixing 1 row(s) with missing share percentage for HUMI
+2026-09-14 03:22:40,829 - INFO: Fixing 1 row(s) with missing share percentage for IATA
+2026-09-14 03:23:02,628 - INFO: Fixing 1 row(s) with missing share percentage for IBFN
+2026-09-14 03:23:10,637 - INFO: Fixing 1 row(s) with missing share percentage for IBOS
+2026-09-14 03:23:33,583 - INFO: Fixing 1 row(s) with missing share percentage for ICBP
+2026-09-14 03:23:40,682 - INFO: Fixing 1 row(s) with missing share percentage for ICON
+2026-09-14 03:25:21,185 - INFO: Fixing 1 row(s) with missing share percentage for IKBI
+2026-09-14 03:25:51,841 - INFO: Fixing 1 row(s) with missing share percentage for IMJS
+2026-09-14 03:25:58,929 - INFO: Fixing 1 row(s) with missing share percentage for IMPC
+2026-09-14 03:27:02,686 - INFO: Fixing 3 row(s) with missing share percentage for INCO
+2026-09-14 03:27:13,023 - INFO: Fixing 2 row(s) with missing share percentage for INDF
+2026-09-14 03:27:43,608 - INFO: Fixing 2 row(s) with missing share percentage for INDS
+2026-09-14 03:28:06,013 - INFO: Fixing 1 row(s) with missing share percentage for INDY
+2026-09-14 03:28:17,613 - INFO: Fixing 1 row(s) with missing share percentage for INET
+2026-09-14 03:28:39,588 - INFO: Fixing 1 row(s) with missing share percentage for INPC
+2026-09-14 03:28:56,532 - INFO: Fixing 1 row(s) with missing share percentage for INPS
+2026-09-14 03:29:55,458 - INFO: Fixing 1 row(s) with missing share amount for IPCC
+2026-09-14 03:30:28,640 - INFO: Fixing 3 row(s) with missing share percentage for IPTV
+2026-09-14 03:32:13,868 - INFO: Fixing 1 row(s) with missing share percentage for JARR
+2026-09-14 03:33:06,712 - INFO: Fixing 2 row(s) with missing share percentage for JATI
+2026-09-14 03:33:35,031 - INFO: Fixing 1 row(s) with missing share percentage for JECC
+2026-09-14 03:34:09,499 - INFO: Fixing 1 row(s) with missing share percentage for JIHD
+2026-09-14 03:34:19,678 - INFO: Fixing 1 row(s) with missing share percentage for JKON
+2026-09-14 03:34:46,747 - INFO: Fixing 2 row(s) with missing share percentage for JPFA
+2026-09-14 03:35:19,022 - INFO: Fixing 2 row(s) with missing share percentage for JSPT
+2026-09-14 03:35:42,825 - INFO: Fixing 2 row(s) with missing share percentage for KAQI
+2026-09-14 03:36:03,653 - INFO: Fixing 1 row(s) with missing share percentage for KAYU
+2026-09-14 03:38:31,066 - INFO: Fixing 1 row(s) with missing share percentage for KICI
+2026-09-14 03:38:51,672 - INFO: Total symbols with share_amount fixed: 1
+2026-09-14 03:38:51,672 - INFO: Total symbols with share_percentage fixed: 56
+2026-09-14 03:40:04,287 - INFO: 2026-09-14 the shareholders data has been scrapped. Execution time: 00:49:18

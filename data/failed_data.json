@@ -1,6 +1,26 @@
 [
   {
-    "ticker": "HKMU",
+    "ticker": "META",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MIRA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "MRAT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "NCKL",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PADA",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "PBRX",
     "reason": "Failed after maximum attempts"
   }
 ]

@@ -1,26 +1,14 @@
 [
   {
-    "ticker": "META",
+    "ticker": "SCPI",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "MIRA",
+    "ticker": "SULI",
     "reason": "Failed after maximum attempts"
   },
   {
-    "ticker": "MRAT",
-    "reason": "Failed after maximum attempts"
-  },
-  {
-    "ticker": "NCKL",
-    "reason": "Failed after maximum attempts"
-  },
-  {
-    "ticker": "PADA",
-    "reason": "Failed after maximum attempts"
-  },
-  {
-    "ticker": "PBRX",
+    "ticker": "SURI",
     "reason": "Failed after maximum attempts"
   }
 ]

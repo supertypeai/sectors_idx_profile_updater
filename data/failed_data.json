@@ -1,14 +1,6 @@
 [
   {
-    "ticker": "SCPI",
-    "reason": "Failed after maximum attempts"
-  },
-  {
-    "ticker": "SULI",
-    "reason": "Failed after maximum attempts"
-  },
-  {
-    "ticker": "SURI",
+    "ticker": "ARKO",
     "reason": "Failed after maximum attempts"
   }
 ]

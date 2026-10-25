@@ -4415,3 +4415,6 @@
 2026-10-22 21:07:07,849 - INFO: Program started
 2026-10-22 21:07:09,820 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
 2026-10-22 21:07:12,404 - INFO: idx_profile_updater finished
+2026-10-25 20:17:37,301 - INFO: Program started
+2026-10-25 20:17:40,043 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2026-10-25 20:18:16,841 - INFO: idx_profile_updater finished

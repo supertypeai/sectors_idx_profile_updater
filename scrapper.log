@@ -4497,3 +4497,6 @@
 2026-11-07 07:27:56,131 - INFO: Fixing 1 row(s) with missing share percentage for CTBN
 2026-11-07 07:27:57,956 - INFO: Total symbols with share_amount fixed: 0
 2026-11-07 07:27:57,956 - INFO: Total symbols with share_percentage fixed: 61
+2026-11-07 21:20:35,825 - INFO: Program started
+2026-11-07 21:20:38,131 - INFO: Starting idx_profile_updater with new symbols and deactivated symbols
+2026-11-07 21:21:21,036 - INFO: idx_profile_updater finished

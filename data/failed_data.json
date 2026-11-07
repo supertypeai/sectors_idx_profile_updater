@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "ticker": "ADMR",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "AIMS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ARKO",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "ASMI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BBLD",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BBSS",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BMRI",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "BRPT",
+    "reason": "Failed after maximum attempts"
+  },
+  {
+    "ticker": "CENT",
+    "reason": "Failed after maximum attempts"
+  }
+]

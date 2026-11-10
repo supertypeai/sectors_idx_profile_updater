@@ -1041,3 +1041,43 @@ Update process finished. Performed 1 updates.
 2026-11-06 22:54:58 [INFO] - Init Global Variable
 2026-11-06 22:54:58 [INFO] - Checking for delistings on date: 20261106
 2026-11-06 22:55:43 [INFO] - No delist data to process.
+2026-11-10 10:31:57 [INFO] - Init Global Variable
+2026-11-10 10:31:57 [INFO] - Checking for delistings on date: 20261110
+2026-11-10 10:32:52 [INFO] - Found company 'SBAT.JK' with no delisting date. Preparing to update
+2026-11-10 10:32:52 [INFO] - Successfully updated delisting date for 'SBAT.JK' to '2026-11-10'.
+2026-11-10 10:32:52 [INFO] - Found company 'MTRA.JK' with no delisting date. Preparing to update
+2026-11-10 10:32:53 [INFO] - Successfully updated delisting date for 'MTRA.JK' to '2026-11-10'.
+2026-11-10 10:32:54 [INFO] - Found company 'ENVY.JK' with no delisting date. Preparing to update
+2026-11-10 10:32:54 [INFO] - Successfully updated delisting date for 'ENVY.JK' to '2026-11-10'.
+2026-11-10 10:32:54 [INFO] - Found company 'MABA.JK' with no delisting date. Preparing to update
+2026-11-10 10:32:55 [INFO] - Successfully updated delisting date for 'MABA.JK' to '2026-11-10'.
+2026-11-10 10:32:55 [INFO] - Found company 'DUCK.JK' with no delisting date. Preparing to update
+2026-11-10 10:32:56 [INFO] - Successfully updated delisting date for 'DUCK.JK' to '2026-11-10'.
+2026-11-10 10:32:56 [INFO] - Found company 'GOLL.JK' with no delisting date. Preparing to update
+2026-11-10 10:32:58 [INFO] - Successfully updated delisting date for 'GOLL.JK' to '2026-11-10'.
+2026-11-10 10:32:58 [INFO] - Found company 'TRIL.JK' with no delisting date. Preparing to update
+2026-11-10 10:32:58 [INFO] - Successfully updated delisting date for 'TRIL.JK' to '2026-11-10'.
+2026-11-10 10:32:59 [INFO] - Found company 'LMAS.JK' with no delisting date. Preparing to update
+2026-11-10 10:32:59 [INFO] - Successfully updated delisting date for 'LMAS.JK' to '2026-11-10'.
+2026-11-10 10:33:00 [INFO] - Found company 'UNIT.JK' with no delisting date. Preparing to update
+2026-11-10 10:33:00 [INFO] - Successfully updated delisting date for 'UNIT.JK' to '2026-11-10'.
+2026-11-10 10:33:01 [INFO] - Found company 'TOYS.JK' with no delisting date. Preparing to update
+2026-11-10 10:33:01 [INFO] - Successfully updated delisting date for 'TOYS.JK' to '2026-11-10'.
+2026-11-10 10:33:02 [INFO] - Found company 'PLAS.JK' with no delisting date. Preparing to update
+2026-11-10 10:33:02 [INFO] - Successfully updated delisting date for 'PLAS.JK' to '2026-11-10'.
+2026-11-10 10:33:02 [INFO] - Found company 'LCGP.JK' with no delisting date. Preparing to update
+2026-11-10 10:33:03 [INFO] - Successfully updated delisting date for 'LCGP.JK' to '2026-11-10'.
+2026-11-10 10:33:03 [INFO] - Found company 'COWL.JK' with no delisting date. Preparing to update
+2026-11-10 10:33:03 [INFO] - Successfully updated delisting date for 'COWL.JK' to '2026-11-10'.
+2026-11-10 10:33:04 [INFO] - Found company 'SRIL.JK' with no delisting date. Preparing to update
+2026-11-10 10:33:04 [INFO] - Successfully updated delisting date for 'SRIL.JK' to '2026-11-10'.
+2026-11-10 10:33:05 [INFO] - Found company 'TELE.JK' with no delisting date. Preparing to update
+2026-11-10 10:33:05 [INFO] - Successfully updated delisting date for 'TELE.JK' to '2026-11-10'.
+2026-11-10 10:33:05 [INFO] - Found company 'TDPM.JK' with no delisting date. Preparing to update
+2026-11-10 10:33:05 [INFO] - Successfully updated delisting date for 'TDPM.JK' to '2026-11-10'.
+2026-11-10 10:33:06 [INFO] - Found company 'SUGI.JK' with no delisting date. Preparing to update
+2026-11-10 10:33:06 [INFO] - Successfully updated delisting date for 'SUGI.JK' to '2026-11-10'.
+2026-11-10 10:33:06 [INFO] - Found company 'SKYB.JK' with no delisting date. Preparing to update
+2026-11-10 10:33:07 [INFO] - Successfully updated delisting date for 'SKYB.JK' to '2026-11-10'.
+2026-11-10 10:33:07 [INFO] - 
+Update process finished. Performed 18 updates.

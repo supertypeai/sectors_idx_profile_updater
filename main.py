@@ -1117,6 +1117,12 @@ class IdxProfileUpdater:
             [company_profile_data, pd.DataFrame({"symbol": updated_new_symbols})],
             ignore_index=True,
         )
+        company_profile_data = company_profile_data.drop_duplicates(
+            subset="symbol", keep="first"
+        )
+        company_profile_data.loc[
+            company_profile_data["symbol"].isin(updated_new_symbols), "delisting_date"
+        ] = None
 
         if target_symbols:
             missing_target_symbols = list(

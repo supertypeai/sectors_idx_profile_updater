@@ -16,6 +16,7 @@ import datetime
 import numpy as np
 import pandas as pd
 
+from mappings import clean_name, normalise_position, normalise_type
 
 load_dotenv()
 
@@ -371,6 +372,11 @@ def get_new_shareholders_data(symbol, supabase,
               columns_to_keep.append('symbol')
           shareholders_df = shareholders_df[columns_to_keep]
       
+      # `type` is inherited from the positions already stored in the DB (get_management_data),
+      # so normalise here too or a stale typo gets written straight back.
+      if 'type' in shareholders_df.columns:
+        shareholders_df['type'] = shareholders_df['type'].map(normalise_type)
+
       if round(shareholders_df['share_percentage'].sum(),0) > 100:
         shareholders_df['share_percentage'] = (shareholders_df['share_amount']/sum(shareholders_df['share_amount']))*100
 
@@ -395,10 +401,8 @@ def get_new_shareholders_data(symbol, supabase,
         directors_processed_data = []
         for i in range(len(directors_data)):
           temp_data = {}
-          temp_data['name'] = directors_data[i]['Nama'].title()
-          temp_data['position'] = directors_data[i]['Jabatan'].title()
-          if ("Vice Presiden" in temp_data['position']):
-            temp_data['position'] = temp_data['position'].replace("Vice Presiden", "Vice President")
+          temp_data['name'] = clean_name(directors_data[i]['Nama'])
+          temp_data['position'] = normalise_position(directors_data[i]['Jabatan'], 'directors')
           temp_data['affiliation'] = directors_data[i]['Afiliasi']
           directors_processed_data.append(temp_data)
         directors_df = pd.DataFrame(directors_processed_data)
@@ -412,16 +416,12 @@ def get_new_shareholders_data(symbol, supabase,
         commissioners_processed_data = []
         for i in range(len(commissioners_data)):
           temp_data = {}
-          temp_data['name'] = commissioners_data[i]['Nama'].title()
-          temp_data['position'] = commissioners_data[i]['Jabatan'].title()
-          if ("Vice Presiden" in temp_data['position']):
-            temp_data['position'] = temp_data['position'].replace("Vice Presiden", "Vice President")
-          if ("Commisioner" in temp_data['position']):
-            temp_data['position'] = temp_data['position'].replace("Commisioner", "Commissioner")
+          temp_data['name'] = clean_name(commissioners_data[i]['Nama'])
+          temp_data['position'] = normalise_position(commissioners_data[i]['Jabatan'], 'commissioners')
           temp_data['independent'] = commissioners_data[i]['Independen']
           commissioners_processed_data.append(temp_data)
         commissioners_df = pd.DataFrame(commissioners_processed_data)
-      except:
+      except Exception as e:
         print(f"Failed to get Commissioners data. Returning None: {e}")
         commissioners_df = None
         

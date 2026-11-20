@@ -22,6 +22,8 @@ import re
 from datetime import date
 from fuzzywuzzy import process
 
+from mappings import normalise_position, normalise_type
+
 # from imp import reload
 from importlib import reload
 
@@ -282,44 +284,11 @@ class OwnershipCleaner:
         clean_names = temp_df["name"].astype(str).str.strip()
         temp_df = temp_df[~clean_names.str.fullmatch(r"-*")]
 
-        temp_df["position"] = temp_df["position"].str.title()
+        temp_df["position"] = temp_df["position"].map(
+            lambda p: normalise_position(p, col_name)
+        )
         temp_df["name"] = temp_df["name"].str.title()
 
-        position_renaming_dicts = {
-            "directors": {
-                "Vice President": "Vice President Director",
-                "Vice Presiden Director": "Vice President Director",
-                "Presiden Direktur": "President Director",
-                "Wakil Presiden Direktur": "Vice President Director",
-                "Direktur": "Director",
-                "Direktur Utama": "President Director",
-                "Wakil Direktur Utama": "Vice President Director",
-                "": "Director",
-            },
-            "commissioners": {
-                "President Commisioner": "President Commissioner",
-                "Vice President Commisioner": "Vice President Commissioner",
-                "Presiden Komisaris": "President Commissioner",
-                "Komisaris": "Commissioner",
-                "Wakil Komisaris Utama": "Vice President Commissioner",
-                "Komisaris Utama": "President Commissioner",
-                "Wakil Presiden Komisaris": "Vice President Commissioner",
-                "": "Commissioner",
-            },
-            "audit_committees": {
-                "Ketua": "Head of Audit Committee",
-                "Anggota": "Member of Audit Committee",
-                "Ketua Komite Audit": "Head of Audit Committee",
-                "Anggota Komite Audit": "Member of Audit Committee",
-                "Head": "Head of Audit Committee",
-                "Member": "Member of Audit Committee",
-                "": "Audit Committee",
-            },
-        }
-
-        temp_df["position"] = temp_df["position"].replace(
-            position_renaming_dicts[col_name]
-        )
         temp_df = temp_df.drop_duplicates(subset=["symbol", "name", "position"])
 
         return temp_df
@@ -472,20 +441,7 @@ class OwnershipCleaner:
             shareholders_df["share_percentage_new"] > 0.00001
         ]
 
-        type_mapping = {
-            "Direksi": "Director",
-            "Commisioner": "Commissioner",
-            "Komisaris": "Commissioner",
-            "Kurang dari 5%": "Less Than 5%",
-            "Lebih dari 5%": "More Than 5%",
-            "Saham Pengendali": "Controlling Share",
-            "Saham Non Pengendali": "Non Controlling Share",
-            "Masyarakat Warkat": "Scrip Public Share",
-            "Masyarakat Non Warkat": "Scripless Public Share",
-            "": "-",
-        }
-
-        shareholders_df = shareholders_df.replace({"type": type_mapping})
+        shareholders_df["type"] = shareholders_df["type"].map(normalise_type)
 
         shareholders_df["name"] = shareholders_df["name"].str.title()
 

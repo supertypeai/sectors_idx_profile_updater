@@ -8,8 +8,6 @@ from ratelimit import limits
 from requests import Session
 from requests_ratelimiter import LimiterMixin, MemoryQueueBucket
 from supabase import create_client
-import ssl
-import urllib.request
 import os
 import time
 import json
@@ -23,6 +21,7 @@ from datetime import date
 from fuzzywuzzy import process
 
 from mappings import normalise_position, normalise_type
+from idx_fetch import idx_get
 
 # from imp import reload
 from importlib import reload
@@ -148,36 +147,14 @@ class ProxyRequester:
             proxy (str, optional): the proxy to be used. Defaults to None. Example: 'brd-customer-xxx-zone-xxx:xxx@brd.superproxy.io:xxx'
         """
         # Set up SSL context to unverified
-        ssl._create_default_https_context = ssl._create_unverified_context
-        self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-
-        if proxy:
-            proxy_support = urllib.request.ProxyHandler({"http": proxy, "https": proxy})
-            opener = urllib.request.build_opener(proxy_support)
-            urllib.request.install_opener(opener)
-        else:
-            # Install an opener without proxy support
-            opener = urllib.request.build_opener()
-            urllib.request.install_opener(opener)
+        self.proxies = {"http": proxy, "https": proxy} if proxy else None
 
     def fetch_url(self, url):
-        # Use the installed opener to fetch the URL
+        print(f"Fetching: {url}")
         try:
-            print(f"Fetching: {url}")
-            req = urllib.request.Request(
-                url,
-                headers={
-                    "User-Agent": self.user_agent,
-                    "Referer": "https://www.idx.co.id/en-us/listed-companies/company-profiles",
-                    "Accept": "application/json, text/plain, */*",
-                    "Accept-Language": "en-US,en;q=0.9",
-                    "Connection": "keep-alive",
-                },
-            )
-            with urllib.request.urlopen(req) as response:
-                content = response.read().decode()
-                print(f"Success! Response length: {len(content)}")
-                return content
+            content = idx_get(url, kind="json", proxies=self.proxies).decode()
+            print(f"Success! Response length: {len(content)}")
+            return content
         except Exception as e:
             print(f"Error fetching URL {url}: {e}")
             return False

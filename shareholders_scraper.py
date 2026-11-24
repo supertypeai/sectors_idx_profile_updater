@@ -2,43 +2,23 @@ from dotenv     import load_dotenv
 from supabase   import create_client
 from fuzzywuzzy import process
 from importlib  import reload
-from random     import choice
 
-import urllib.request
 import os
 import time
 import json
 import logging
 import re
 import sys
-import requests
 import datetime
 import numpy as np
 import pandas as pd
 
 from mappings import clean_name, normalise_position, normalise_type
+from idx_fetch import idx_get
 
 load_dotenv()
 
 
-USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1'
-]
-
-HEADERS = {
-        "User-Agent": choice(USER_AGENTS),
-        "Accept": "*/*",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "Cache-Control": "max-age=0",
-    }
   
 PROXY_URL = os.getenv("proxy")
 SUPABASE_URL = os.getenv('SUPABASE_URL')
@@ -87,26 +67,18 @@ def get_management_data(supabase,symbol):
 
 
 def fetch_url_proxy(url):
-  response = requests.get(url, proxies=PROXIES, verify=False)   
-  status_code = response.status_code
-  if (status_code == 200):
-    data = response.json()
-    return data
-  else:
-    print(f"Failed to fetch from {url}. Get status code : {status_code}")
+  try:
+    return json.loads(idx_get(url, kind="json", proxies=PROXIES))
+  except Exception as error:
+    print(f"Failed to fetch from {url}. {error}")
     return None
 
 
 def fetch_url(url):
-  req = urllib.request.Request(url, headers=HEADERS)
-  resp = urllib.request.urlopen(req)
-  status_code = resp.getcode()
-  if (status_code == 200):
-    data= resp.read()
-    json_data = json.loads(data)
-    return json_data
-  else:
-    print(f"Failed to fetch from {url}. Get status code : {status_code}")
+  try:
+    return json.loads(idx_get(url, kind="json"))
+  except Exception as error:
+    print(f"Failed to fetch from {url}. {error}")
     return None
 
 

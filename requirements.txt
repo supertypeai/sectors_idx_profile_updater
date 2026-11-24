@@ -5,6 +5,7 @@ pyrate_limiter==2.9.0
 python-dotenv==1.0.1
 ratelimit==2.2.1
 Requests==2.32.3
+curl_cffi==0.15.0
 requests_ratelimiter==0.7.0
 selenium==4.23.1
 supabase==2.16.0

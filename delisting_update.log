@@ -1109,3 +1109,7 @@ Update process finished. Performed 0 updates.
 2026-11-24 03:54:33 [INFO] - Init Global Variable
 2026-11-24 03:54:33 [INFO] - Checking for delistings on date: 20261124
 2026-11-24 03:55:01 [INFO] - No delist data to process.
+2026-11-25 02:05:54 [INFO] - Init Global Variable
+2026-11-25 02:05:54 [INFO] - Checking for delistings on date: 20261125
+2026-11-25 02:07:13 [WARNING] - Retrying (Retry(total=0, connect=2, read=1, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='www.idx.co.id', port=443): Read timed out. (read timeout=60)")': /primary/ListingActivity/GetIssuedHistory?caType=DELIST&dateFrom=20261125&dateTo=20261125&start=0&length=999
+2026-11-25 02:07:16 [INFO] - No delist data to process.
